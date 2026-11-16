@@ -17,6 +17,10 @@ final class exacomp_compatibility_test extends \advanced_testcase {
         require_once(__DIR__ . '/../db/install.php');
         require_once(__DIR__ . '/../db/upgrade.php');
 
+        // Task queuing resolves the component's metadata. Load that from the real Moodle root
+        // before replacing dirroot with the temporary Exacomp deployment under test.
+        \core_plugin_manager::instance()->get_plugin_info('block_exaport');
+
         $directory = make_request_directory();
         if ($version !== null) {
             mkdir($directory . '/blocks/exacomp', 0777, true);

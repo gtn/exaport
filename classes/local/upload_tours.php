@@ -26,8 +26,8 @@ final class upload_tours {
     /**
      * Install each guide once without overwriting edits, disabled tours or later deletions.
      *
-     * Blocks are installed before admin tools on a fresh Moodle installation. In that case,
-     * registration is deferred until the first item page, before Moodle bootstraps its tours.
+     * Called by the post-upgrade ad-hoc task, or by the first item page before cron runs.
+     * Never call the User tours API from an upgrade step: its schema may still be old.
      */
     public static function register(): void {
         global $DB;

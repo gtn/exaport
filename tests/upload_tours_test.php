@@ -119,7 +119,7 @@ final class upload_tours_test extends \advanced_testcase {
         $this->assertCount(2, $this->guides());
     }
 
-    public function test_install_recovery_and_upgrade_register_the_guides(): void {
+    public function test_install_recovery_and_upgrade_queue_one_registration_task(): void {
         global $CFG;
 
         require_once(__DIR__ . '/../db/install.php');
@@ -127,13 +127,30 @@ final class upload_tours_test extends \advanced_testcase {
         require_once($CFG->libdir . '/upgradelib.php');
         xmldb_block_exaport_install();
         xmldb_block_exaport_install_recovery();
+        $this->assertSame([], $this->guides(), 'Install callbacks must not call the User tours API.');
+        $this->assertCount(1, \core\task\manager::get_adhoc_tasks(task\register_upload_tours::class));
+        $this->runAdhocTasks(task\register_upload_tours::class);
         $this->assertCount(2, $this->guides());
 
         upload_tours::uninstall();
         set_config('version', 2026111301, 'block_exaport');
         $this->assertTrue(xmldb_block_exaport_upgrade(2026111301));
+        $this->assertSame([], $this->guides(), 'Upgrade must defer calls to the User tours API.');
+        $this->assertCount(1, \core\task\manager::get_adhoc_tasks(task\register_upload_tours::class));
+        $this->runAdhocTasks(task\register_upload_tours::class);
         $this->assertCount(2, $this->guides());
         $this->assertSame('2026111600', get_config('block_exaport', 'version'));
+    }
+
+    public function test_first_page_registration_before_cron_keeps_queued_task_idempotent(): void {
+        require_once(__DIR__ . '/../db/install.php');
+        xmldb_block_exaport_install();
+        upload_tours::register();
+        $before = array_map(static fn($guide) => $guide->get_id(), $this->guides());
+        $this->assertCount(2, $before);
+        $this->runAdhocTasks(task\register_upload_tours::class);
+        $this->assertSame($before, array_map(static fn($guide) => $guide->get_id(), $this->guides()));
+        $this->assertSame([], \core\task\manager::get_adhoc_tasks(task\register_upload_tours::class));
     }
 
     public function test_completion_is_per_user_and_per_guide_with_native_replay(): void {

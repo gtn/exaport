@@ -1634,7 +1634,8 @@ function xmldb_block_exaport_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026111600) {
-        \block_exaport\local\upload_tours::register();
+        // Plugin APIs must run after upgrade, against their current schemas.
+        \core\task\manager::queue_adhoc_task(new \block_exaport\task\register_upload_tours(), true);
         upgrade_block_savepoint(true, 2026111600, 'exaport');
     }
 

@@ -245,11 +245,11 @@ final class item_content_blocks_test extends \advanced_testcase {
 
         $html = $OUTPUT->render_from_template('block_exaport/item_content_blocks', $data);
         $this->assertStringContainsString(
-            'divider d-flex justify-content-center align-items-center my-3',
+            'd-flex justify-content-center align-items-center my-3 exaport-item-content-divider',
             $html
         );
-        $this->assertStringContainsString('<div class="divider-content px-3">', $html);
-        $this->assertStringContainsString('btn add-content exaport-item-content-add-button', $html);
+        $this->assertStringContainsString('<div class="px-3">', $html);
+        $this->assertStringContainsString('btn btn-secondary exaport-item-content-add-button', $html);
         $this->assertStringNotContainsString('dropdown-toggle', $html);
         $this->assertStringContainsString('data-content-type="text"', $html);
         $this->assertStringContainsString('data-content-url=', $html);

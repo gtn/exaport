@@ -38,10 +38,10 @@ final class user_tours_test extends \advanced_testcase {
     }
 
     /** Make an ordinary administrator-created guide without Exaport ownership metadata. */
-    private function custom_guide(): \tool_usertours\tour {
+    private function custom_guide(array $config = []): \tool_usertours\tour {
         $definition = json_decode(file_get_contents(__DIR__ . '/../db/usertours/create_item.json'));
         $definition->name = 'Administrator guide';
-        $definition->configdata = '{}';
+        $definition->configdata = json_encode((object)$config);
         return \tool_usertours\manager::import_tour_from_json(json_encode($definition));
     }
 
@@ -309,5 +309,159 @@ final class user_tours_test extends \advanced_testcase {
         }
         $this->assertTrue($DB->record_exists('tool_usertours_tours', ['id' => $custom->get_id()]));
         $this->assertFalse(get_config('block_exaport', 'usertourssignature'));
+    }
+
+    public function test_uninstall_preserves_lookalikes_steps_and_every_other_users_preferences(): void {
+        global $DB;
+
+        $otherguides = [$this->custom_guide()];
+        user_tours::register();
+        $owned = $this->guides();
+        // Include ordinary guides after the Exaport ones to exercise native sort-order renumbering.
+        foreach ([
+            ['block_exaport_tour' => 'upload-create-extra'],
+            ['block_exaport_tour' => 'upload-create '],
+            ['block_exaport_tour' => 1],
+            ['block_exaport_tour' => ['upload-create']],
+            ['other_plugin_tour' => 'upload-create'],
+            ['shipped_tour' => true, 'shipped_filename' => 'other.json', 'shipped_version' => 1],
+        ] as $config) {
+            $guide = $this->custom_guide($config);
+            // Names and URLs do not grant Exaport ownership.
+            $guide->set_name($owned['upload-create']->get_name());
+            $guide->set_pathmatch($owned['upload-create']->get_pathmatch())->persist();
+            $otherguides[] = $guide;
+        }
+        $owned['upload-create']->set_name('Renamed by the site administrator')->persist();
+        // Copies exported/imported with Exaport's exact identity are still Exaport-owned.
+        $copy = $this->custom_guide(['block_exaport_tour' => 'upload-create']);
+        $owned[] = $copy;
+
+        $users = [$this->getDataGenerator()->create_user(), $this->getDataGenerator()->create_user()];
+        foreach ($users as $user) {
+            $this->setUser($user);
+            foreach (array_merge($owned, $otherguides) as $guide) {
+                $guide->mark_user_completed();
+                $guide->request_user_reset();
+            }
+            // Preference removal must use the exact tour ID, not a numeric-prefix match.
+            set_user_preference(\tool_usertours\tour::TOUR_LAST_COMPLETED_BY_USER . $copy->get_id() . '0', 123);
+        }
+        $records = [];
+        $steps = [];
+        foreach ($otherguides as $guide) {
+            $record = $DB->get_record('tool_usertours_tours', ['id' => $guide->get_id()]);
+            unset($record->sortorder);
+            $records[$guide->get_id()] = $record;
+            $steps[$guide->get_id()] = $DB->get_records('tool_usertours_steps', ['tourid' => $guide->get_id()]);
+        }
+        $preferences = $DB->get_records('user_preferences');
+        foreach ($preferences as $id => $preference) {
+            foreach ($owned as $guide) {
+                if (in_array($preference->name, [
+                    \tool_usertours\tour::TOUR_LAST_COMPLETED_BY_USER . $guide->get_id(),
+                    \tool_usertours\tour::TOUR_REQUESTED_BY_USER . $guide->get_id(),
+                ], true)) {
+                    unset($preferences[$id]);
+                }
+            }
+        }
+        set_config('unrelatedsetting', 'keep', 'block_exaport');
+        set_config('usertourssignature', 'other-component-marker', 'local_other');
+        require_once(__DIR__ . '/../db/uninstall.php');
+        $this->setAdminUser();
+        $this->assertTrue(xmldb_block_exaport_uninstall());
+
+        foreach ($owned as $guide) {
+            $this->assertFalse($DB->record_exists('tool_usertours_tours', ['id' => $guide->get_id()]));
+            $this->assertFalse($DB->record_exists('tool_usertours_steps', ['tourid' => $guide->get_id()]));
+        }
+        foreach ($records as $id => $expected) {
+            $record = $DB->get_record('tool_usertours_tours', ['id' => $id], '*', MUST_EXIST);
+            unset($record->sortorder);
+            $this->assertEquals($expected, $record);
+            $this->assertEquals($steps[$id], $DB->get_records('tool_usertours_steps', ['tourid' => $id]));
+        }
+        $this->assertEquals($preferences, $DB->get_records('user_preferences'));
+        $this->assertSame('keep', get_config('block_exaport', 'unrelatedsetting'));
+        $this->assertSame('other-component-marker', get_config('local_other', 'usertourssignature'));
+        $this->assertFalse(get_config('block_exaport', 'usertourssignature'));
+        $this->assertTrue(xmldb_block_exaport_uninstall(), 'Repeated cleanup must be safe.');
+        $this->assertEquals($preferences, $DB->get_records('user_preferences'));
+    }
+
+    public function test_failed_import_rolls_back_and_releases_the_registration_lock(): void {
+        global $DB;
+
+        $this->preventResetByRollback();
+        user_tours::register();
+        foreach ($this->guides() as $guide) {
+            $guide->set_config('block_exaport_tour_version', 0)->persist();
+            $guide->mark_user_completed();
+        }
+        set_config('usertourssignature', 'earlier-release', 'block_exaport');
+        $records = $DB->get_records('tool_usertours_tours');
+        $steps = $DB->get_records('tool_usertours_steps');
+        $preferences = $DB->get_records('user_preferences');
+
+        // Give an exact copy of the registrar its own deployment files, leaving the source tree untouched.
+        $directory = make_request_directory();
+        mkdir($directory . '/classes/local', 0777, true);
+        mkdir($directory . '/db/usertours', 0777, true);
+        $namespace = 'block_exaport\\local\\fixture_' . bin2hex(random_bytes(4));
+        $source = file_get_contents(__DIR__ . '/../classes/local/user_tours.php');
+        file_put_contents($directory . '/classes/local/user_tours.php',
+            str_replace('namespace block_exaport\\local;', 'namespace ' . $namespace . ';', $source));
+        copy(__DIR__ . '/../db/usertours/create_item.json', $directory . '/db/usertours/create_item.json');
+        file_put_contents($directory . '/db/usertours/add_file.json', '{');
+        require($directory . '/classes/local/user_tours.php');
+        $registrar = $namespace . '\\user_tours';
+
+        $caught = null;
+        // Turn the native importer's malformed-JSON warning into the expected exception.
+        set_error_handler(static function($severity, $message, $file, $line): void {
+            throw new \ErrorException($message, 0, $severity, $file, $line);
+        });
+        try {
+            $registrar::register();
+        } catch (\Throwable $exception) {
+            $caught = $exception;
+        } finally {
+            restore_error_handler();
+        }
+        $open = $DB->is_transaction_started();
+        if ($open) {
+            $DB->force_transaction_rollback();
+        }
+        $this->assertNotNull($caught, 'The malformed deployment file must interrupt synchronisation.');
+        $this->assertFalse($open, 'Rollback must finish before returning control to a caller or task runner.');
+        $this->assertEquals($records, $DB->get_records('tool_usertours_tours'));
+        $this->assertEquals($steps, $DB->get_records('tool_usertours_steps'));
+        $this->assertEquals($preferences, $DB->get_records('user_preferences'));
+        $this->assertSame('earlier-release', get_config('block_exaport', 'usertourssignature'));
+        $lock = \core\lock\lock_config::get_lock_factory('block_exaport')->get_lock('usertours', 0);
+        $this->assertNotFalse($lock);
+        if ($lock) {
+            $lock->release();
+        }
+
+        copy(__DIR__ . '/../db/usertours/add_file.json', $directory . '/db/usertours/add_file.json');
+        $registrar::register();
+        $this->assertNotSame('earlier-release', get_config('block_exaport', 'usertourssignature'));
+        $this->assertCount(2, $this->guides());
+        foreach ($this->guides() as $guide) {
+            $this->assertSame(1, $guide->get_config('block_exaport_tour_version'));
+        }
+    }
+
+    public function test_completed_signature_skips_database_work_with_warm_configuration_cache(): void {
+        global $DB;
+
+        user_tours::register();
+        // set_config() invalidates Moodle's cache; allow its normal single reload first.
+        get_config('block_exaport', 'usertourssignature');
+        $before = $DB->perf_get_queries();
+        user_tours::register();
+        $this->assertSame($before, $DB->perf_get_queries());
     }
 }

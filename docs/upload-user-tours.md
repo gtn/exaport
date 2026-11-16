@@ -1,8 +1,8 @@
 # Document-upload User tours
 
 Exaport uses Moodle's native User tours tool to explain the document-upload
-workflow. Both guides have two steps and use the normal Next, Back and End tour
-controls. They do not submit forms or upload files for the user.
+workflow. Both guides have two steps and use Moodle's native tour navigation and
+End tour controls. They do not submit forms or upload files for the user.
 
 * **Create an object to upload a document** appears on the add-object page. It
   points to the title and **Save and keep editing**, explaining that documents
@@ -74,6 +74,10 @@ there is no second version number to bump manually. Missing guides, including
 ones deleted locally, are recreated on the next catalogue synchronisation.
 Unrelated tours are left alone. Uninstalling Exaport removes only the guides
 bearing its known identity markers and clears the signature.
+
+Failed synchronisation explicitly rolls back before releasing the registration
+lock. Existing guides, their completion preferences and the previous signature
+are retained, so a repaired deployment can be retried safely.
 
 ## Adding and updating guides
 

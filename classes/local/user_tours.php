@@ -54,25 +54,30 @@ final class user_tours {
             }
 
             $transaction = $DB->start_delegated_transaction();
-            $pending = self::TOURS;
-            foreach (self::managed_tours() as $tour) {
-                $identity = $tour->get_config('block_exaport_tour');
-                if ((int)$tour->get_config('block_exaport_tour_version', 0) < self::TOURS[$identity]['version']) {
-                    // Moodle removes this tour's steps and completion preferences with it.
-                    $tour->remove();
-                } else {
-                    unset($pending[$identity]);
+            try {
+                $pending = self::TOURS;
+                foreach (self::managed_tours() as $tour) {
+                    $identity = $tour->get_config('block_exaport_tour');
+                    if ((int)$tour->get_config('block_exaport_tour_version', 0) < self::TOURS[$identity]['version']) {
+                        // Moodle removes this tour's steps and completion preferences with it.
+                        $tour->remove();
+                    } else {
+                        unset($pending[$identity]);
+                    }
                 }
+                foreach ($pending as $identity => $definition) {
+                    $json = file_get_contents(__DIR__ . '/../../db/usertours/' . $definition['file']);
+                    $tour = \tool_usertours\manager::import_tour_from_json($json);
+                    $tour->set_config('block_exaport_tour', $identity);
+                    $tour->set_config('block_exaport_tour_version', $definition['version']);
+                    $tour->mark_major_change();
+                }
+                set_config(self::SIGNATURE_CONFIG, $signature, 'block_exaport');
+                $transaction->allow_commit();
+            } catch (\Throwable $exception) {
+                // Finish rollback before the registration lock is released or a task runner retries.
+                $transaction->rollback($exception);
             }
-            foreach ($pending as $identity => $definition) {
-                $json = file_get_contents(__DIR__ . '/../../db/usertours/' . $definition['file']);
-                $tour = \tool_usertours\manager::import_tour_from_json($json);
-                $tour->set_config('block_exaport_tour', $identity);
-                $tour->set_config('block_exaport_tour_version', $definition['version']);
-                $tour->mark_major_change();
-            }
-            set_config(self::SIGNATURE_CONFIG, $signature, 'block_exaport');
-            $transaction->allow_commit();
         } finally {
             $lock->release();
         }

@@ -137,6 +137,7 @@ final class pdf_file_access_test extends \advanced_testcase {
         return (object)compact('owner', 'recipient', 'viewid', 'itemid', 'block', 'context', 'file', 'url', 'setting', 'png', 'access');
     }
 
+    /** @dataProvider shared_images */
     #[DataProvider('shared_images')]
     public function test_pdf_images_follow_sharing_and_policy_revocation(string $channel, string $area, bool $slasharguments): void {
         global $DB, $USER;

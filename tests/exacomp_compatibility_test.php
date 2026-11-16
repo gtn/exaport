@@ -20,6 +20,7 @@ final class exacomp_compatibility_test extends \advanced_testcase {
         // Task queuing resolves the component's metadata. Load that from the real Moodle root
         // before replacing dirroot with the temporary Exacomp deployment under test.
         \core_plugin_manager::instance()->get_plugin_info('block_exaport');
+        \core\di::get(\core\clock::class);
 
         $directory = make_request_directory();
         if ($version !== null) {

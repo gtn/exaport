@@ -152,8 +152,7 @@ final class user_tours_test extends \advanced_testcase {
         set_config('usertourssignature', 'earlier-release', 'block_exaport');
         \core\task\manager::queue_adhoc_task(new task\register_user_tours(), true);
 
-        // The first page applies the new revision before cron; its queued task must then be a no-op.
-        user_tours::register();
+        $this->runAdhocTasks(task\register_user_tours::class);
         $updated = $this->guides();
         $replacement = $updated['upload-content'];
         $this->assertNotSame($outdated->get_id(), $replacement->get_id());
@@ -179,8 +178,6 @@ final class user_tours_test extends \advanced_testcase {
             $this->assertTrue($replacement->should_show_for_user());
             $this->assertFalse($updated['upload-create']->should_show_for_user());
         }
-        $this->runAdhocTasks(task\register_user_tours::class);
-        $this->assertSame($replacement->get_id(), $this->guides()['upload-content']->get_id());
     }
 
     public function test_newer_installed_revision_is_not_downgraded(): void {
@@ -238,14 +235,52 @@ final class user_tours_test extends \advanced_testcase {
         $this->assertSame('2026111600', get_config('block_exaport', 'version'));
     }
 
-    public function test_first_page_registration_before_cron_keeps_queued_task_idempotent(): void {
+    public function test_queued_registration_task_is_idempotent(): void {
         require_once(__DIR__ . '/../db/install.php');
         xmldb_block_exaport_install();
-        user_tours::register();
+        $this->runAdhocTasks(task\register_user_tours::class);
         $before = array_map(static fn($guide) => $guide->get_id(), $this->guides());
         $this->assertCount(2, $before);
+        \core\task\manager::queue_adhoc_task(new task\register_user_tours(), true);
         $this->runAdhocTasks(task\register_user_tours::class);
         $this->assertSame($before, array_map(static fn($guide) => $guide->get_id(), $this->guides()));
+        $this->assertSame([], \core\task\manager::get_adhoc_tasks(task\register_user_tours::class));
+    }
+
+    public function test_lock_timeout_keeps_registration_task_available_for_retry(): void {
+        global $CFG;
+
+        \core\task\manager::queue_adhoc_task(new task\register_user_tours(), true);
+        $factory = new class('block_exaport') extends \core\lock\file_lock_factory {
+            /** Simulate an exhausted lock wait without delaying the test. */
+            public function get_lock($resource, $timeout, $maxlifetime = 86400) {
+                return false;
+            }
+        };
+        $originalfactory = $CFG->lock_factory ?? null;
+        $CFG->lock_factory = get_class($factory);
+        $caught = null;
+        try {
+            $this->runAdhocTasks(task\register_user_tours::class);
+        } catch (\moodle_exception $exception) {
+            $caught = $exception;
+        } finally {
+            if ($originalfactory === null) {
+                unset($CFG->lock_factory);
+            } else {
+                $CFG->lock_factory = $originalfactory;
+            }
+        }
+
+        $this->assertInstanceOf(\moodle_exception::class, $caught);
+        $this->assertSame('locktimeout', $caught->errorcode);
+        $this->assertFalse(get_config('block_exaport', 'usertourssignature'));
+        $this->assertSame([], $this->guides());
+        $this->assertCount(1, \core\task\manager::get_adhoc_tasks(task\register_user_tours::class));
+
+        $this->runAdhocTasks(task\register_user_tours::class);
+        $this->assertCount(2, $this->guides());
+        $this->assertNotFalse(get_config('block_exaport', 'usertourssignature'));
         $this->assertSame([], \core\task\manager::get_adhoc_tasks(task\register_user_tours::class));
     }
 

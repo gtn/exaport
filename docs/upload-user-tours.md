@@ -40,10 +40,12 @@ plugin API calls to be deferred until all plugin schemas are current. The task
 imports new guides and replaces outdated guides after upgrade; the install and
 upgrade callbacks only queue it.
 
-If cron has not run yet, the first Exaport item-page request completes registration
-before Moodle renders the header and selects a tour. This also handles a completely
+Guides become available once cron successfully runs the queued task. Item-page
+requests do not perform registration. Deferring the import also handles a completely
 fresh Moodle installation, where blocks are installed before the User tours tool.
-A lock protects concurrent requests. The queued task then becomes a no-op.
+A lock serialises concurrent registration attempts. If it cannot be obtained,
+the task throws Moodle's lock-timeout exception so the task runner retains it
+for a retry.
 
 The `db/usertours/` directory is Exaport's own organization for JSON data files;
 Moodle does not automatically discover tours there. The list in
@@ -68,7 +70,7 @@ Synchronisation follows Moodle's own shipped-tour pattern:
 
 The transaction covers removals, imports and the quick-check marker. A single
 `usertourssignature` value in `config_plugins` records a hash of the declared tour
-list and revisions. It lets ordinary page visits skip the synchronisation work.
+list and revisions. It lets repeated task executions skip the synchronisation work.
 The hash changes automatically when a guide is added or its revision increases;
 there is no second version number to bump manually. Missing guides, including
 ones deleted locally, are recreated on the next catalogue synchronisation.

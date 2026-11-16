@@ -26,8 +26,10 @@ final class user_tours {
     /**
      * Add new guides and replace only guides with an older installed revision.
      *
-     * Called by the post-upgrade ad-hoc task, or by the first item page before cron runs.
+     * Called by the ad-hoc task after plugin installation or upgrade.
      * Never call the User tours API from an upgrade step: its schema may still be old.
+     *
+     * @throws \moodle_exception When the registration lock cannot be obtained.
      */
     public static function register(): void {
         global $DB;
@@ -37,15 +39,16 @@ final class user_tours {
             return;
         }
 
-        // First visits can happen concurrently after a fresh Moodle installation.
+        // Serialise registration across concurrent task executions.
         $factory = \core\lock\lock_config::get_lock_factory('block_exaport');
         $lock = $factory->get_lock('usertours', 10);
         if (!$lock) {
-            return;
+            // Let Moodle retain and retry the task when another attempt holds the lock.
+            throw new \moodle_exception('locktimeout');
         }
 
         try {
-            // Read directly: another request may have completed registration while we waited.
+            // Read directly: another task may have completed registration while we waited.
             $installed = $DB->get_field('config_plugins', 'value', [
                 'plugin' => 'block_exaport', 'name' => self::SIGNATURE_CONFIG,
             ]);

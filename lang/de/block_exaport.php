@@ -1138,18 +1138,18 @@ $string['linkedbadgeissued'] = 'Verliehen: {$a}';
 $string['linkedbadgeexpires'] = 'Gültig bis: {$a}';
 
 // Document-upload User tours.
-$string['uploadtour_create_name'] = 'Exaport: Inhalte vor dem Speichern hinzufügen';
-$string['uploadtour_create_description'] = 'Erklärt, wie Inhalte vor dem Speichern einer neuen Portfolio-Seite hochgeladen werden.';
-$string['uploadtour_title_title'] = 'Das Hochladen hat sich geändert';
-$string['uploadtour_title_content'] = 'Sie können Dokumente jetzt vor dem Speichern der Seite hinzufügen. Wählen Sie unter Inhalt zuerst + und anschließend Datei. Das Symbolbild dient nur als Vorschaubild.';
-$string['uploadtour_save_title'] = 'Die gesamte Seite speichern';
-$string['uploadtour_save_content'] = 'Wählen Sie in jedem Dialog Übernehmen, um dieses Formular zu aktualisieren. Speichern und schließen speichert die Seite mit allen Inhalten und Kompetenzen gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
+$string['uploadtour_create_name'] = 'Exaport: Ein Dokument hochladen';
+$string['uploadtour_create_description'] = 'Erklärt, wo Sie Dokumente hochladen und wie Sie eine Portfolio-Seite mit ihren Inhalten speichern.';
+$string['uploadtour_title_title'] = 'Ein Dokument hochladen';
+$string['uploadtour_title_content'] = 'Wählen Sie unter Inhalt zuerst + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Ihr Dokument wird erst gespeichert, wenn Sie die Seite speichern. Das Symbolbild dient als Vorschaubild.';
+$string['uploadtour_save_title'] = 'Ihre Seite speichern';
+$string['uploadtour_save_content'] = 'Dateien und Inhalte werden erst gespeichert, wenn Sie die Seite speichern. Wählen Sie Speichern und schließen, um alles einschließlich der Kompetenzen zu speichern. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.';
 $string['uploadtour_content_name'] = 'Exaport: Dokumente unter Inhalt hinzufügen';
-$string['uploadtour_content_description'] = 'Zeigt, wo Dokumente hochgeladen und noch nicht gespeicherte Inhaltsänderungen gespeichert werden.';
-$string['uploadtour_content_title'] = 'Inhalt wird mit der Seite gespeichert';
-$string['uploadtour_content_content'] = 'Verwenden Sie Inhalt für Dokumente, Texte und Links. Änderungen werden erst mit der Seite gespeichert; Abbrechen verwirft daher auch Inhaltsänderungen.';
-$string['uploadtour_file_title'] = 'Datei zum Hochladen eines Dokuments wählen';
-$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen. Sie können den Block erneut öffnen und bearbeiten. Speichern und schließen speichert alle Änderungen gemeinsam.';
+$string['uploadtour_content_description'] = 'Zeigt, wie Dokumente hinzugefügt und Inhaltsänderungen gespeichert werden.';
+$string['uploadtour_content_title'] = 'Inhalte zu Ihrer Seite hinzufügen';
+$string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie Dokumente, Texte und Links hinzu. Änderungen werden erst mit der Seite gespeichert. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.';
+$string['uploadtour_file_title'] = 'Ein Dokument hochladen';
+$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.';
 
 $string['itemeditorinvalid'] = 'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.';
 $string['itemeditorconflict'] = 'Diese Seite wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie die aktuelle Seite in einem anderen Tab, bevor Sie diesen Editor neu laden.';

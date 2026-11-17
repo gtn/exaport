@@ -4055,52 +4055,52 @@ return [
     'linkedbadgeexpires' => ['Gültig bis: {$a}', 'Expires: {$a}'],
     // Document-upload User tours.
     'uploadtour_create_name' => [
-        'Exaport: Inhalte vor dem Speichern hinzufügen',
-        'Exaport: Add content before saving',
+        'Exaport: Ein Dokument hochladen',
+        'Exaport: Upload a document',
     ],
     'uploadtour_create_description' => [
-        'Erklärt, wie Inhalte vor dem Speichern einer neuen Portfolio-Seite hochgeladen werden.',
-        'Explains how to upload content before saving a new portfolio page.',
+        'Erklärt, wo Sie Dokumente hochladen und wie Sie eine Portfolio-Seite mit ihren Inhalten speichern.',
+        'Explains where to upload documents and how to save a portfolio page with its content.',
     ],
     'uploadtour_title_title' => [
-        'Das Hochladen hat sich geändert',
-        'Uploading has changed',
+        'Ein Dokument hochladen',
+        'Upload a document',
     ],
     'uploadtour_title_content' => [
-        'Sie können Dokumente jetzt vor dem Speichern der Seite hinzufügen. Wählen Sie unter Inhalt zuerst + und anschließend Datei. Das Symbolbild dient nur als Vorschaubild.',
-        'You can now add documents before saving the page. In Content, choose + and File. The icon image field is only for a thumbnail.',
+        'Wählen Sie unter Inhalt zuerst + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Ihr Dokument wird erst gespeichert, wenn Sie die Seite speichern. Das Symbolbild dient als Vorschaubild.',
+        'In Content, choose +, then File. Upload your document and choose Apply to return to this form. Your document is only saved when you save the page. The icon image field is for a thumbnail.',
     ],
     'uploadtour_save_title' => [
-        'Die gesamte Seite speichern',
-        'Save the whole page',
+        'Ihre Seite speichern',
+        'Save your page',
     ],
     'uploadtour_save_content' => [
-        'Wählen Sie in jedem Dialog Übernehmen, um dieses Formular zu aktualisieren. Speichern und schließen speichert die Seite mit allen Inhalten und Kompetenzen gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
-        'Choose Apply in each dialog to update this form. Save and close saves the page and all its content and competencies together. Cancel discards pending changes.',
+        'Dateien und Inhalte werden erst gespeichert, wenn Sie die Seite speichern. Wählen Sie Speichern und schließen, um alles einschließlich der Kompetenzen zu speichern. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.',
+        'Files and content are saved only when you save the page. Choose Save and close to save everything, including competencies. Cancel on this form discards unsaved changes.',
     ],
     'uploadtour_content_name' => [
         'Exaport: Dokumente unter Inhalt hinzufügen',
         'Exaport: Add documents through Content',
     ],
     'uploadtour_content_description' => [
-        'Zeigt, wo Dokumente hochgeladen und noch nicht gespeicherte Inhaltsänderungen gespeichert werden.',
-        'Shows where to upload documents and how to save pending content changes.',
+        'Zeigt, wie Dokumente hinzugefügt und Inhaltsänderungen gespeichert werden.',
+        'Shows how to add documents and save content changes.',
     ],
     'uploadtour_content_title' => [
-        'Inhalt wird mit der Seite gespeichert',
-        'Content is saved with the page',
+        'Inhalte zu Ihrer Seite hinzufügen',
+        'Add content to your page',
     ],
     'uploadtour_content_content' => [
-        'Verwenden Sie Inhalt für Dokumente, Texte und Links. Änderungen werden erst mit der Seite gespeichert; Abbrechen verwirft daher auch Inhaltsänderungen.',
-        'Use Content for documents, text and links. Changes stay pending until you save the page, so Cancel also discards content changes.',
+        'Unter Inhalt fügen Sie Dokumente, Texte und Links hinzu. Änderungen werden erst mit der Seite gespeichert. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.',
+        'Use Content for documents, text and links. Changes are saved only when you save the page. Cancel on this form discards unsaved changes.',
     ],
     'uploadtour_file_title' => [
-        'Datei zum Hochladen eines Dokuments wählen',
-        'Choose File to upload a document',
+        'Ein Dokument hochladen',
+        'Upload a document',
     ],
     'uploadtour_file_content' => [
-        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen. Sie können den Block erneut öffnen und bearbeiten. Speichern und schließen speichert alle Änderungen gemeinsam.',
-        'Choose +, then File. Upload your document and choose Apply. You can reopen the block to edit it. Save and close saves all your changes together.',
+        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.',
+        'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.',
     ],
     'itemeditorinvalid' => [
         'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.',

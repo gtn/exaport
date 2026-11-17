@@ -4,9 +4,9 @@ Exaport uses Moodle's native User tours tool to explain the document-upload
 workflow. Both guides have two steps and use Moodle's native tour navigation and
 End tour controls. They do not submit forms or upload files for the user.
 
-* **Add content before saving** appears on the page creation form. It announces the
-  changed upload workflow, points to **Content** and **Save and close**, and explains
-  that documents can now be uploaded before the first save.
+* **Upload a document** appears on the page creation form. It points to
+  **Content** and **Save and close**, explaining how to upload a document, apply
+  the dialog and save the page to keep the upload.
 * **Add documents through Content** appears in the page editor when the
   Content add button is available. It points to Content and the **+** button,
   explaining how to choose **File**, apply the upload dialog, then save the page.

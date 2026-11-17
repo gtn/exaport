@@ -1175,18 +1175,18 @@ $string['linkedbadgeissued'] = 'Awarded: {$a}';
 $string['linkedbadgeexpires'] = 'Expires: {$a}';
 
 // Document-upload User tours.
-$string['uploadtour_create_name'] = 'Exaport: Add content before saving';
-$string['uploadtour_create_description'] = 'Explains how to upload content before saving a new portfolio page.';
-$string['uploadtour_title_title'] = 'Uploading has changed';
-$string['uploadtour_title_content'] = 'You can now add documents before saving the page. In Content, choose + and File. The icon image field is only for a thumbnail.';
-$string['uploadtour_save_title'] = 'Save the whole page';
-$string['uploadtour_save_content'] = 'Choose Apply in each dialog to update this form. Save and close saves the page and all its content and competencies together. Cancel discards pending changes.';
+$string['uploadtour_create_name'] = 'Exaport: Upload a document';
+$string['uploadtour_create_description'] = 'Explains where to upload documents and how to save a portfolio page with its content.';
+$string['uploadtour_title_title'] = 'Upload a document';
+$string['uploadtour_title_content'] = 'In Content, choose +, then File. Upload your document and choose Apply to return to this form. Your document is only saved when you save the page. The icon image field is for a thumbnail.';
+$string['uploadtour_save_title'] = 'Save your page';
+$string['uploadtour_save_content'] = 'Files and content are saved only when you save the page. Choose Save and close to save everything, including competencies. Cancel on this form discards unsaved changes.';
 $string['uploadtour_content_name'] = 'Exaport: Add documents through Content';
-$string['uploadtour_content_description'] = 'Shows where to upload documents and how to save pending content changes.';
-$string['uploadtour_content_title'] = 'Content is saved with the page';
-$string['uploadtour_content_content'] = 'Use Content for documents, text and links. Changes stay pending until you save the page, so Cancel also discards content changes.';
-$string['uploadtour_file_title'] = 'Choose File to upload a document';
-$string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and choose Apply. You can reopen the block to edit it. Save and close saves all your changes together.';
+$string['uploadtour_content_description'] = 'Shows how to add documents and save content changes.';
+$string['uploadtour_content_title'] = 'Add content to your page';
+$string['uploadtour_content_content'] = 'Use Content for documents, text and links. Changes are saved only when you save the page. Cancel on this form discards unsaved changes.';
+$string['uploadtour_file_title'] = 'Upload a document';
+$string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.';
 
 $string['itemeditorinvalid'] = 'Some page changes are missing or invalid. Your changes have not been saved.';
 $string['itemeditorconflict'] = 'This page changed while you were editing it. Your pending changes have been kept. Review the current page in another tab before reloading this editor.';

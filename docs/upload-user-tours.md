@@ -4,21 +4,21 @@ Exaport uses Moodle's native User tours tool to explain the document-upload
 workflow. Both guides have two steps and use Moodle's native tour navigation and
 End tour controls. They do not submit forms or upload files for the user.
 
-* **Add content before saving** appears on the add-object page. It announces the
+* **Add content before saving** appears on the page creation form. It announces the
   changed upload workflow, points to **Content** and **Save and close**, and explains
   that documents can now be uploaded before the first save.
-* **Add documents through Content** appears on the edit-object page when the
+* **Add documents through Content** appears in the page editor when the
   Content add button is available. It points to Content and the **+** button,
-  explaining how to choose **File**, apply the upload dialog, then save the item.
+  explaining how to choose **File**, apply the upload dialog, then save the page.
 
 Both guides explain that **Apply** updates the form while the main **Save** saves
-the item, content and competencies together. Cancelling the main form discards
+the page, content and competencies together. Cancelling the main form discards
 its pending changes. The icon image field remains a thumbnail field.
 
 The guides apply across courses, including creation in Shared Categories. The
-second guide is excluded when an object cannot be edited. Assignment imports,
-read-only shared-item pages and other Exaport pages are outside their URL
-matches. The permanent hint on the new-object form also explains where to
+second guide is excluded when a page cannot be edited. Assignment imports,
+read-only shared pages and other Exaport pages are outside their URL
+matches. The permanent hint on the page creation form also explains where to
 upload documents.
 
 ## Administration and completion
@@ -44,9 +44,9 @@ plugin API calls to be deferred until all plugin schemas are current. The task
 imports new guides and replaces outdated guides after upgrade; the install and
 upgrade callbacks only queue it.
 
-Guides become available once cron successfully runs the queued task. Item-page
-requests do not perform registration. Deferring the import also handles a completely
-fresh Moodle installation, where blocks are installed before the User tours tool.
+Guides become available once cron successfully runs the queued task. Requests
+from the page editor do not perform registration. Deferring the import also handles
+a completely fresh Moodle installation, where blocks are installed before the User tours tool.
 A lock serialises concurrent registration attempts. If it cannot be obtained,
 the task throws Moodle's lock-timeout exception so the task runner retains it
 for a retry.

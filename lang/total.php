@@ -776,8 +776,8 @@ return [
         'Save and keep editing',
     ],
     'contentaftersave' => [
-        'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie das Objekt, um alle Änderungen gemeinsam zu speichern.',
-        'Add documents through Content: choose +, then File. Apply updates the form; save the item to save all changes together.',
+        'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie die Seite, um alle Änderungen gemeinsam zu speichern.',
+        'Add documents through Content: choose +, then File. Apply updates the form; save the page to save all changes together.',
     ],
     'disableditemwriteapi' => [
         'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.',
@@ -3826,8 +3826,8 @@ return [
         'Delete this content block? Its files will also be permanently deleted.',
     ],
     'deletecontentblockpendingconfirm' => [
-        'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern des Objekts wirksam. Abbrechen im Objektformular verwirft die Entfernung.',
-        'Remove this content block? The removal takes effect when you save the item. Cancel on the item form discards the removal.',
+        'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern der Seite wirksam. Abbrechen im Seitenformular verwirft die Entfernung.',
+        'Remove this content block? The removal takes effect when you save the page. Cancel on the page form discards the removal.',
     ],
     'privacy:metadata:block_exaportitemblock' => [
         'Geordnete Inhalte eines Portfolioeintrags.',
@@ -4059,24 +4059,24 @@ return [
         'Exaport: Add content before saving',
     ],
     'uploadtour_create_description' => [
-        'Erklärt, wie Inhalte vor dem Speichern eines neuen Portfolio-Objekts hochgeladen werden.',
-        'Explains how to upload content before saving a new portfolio item.',
+        'Erklärt, wie Inhalte vor dem Speichern einer neuen Portfolio-Seite hochgeladen werden.',
+        'Explains how to upload content before saving a new portfolio page.',
     ],
     'uploadtour_title_title' => [
         'Das Hochladen hat sich geändert',
         'Uploading has changed',
     ],
     'uploadtour_title_content' => [
-        'Sie können Dokumente jetzt vor dem Speichern des Objekts hinzufügen. Wählen Sie unter Inhalt zuerst + und anschließend Datei. Das Symbolbild dient nur als Vorschaubild.',
-        'You can now add documents before saving the item. In Content, choose + and File. The icon image field is only for a thumbnail.',
+        'Sie können Dokumente jetzt vor dem Speichern der Seite hinzufügen. Wählen Sie unter Inhalt zuerst + und anschließend Datei. Das Symbolbild dient nur als Vorschaubild.',
+        'You can now add documents before saving the page. In Content, choose + and File. The icon image field is only for a thumbnail.',
     ],
     'uploadtour_save_title' => [
-        'Das gesamte Objekt speichern',
-        'Save the whole item',
+        'Die gesamte Seite speichern',
+        'Save the whole page',
     ],
     'uploadtour_save_content' => [
-        'Wählen Sie in jedem Dialog Übernehmen, um dieses Formular zu aktualisieren. Speichern und schließen speichert das Objekt mit allen Inhalten und Kompetenzen gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
-        'Choose Apply in each dialog to update this form. Save and close saves the item and all its content and competencies together. Cancel discards pending changes.',
+        'Wählen Sie in jedem Dialog Übernehmen, um dieses Formular zu aktualisieren. Speichern und schließen speichert die Seite mit allen Inhalten und Kompetenzen gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
+        'Choose Apply in each dialog to update this form. Save and close saves the page and all its content and competencies together. Cancel discards pending changes.',
     ],
     'uploadtour_content_name' => [
         'Exaport: Dokumente unter Inhalt hinzufügen',
@@ -4087,12 +4087,12 @@ return [
         'Shows where to upload documents and how to save pending content changes.',
     ],
     'uploadtour_content_title' => [
-        'Inhalt wird mit dem Objekt gespeichert',
-        'Content is saved with the item',
+        'Inhalt wird mit der Seite gespeichert',
+        'Content is saved with the page',
     ],
     'uploadtour_content_content' => [
-        'Verwenden Sie Inhalt für Dokumente, Texte und Links. Änderungen werden erst mit dem Objekt gespeichert; Abbrechen verwirft daher auch Inhaltsänderungen.',
-        'Use Content for documents, text and links. Changes stay pending until you save the item, so Cancel also discards content changes.',
+        'Verwenden Sie Inhalt für Dokumente, Texte und Links. Änderungen werden erst mit der Seite gespeichert; Abbrechen verwirft daher auch Inhaltsänderungen.',
+        'Use Content for documents, text and links. Changes stay pending until you save the page, so Cancel also discards content changes.',
     ],
     'uploadtour_file_title' => [
         'Datei zum Hochladen eines Dokuments wählen',
@@ -4103,19 +4103,19 @@ return [
         'Choose +, then File. Upload your document and choose Apply. You can reopen the block to edit it. Save and close saves all your changes together.',
     ],
     'itemeditorinvalid' => [
-        'Einige Änderungen am Objekt fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.',
-        'Some item changes are missing or invalid. Your changes have not been saved.',
+        'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.',
+        'Some page changes are missing or invalid. Your changes have not been saved.',
     ],
     'itemeditorconflict' => [
-        'Dieses Objekt wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie das aktuelle Objekt in einem anderen Tab, bevor Sie diesen Editor neu laden.',
-        'This item changed while you were editing it. Your pending changes have been kept. Review the current item in another tab before reloading this editor.',
+        'Diese Seite wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie die aktuelle Seite in einem anderen Tab, bevor Sie diesen Editor neu laden.',
+        'This page changed while you were editing it. Your pending changes have been kept. Review the current page in another tab before reloading this editor.',
     ],
     'itemeditorpendinghint' => [
-        'Änderungen an Inhalt und Kompetenzen werden mit diesem Objekt gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
-        'Content and competency changes are saved with this item. Apply updates the form; Save saves everything together. Cancel discards pending changes.',
+        'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
+        'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.',
     ],
     'itemeditorlocked' => [
-        'Dieses Objekt kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.',
-        'This item can no longer be edited. Your pending changes are shown below, but nothing has been saved.',
+        'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.',
+        'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.',
     ],
 ];

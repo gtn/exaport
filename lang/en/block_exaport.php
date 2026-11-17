@@ -211,7 +211,7 @@ $string['gradeitem'] = 'Grade the item';
 $string['submititem'] = 'Submit';
 $string['saveitem'] = 'Save and close';
 $string['saveandkeepediting'] = 'Save and keep editing';
-$string['contentaftersave'] = 'Add documents through Content: choose +, then File. Apply updates the form; save the item to save all changes together.';
+$string['contentaftersave'] = 'Add documents through Content: choose +, then File. Apply updates the form; save the page to save all changes together.';
 $string['disableditemwriteapi'] = 'This legacy item write service is disabled. Use the structured content interface.';
 
 // === Notes.
@@ -1176,20 +1176,20 @@ $string['linkedbadgeexpires'] = 'Expires: {$a}';
 
 // Document-upload User tours.
 $string['uploadtour_create_name'] = 'Exaport: Add content before saving';
-$string['uploadtour_create_description'] = 'Explains how to upload content before saving a new portfolio item.';
+$string['uploadtour_create_description'] = 'Explains how to upload content before saving a new portfolio page.';
 $string['uploadtour_title_title'] = 'Uploading has changed';
-$string['uploadtour_title_content'] = 'You can now add documents before saving the item. In Content, choose + and File. The icon image field is only for a thumbnail.';
-$string['uploadtour_save_title'] = 'Save the whole item';
-$string['uploadtour_save_content'] = 'Choose Apply in each dialog to update this form. Save and close saves the item and all its content and competencies together. Cancel discards pending changes.';
+$string['uploadtour_title_content'] = 'You can now add documents before saving the page. In Content, choose + and File. The icon image field is only for a thumbnail.';
+$string['uploadtour_save_title'] = 'Save the whole page';
+$string['uploadtour_save_content'] = 'Choose Apply in each dialog to update this form. Save and close saves the page and all its content and competencies together. Cancel discards pending changes.';
 $string['uploadtour_content_name'] = 'Exaport: Add documents through Content';
 $string['uploadtour_content_description'] = 'Shows where to upload documents and how to save pending content changes.';
-$string['uploadtour_content_title'] = 'Content is saved with the item';
-$string['uploadtour_content_content'] = 'Use Content for documents, text and links. Changes stay pending until you save the item, so Cancel also discards content changes.';
+$string['uploadtour_content_title'] = 'Content is saved with the page';
+$string['uploadtour_content_content'] = 'Use Content for documents, text and links. Changes stay pending until you save the page, so Cancel also discards content changes.';
 $string['uploadtour_file_title'] = 'Choose File to upload a document';
 $string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and choose Apply. You can reopen the block to edit it. Save and close saves all your changes together.';
 
-$string['itemeditorinvalid'] = 'Some item changes are missing or invalid. Your changes have not been saved.';
-$string['itemeditorconflict'] = 'This item changed while you were editing it. Your pending changes have been kept. Review the current item in another tab before reloading this editor.';
-$string['itemeditorpendinghint'] = 'Content and competency changes are saved with this item. Apply updates the form; Save saves everything together. Cancel discards pending changes.';
-$string['itemeditorlocked'] = 'This item can no longer be edited. Your pending changes are shown below, but nothing has been saved.';
-$string['deletecontentblockpendingconfirm'] = 'Remove this content block? The removal takes effect when you save the item. Cancel on the item form discards the removal.';
+$string['itemeditorinvalid'] = 'Some page changes are missing or invalid. Your changes have not been saved.';
+$string['itemeditorconflict'] = 'This page changed while you were editing it. Your pending changes have been kept. Review the current page in another tab before reloading this editor.';
+$string['itemeditorpendinghint'] = 'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.';
+$string['itemeditorlocked'] = 'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.';
+$string['deletecontentblockpendingconfirm'] = 'Remove this content block? The removal takes effect when you save the page. Cancel on the page form discards the removal.';

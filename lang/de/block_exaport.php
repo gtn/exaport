@@ -177,7 +177,7 @@ $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
 $string['saveitem'] = 'Speichern und schließen';
 $string['saveandkeepediting'] = 'Speichern und weiter bearbeiten';
-$string['contentaftersave'] = 'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie das Objekt, um alle Änderungen gemeinsam zu speichern.';
+$string['contentaftersave'] = 'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie die Seite, um alle Änderungen gemeinsam zu speichern.';
 $string['disableditemwriteapi'] = 'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.';
 
 // === Notes.
@@ -1139,20 +1139,20 @@ $string['linkedbadgeexpires'] = 'Gültig bis: {$a}';
 
 // Document-upload User tours.
 $string['uploadtour_create_name'] = 'Exaport: Inhalte vor dem Speichern hinzufügen';
-$string['uploadtour_create_description'] = 'Erklärt, wie Inhalte vor dem Speichern eines neuen Portfolio-Objekts hochgeladen werden.';
+$string['uploadtour_create_description'] = 'Erklärt, wie Inhalte vor dem Speichern einer neuen Portfolio-Seite hochgeladen werden.';
 $string['uploadtour_title_title'] = 'Das Hochladen hat sich geändert';
-$string['uploadtour_title_content'] = 'Sie können Dokumente jetzt vor dem Speichern des Objekts hinzufügen. Wählen Sie unter Inhalt zuerst + und anschließend Datei. Das Symbolbild dient nur als Vorschaubild.';
-$string['uploadtour_save_title'] = 'Das gesamte Objekt speichern';
-$string['uploadtour_save_content'] = 'Wählen Sie in jedem Dialog Übernehmen, um dieses Formular zu aktualisieren. Speichern und schließen speichert das Objekt mit allen Inhalten und Kompetenzen gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
+$string['uploadtour_title_content'] = 'Sie können Dokumente jetzt vor dem Speichern der Seite hinzufügen. Wählen Sie unter Inhalt zuerst + und anschließend Datei. Das Symbolbild dient nur als Vorschaubild.';
+$string['uploadtour_save_title'] = 'Die gesamte Seite speichern';
+$string['uploadtour_save_content'] = 'Wählen Sie in jedem Dialog Übernehmen, um dieses Formular zu aktualisieren. Speichern und schließen speichert die Seite mit allen Inhalten und Kompetenzen gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
 $string['uploadtour_content_name'] = 'Exaport: Dokumente unter Inhalt hinzufügen';
 $string['uploadtour_content_description'] = 'Zeigt, wo Dokumente hochgeladen und noch nicht gespeicherte Inhaltsänderungen gespeichert werden.';
-$string['uploadtour_content_title'] = 'Inhalt wird mit dem Objekt gespeichert';
-$string['uploadtour_content_content'] = 'Verwenden Sie Inhalt für Dokumente, Texte und Links. Änderungen werden erst mit dem Objekt gespeichert; Abbrechen verwirft daher auch Inhaltsänderungen.';
+$string['uploadtour_content_title'] = 'Inhalt wird mit der Seite gespeichert';
+$string['uploadtour_content_content'] = 'Verwenden Sie Inhalt für Dokumente, Texte und Links. Änderungen werden erst mit der Seite gespeichert; Abbrechen verwirft daher auch Inhaltsänderungen.';
 $string['uploadtour_file_title'] = 'Datei zum Hochladen eines Dokuments wählen';
 $string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen. Sie können den Block erneut öffnen und bearbeiten. Speichern und schließen speichert alle Änderungen gemeinsam.';
 
-$string['itemeditorinvalid'] = 'Einige Änderungen am Objekt fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.';
-$string['itemeditorconflict'] = 'Dieses Objekt wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie das aktuelle Objekt in einem anderen Tab, bevor Sie diesen Editor neu laden.';
-$string['itemeditorpendinghint'] = 'Änderungen an Inhalt und Kompetenzen werden mit diesem Objekt gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
-$string['itemeditorlocked'] = 'Dieses Objekt kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.';
-$string['deletecontentblockpendingconfirm'] = 'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern des Objekts wirksam. Abbrechen im Objektformular verwirft die Entfernung.';
+$string['itemeditorinvalid'] = 'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.';
+$string['itemeditorconflict'] = 'Diese Seite wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie die aktuelle Seite in einem anderen Tab, bevor Sie diesen Editor neu laden.';
+$string['itemeditorpendinghint'] = 'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
+$string['itemeditorlocked'] = 'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.';
+$string['deletecontentblockpendingconfirm'] = 'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern der Seite wirksam. Abbrechen im Seitenformular verwirft die Entfernung.';

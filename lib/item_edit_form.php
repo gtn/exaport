@@ -293,6 +293,8 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 'mode' => $itemshareall,
                 'alwaysnotify' => (bool)get_config('block_exaport', 'alwaysnotifywhenshare'),
                 'submittedsharing' => $submittedsharing,
+                'submittedgroupsknown' => $sharing !== null && $sharing['groups'] !== null,
+                'submittedgroups' => $sharing['groups'] ?? [],
             ]);
             $sharinghtml = $OUTPUT->render_from_template(
                 'block_exaport/sharing_form',

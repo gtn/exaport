@@ -1137,18 +1137,25 @@ namespace {
     }
 
     /**
-     * Refuse an incomplete individual-recipient form before any entity changes are written.
-     * This is a loading-completeness safeguard, not a replacement for ownership/capability checks.
-     * Everyone/groups and deliberately disabling sharing do not depend on this user picker.
+     * Refuse an incomplete active picker before any entity changes are written.
+     * A missing selection is unknown, while a ready picker may deliberately select nobody.
+     * This guard supplements the caller's ownership/capability checks; it grants no sharing access.
      *
      * @param bool $enabled Whether internal sharing is enabled in the submitted form.
-     * @param int $mode Submitted audience (0 = individual users).
+     * @param int $mode Submitted audience (0 = users, 1 = everyone, 2 = groups).
      */
-    function block_exaport_require_loaded_share_users(bool $enabled, int $mode): void {
+    function block_exaport_require_loaded_share_selection(bool $enabled, int $mode): void {
+        if (!$enabled || !has_capability('block/exaport:shareintern', context_system::instance())) {
+            return;
+        }
         $mode = in_array($mode, [0, 1, 2], true) ? $mode : 0;
-        if ($enabled && $mode === 0 && has_capability('block/exaport:shareintern', context_system::instance())
-                && optional_param('exaport_userlist_ready', 0, PARAM_INT) !== 1) {
+        if ($mode === 0 && optional_param('exaport_userlist_ready', 0, PARAM_INT) !== 1) {
             throw new moodle_exception('sharing_users_not_ready', 'block_exaport');
+        }
+        // With group sharing disabled, the saver preserves stored groups without reading the picker.
+        if ($mode === 2 && block_exaport_sharegroups_enabled()
+                && optional_param('exaport_grouplist_ready', 0, PARAM_INT) !== 1) {
+            throw new moodle_exception('sharing_groups_not_ready', 'block_exaport');
         }
     }
 

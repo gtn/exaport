@@ -3949,6 +3949,14 @@ return [
         'Die Empfängerliste ist noch nicht vollständig geladen. Bitte warten Sie oder laden Sie die Seite neu, bevor Sie speichern.',
         'The recipient list is incomplete. Please wait for it to load, or reload the page before saving.',
     ],
+    'sharing_load_groups_error' => [
+        'Die Gruppenliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.',
+        'The group list could not be loaded. Please try again.',
+    ],
+    'sharing_groups_not_ready' => [
+        'Die Gruppenauswahl ist noch nicht geladen. Bitte warten Sie oder versuchen Sie es erneut, bevor Sie speichern.',
+        'The group selection is not ready. Please wait for it to load, or retry loading it before saving.',
+    ],
 
     'exacompupdaterequired' => [
         'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.',

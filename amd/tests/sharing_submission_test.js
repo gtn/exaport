@@ -16,6 +16,7 @@ define(['jquery', 'core/str'], function($, Str) {
                 {key: 'sharing_load_more_users', component: 'block_exaport'},
                 {key: 'sharing_load_users_error', component: 'block_exaport'},
                 {key: 'sharing_users_not_ready', component: 'block_exaport'},
+                {key: 'sharing_load_groups_error', component: 'block_exaport'},
                 {key: 'loading', component: 'moodle'}, {key: 'retry', component: 'moodle'}
             ]);
             return $.when(loaded, strings).then(function() {
@@ -41,11 +42,20 @@ define(['jquery', 'core/str'], function($, Str) {
                         '<input type="radio" name="shareall" value="0" checked>' +
                         '<input type="radio" name="shareall" value="2">' +
                         '<div data-region="sharing-settings"><div id="sharing-userlist"></div>' +
-                        '<div id="sharing-grouplist"></div></div></section></form>');
+                        '<div data-region="groups-settings"><div id="sharing-grouplist"></div></div>' +
+                        '</div></section></form>');
                     test.root = $('#qunit-fixture [data-region="exaport-sharing"]');
                     test.form = test.root.closest('form');
                     if (submitted !== undefined) {
                         test.root.attr('data-submitted-sharing', JSON.stringify(submitted));
+                        if (Array.isArray(submitted.groups)) {
+                            var fallback = $('<div data-region="submitted-group-selection"></div>')
+                                .prependTo(test.root.find('[data-region="groups-settings"]'));
+                            submitted.groups.forEach(function(id) {
+                                $('<input type="hidden">').attr('name', 'sharegroups[' + id + ']').val(id).appendTo(fallback);
+                            });
+                            test.root.find('[name="exaport_grouplist_ready"]').val('1');
+                        }
                     }
                 };
                 return null;
@@ -184,7 +194,7 @@ define(['jquery', 'core/str'], function($, Str) {
             window.ExabisEportfolio.load_grouplist('cat_mod');
             var request = test.requests[test.requests.length - 1];
             assert.strictEqual(request.params.action, 'grouplist', 'group availability still comes from the server');
-            assert.strictEqual(test.root.find('[name="exaport_grouplist_ready"]').val(), '0');
+            assert.strictEqual(test.root.find('[name="exaport_grouplist_ready"]').val(), '1');
             request.response.resolve([{id: 11, name: 'Course', groups: [
                 {id: 11, name: 'Old DB group', member_cnt: 1, shared_to: true},
                 {id: 22, name: 'New selected group', member_cnt: 1, shared_to: false}
@@ -192,6 +202,40 @@ define(['jquery', 'core/str'], function($, Str) {
             assert.notOk(test.root.find('.sharegroups[value="11"]').prop('checked'), 'old DB group remains unchecked');
             assert.strictEqual(test.root.find('.sharegroups[value="22"]').prop('checked'), selected.length > 0);
             assert.strictEqual(test.root.find('[name="exaport_grouplist_ready"]').val(), '1');
+            assert.strictEqual(test.root.find('[data-region="submitted-group-selection"]').length, 0);
+        });
+    });
+
+    QUnit.test('restored groups remain submitted through loading and failures, then real checkboxes take over', function(assert) {
+        var test = this;
+        [[22], []].forEach(function(selected) {
+            test.show({users: null, notify: null, groups: selected, courses: null});
+            var postedGroups = function() {
+                return test.form.serializeArray().filter(function(field) {
+                    return field.name.indexOf('sharegroups[') === 0;
+                }).map(function(field) {
+                    return Number(field.value);
+                });
+            };
+            window.ExabisEportfolio.load_grouplist('cat_mod');
+            assert.deepEqual(postedGroups(), selected, 'a second POST retains the known selection while loading');
+            assert.strictEqual(test.root.find('[name="exaport_grouplist_ready"]').val(), '1');
+            test.requests[test.requests.length - 1].response.reject();
+            assert.deepEqual(postedGroups(), selected, 'network failure cannot discard restored group inputs');
+            assert.strictEqual(test.root.find('[name="exaport_grouplist_ready"]').val(), '1');
+            test.root.find('#sharing-grouplist button').trigger('click');
+            test.requests[test.requests.length - 1].response.resolve({error: true});
+            assert.deepEqual(postedGroups(), selected, 'malformed responses retain the selection on retry');
+            test.root.find('#sharing-grouplist button').trigger('click');
+            test.requests[test.requests.length - 1].response.resolve([{name: 'Groups', groups: [
+                {id: 11, name: 'Old group', member_cnt: 1, shared_to: true},
+                {id: 22, name: 'New group', member_cnt: 1, shared_to: false}
+            ]}]);
+            assert.deepEqual(postedGroups(), selected, 'handover introduces no duplicate submitted group values');
+            assert.strictEqual(test.root.find('[data-region="submitted-group-selection"]').length, 0);
+            test.root.find('.sharegroups[value="22"]').prop('checked', false).triggerHandler('click');
+            assert.deepEqual(postedGroups(), [], 'unchecking after handover never reintroduces the fallback');
+            assert.strictEqual(test.root.find('#sharing-grouplist button').length, 0, 'success removes Retry');
         });
     });
 
@@ -206,6 +250,39 @@ define(['jquery', 'core/str'], function($, Str) {
         assert.strictEqual(this.root.find('[name="exaport_grouplist_ready"]').val(), '1');
     });
 
+    QUnit.test('a partial group render is removed while restored POST inputs remain available for Retry', function(assert) {
+        this.show({users: null, notify: null, groups: [22], courses: null});
+        var originalHtml = $.fn.html;
+        var failOnce = true;
+        $.fn.html = function(value) {
+            var result = originalHtml.apply(this, arguments);
+            if (failOnce && this.is('#sharing-grouplist') && typeof value === 'string' &&
+                    value.indexOf('name="sharegroups[') >= 0) {
+                failOnce = false;
+                throw new Error('Group render failed after inserting controls');
+            }
+            return result;
+        };
+        try {
+            window.ExabisEportfolio.load_grouplist('cat_mod');
+            var courses = [{name: 'Groups', groups: [
+                {id: 22, name: 'New group', member_cnt: 1, shared_to: false}
+            ]}];
+            this.requests[0].response.resolve(courses);
+            assert.strictEqual(this.root.find('#sharing-grouplist .sharegroups').length, 0, 'partial controls are removed');
+            assert.strictEqual(this.root.find('[name="exaport_grouplist_ready"]').val(), '1');
+            assert.strictEqual(this.form.serializeArray().filter(function(field) {
+                return field.name === 'sharegroups[22]';
+            }).length, 1, 'the accepted selection still submits exactly once');
+            this.root.find('#sharing-grouplist button').trigger('click');
+            this.requests[1].response.resolve(courses);
+            assert.strictEqual(this.root.find('[data-region="submitted-group-selection"]').length, 0);
+            assert.ok(this.root.find('.sharegroups[value="22"]').prop('checked'), 'Retry uses the submitted selection');
+        } finally {
+            $.fn.html = originalHtml;
+        }
+    });
+
     QUnit.test('failed, malformed and unrenderable group responses keep the group audience unknown', function(assert) {
         var test = this;
         ['failed', 'malformed', 'unrenderable'].forEach(function(failure) {
@@ -218,6 +295,8 @@ define(['jquery', 'core/str'], function($, Str) {
                 response.resolve(failure === 'malformed' ? {error: true} : [{id: 11, name: 'Course', groups: [null]}]);
             }
             assert.strictEqual(test.root.find('[name="exaport_grouplist_ready"]').val(), '0', failure);
+            assert.strictEqual(test.root.find('#sharing-grouplist .sharegroups').length, 0, 'no partial controls remain');
+            assert.strictEqual(test.root.find('#sharing-grouplist button').length, 1, 'the list can be retried');
         });
     });
 });

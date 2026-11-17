@@ -96,6 +96,24 @@ final class item_pending_form_test extends \advanced_testcase {
         return json_decode($root->getAttribute('data-submitted-sharing'), true, 32, JSON_THROW_ON_ERROR);
     }
 
+    /** Serialize the sharing controls present before the group AJAX callback, keeping the other posted fields. */
+    private function sharing_retry_fields(array $posted, \DOMXPath $dom): array {
+        foreach (['shareenabled', 'shareall', 'shareusers', 'notifyusers', 'sharegroups',
+                'exaport_userlist_ready', 'exaport_grouplist_ready'] as $name) {
+            unset($posted[$name]);
+        }
+        $pairs = [];
+        foreach ($dom->query('//*[@id="item-sharing"]//input[@name]') as $input) {
+            if ($input->hasAttribute('disabled') ||
+                    (in_array($input->getAttribute('type'), ['checkbox', 'radio'], true) && !$input->hasAttribute('checked'))) {
+                continue;
+            }
+            $pairs[] = rawurlencode($input->getAttribute('name')) . '=' . rawurlencode($input->getAttribute('value'));
+        }
+        parse_str(implode('&', $pairs), $sharing);
+        return array_replace($posted, $sharing);
+    }
+
     public static function sharing_error_contexts(): array {
         return ['new name error' => [false, false], 'saved name error' => [true, false],
             'new quota error' => [false, true], 'saved quota error' => [true, true]];
@@ -158,8 +176,18 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertSame([], $bridge['users']);
         $this->assertSame([], $bridge['notify']);
         $this->assertSame([], $bridge['groups']);
+        $this->assertSame(1, $dom->query('//*[@data-region="sharing-settings"]//*[@data-region="groups-settings"]'
+            . '/*[@data-region="submitted-group-selection"]')->length);
         foreach ($bridge['courses'] as $course) {
             $this->assertEmpty($course['users'] ?? []);
+        }
+        if (!$enabled) {
+            $retry = $this->sharing_retry_fields($posted, $dom);
+            $form = $this->form($custom, $retry);
+            $this->assertNull($form->get_data());
+            $retrydom = $this->dom($form->render());
+            $this->assertSame(0, $retrydom->query('//input[@name="shareenabled"][@checked]')->length);
+            $this->assertSame([], $this->sharing_bridge($retrydom)['groups']);
         }
     }
 
@@ -212,9 +240,59 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertSame(1, $dom->query('//input[@name="shareall"][@value="' . $mode . '"][@checked]')->length);
         $bridge = $this->sharing_bridge($dom);
         $this->assertNull($bridge['groups']);
+        $this->assertSame('0', $dom->query('//input[@name="exaport_grouplist_ready"]')->item(0)->getAttribute('value'));
+        $this->assertSame(0, $dom->query('//*[@data-region="submitted-group-selection"]')->length);
         $this->assertSame([], $bridge['users']);
         $this->assertTrue($DB->record_exists('block_exaportitemgroupshar',
             ['itemid' => $custom['current']->id, 'groupid' => $group->id]));
+    }
+
+    public static function group_retry_contexts(): array {
+        $cases = [];
+        foreach ([false, true] as $saved) {
+            foreach (['users' => 0, 'everyone' => 1, 'groups' => 2] as $name => $mode) {
+                foreach ([false, true] as $empty) {
+                    $cases[($saved ? 'saved ' : 'new ') . $name . ($empty ? ' clear' : ' selected')] = [$saved, $mode, $empty];
+                }
+            }
+        }
+        return $cases;
+    }
+
+    /** @dataProvider group_retry_contexts */
+    public function test_group_selection_survives_a_second_error_before_ajax_finishes(bool $saved, int $mode, bool $empty): void {
+        global $DB;
+        [$custom, , , $group] = $this->sharing_fixture($saved);
+        if ($saved) {
+            $previous = $this->getDataGenerator()->create_cohort();
+            $DB->insert_record('block_exaportitemgroupshar',
+                ['itemid' => $custom['current']->id, 'groupid' => $previous->id]);
+        }
+        $selected = $empty ? [] : [(int)$group->id];
+        $posted = $this->values($custom) + ['shareenabled' => 1, 'shareall' => $mode,
+            'exaport_userlist_ready' => 1, 'exaport_grouplist_ready' => 1, 'sharegroups' => $selected];
+        $posted['name'] = '';
+        $form = $this->form($custom, $posted);
+        $this->assertNull($form->get_data());
+        $first = $this->dom($form->render());
+        $retry = $this->sharing_retry_fields($posted, $first);
+        $retry['name'] = 'Retry blocked by quota';
+        set_config('block_exaport_userquota', 1);
+        $retry['contentblocks'] = json_encode($this->file_state(), JSON_THROW_ON_ERROR);
+        $form = $this->form($custom, $retry);
+        $this->assertNull($form->get_data());
+        $second = $this->dom($form->render());
+        $this->assertSame($selected, $this->sharing_bridge($second)['groups']);
+        $this->assertSame('1', $first->query('//input[@name="exaport_grouplist_ready"]')->item(0)->getAttribute('value'));
+        $this->assertSame(1, $first->query('//*[@data-region="groups-settings"]/*[@data-region="submitted-group-selection"]')->length);
+        $this->assertSame(count($selected), $first->query('//*[@data-region="submitted-group-selection"]/input')->length);
+        $this->assertSame(0, $first->query('//*[@id="sharing-grouplist"]//*[@name]')->length);
+        if ($saved) {
+            $this->assertTrue($DB->record_exists('block_exaportitemgroupshar',
+                ['itemid' => $custom['current']->id, 'groupid' => $previous->id]));
+        } else {
+            $this->assertSame(0, $DB->count_records('block_exaportitem'));
+        }
     }
 
     public function test_sharing_restore_does_not_fill_missing_post_controls_from_query_parameters(): void {
@@ -251,6 +329,8 @@ final class item_pending_form_test extends \advanced_testcase {
         $dom = $this->dom($form->render());
         $this->assertSame(0, $dom->query('//input[@name="shareenabled"][@checked]')->length);
         $this->assertSame('', $dom->query('//*[@id="item-sharing"]')->item(0)->getAttribute('data-submitted-sharing'));
+        $this->assertSame('0', $dom->query('//input[@name="exaport_grouplist_ready"]')->item(0)->getAttribute('value'));
+        $this->assertSame(0, $dom->query('//*[@data-region="submitted-group-selection"]')->length);
     }
 
     public function test_creation_offers_content_and_competencies_before_an_item_exists(): void {

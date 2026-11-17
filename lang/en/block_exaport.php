@@ -1127,6 +1127,8 @@ $string['settings_sharing_courses_with_block_only_description'] = 'Restrict the 
 $string['sharing_load_more_users'] = 'Load all users of this course …';
 $string['sharing_load_users_error'] = 'The user list could not be loaded. Please try again.';
 $string['sharing_users_not_ready'] = 'The recipient list is incomplete. Please wait for it to load, or reload the page before saving.';
+$string['sharing_load_groups_error'] = 'The group list could not be loaded. Please try again.';
+$string['sharing_groups_not_ready'] = 'The group selection is not ready. Please wait for it to load, or retry loading it before saving.';
 
 $string['settings_enable_copy_root_naming'] = 'Allow course-based naming of copied templates';
 $string['settings_enable_copy_root_naming_description'] = 'Allow courses to rename the first root of their copied category template during course copy or restore. Existing portfolio categories and the source template are never changed.';

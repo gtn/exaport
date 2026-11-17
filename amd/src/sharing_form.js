@@ -46,15 +46,36 @@ const initialiseRoot = (root, loaderType) => {
         {key: 'sharing_disable_title', component: 'block_exaport'},
         {key: 'disable'},
         {key: 'cancel'},
+        {key: 'sharing_groups_not_ready', component: 'block_exaport'},
     ]).then(strings => {
     const $root = $(root);
     const $master = $root.find(selectors.master);
     let usersLoaded = false;
     let groupsLoaded = false;
 
+    $root.closest('form').on('submit.exaportSharedGroups', event => {
+        if (event.originalEvent?.submitter?.name === 'cancel') {
+            return;
+        }
+        const enabled = !$master.length || $master.is(':checked');
+        const internalEnabled = enabled && (!$root.find(selectors.internal).length ||
+            $root.find(selectors.internal).is(':checked'));
+        const groups = $root.find(selectors.groups);
+        const mode = $root.find(`${selectors.mode}:checked`).val();
+        if (internalEnabled && mode === '2' && groups.length &&
+                $root.find('[name="exaport_grouplist_ready"]').val() !== '1') {
+            event.preventDefault();
+            groups.find('.exaport-grouplist-incomplete').remove();
+            $('<div class="alert alert-warning exaport-grouplist-incomplete"' +
+                ' role="alert" tabindex="-1"></div>')
+                .text(strings[10]).prependTo(groups).trigger('focus');
+        }
+    });
+
     const update = () => {
         const enabled = !$master.length || $master.is(':checked');
-        const internalEnabled = enabled && (!$root.find(selectors.internal).length || $root.find(selectors.internal).is(':checked'));
+        const internalEnabled = enabled && (!$root.find(selectors.internal).length ||
+            $root.find(selectors.internal).is(':checked'));
         // Keep a saved, inactive group audience until the owner explicitly chooses another one.
         const mode = String($root.find(`${selectors.mode}:checked`).val() ??
             $root.find('[data-region="disabled-group-mode"]').val() ?? '0');

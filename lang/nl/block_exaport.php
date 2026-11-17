@@ -407,6 +407,9 @@ $string['saveitem'] = 'Opslaan en sluiten';
 $string['saveandkeepediting'] = 'Opslaan en verder bewerken';
 $string['contentaftersave'] = 'Voeg documenten toe via Inhoud: kies + en daarna Bestand. Toepassen werkt het formulier bij; sla het object op om alle wijzigingen samen op te slaan.';
 
+$string['sharing_load_groups_error'] = 'De groepenlijst kon niet worden geladen. Probeer het opnieuw.';
+$string['sharing_groups_not_ready'] = 'De groepsselectie is nog niet geladen. Wacht tot deze is geladen of probeer opnieuw te laden voordat je opslaat.';
+
 // Document-upload User tours.
 $string['uploadtour_create_name'] = 'Exaport: Een document uploaden';
 $string['uploadtour_create_description'] = 'Legt uit waar je documenten uploadt en hoe je een portfolio-object met de inhoud opslaat.';

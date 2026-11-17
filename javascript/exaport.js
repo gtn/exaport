@@ -596,13 +596,11 @@
       var $ready = $root.find('[name="exaport_grouplist_ready"]');
       var submitted = getSubmittedSharing($root);
       var restoreGroups = !!submitted && Array.isArray(submitted.groups);
+      var $fallback = $root.find('[data-region="submitted-group-selection"]');
       var selectedGroups = {};
       if (restoreGroups) {
         $.each(submitted.groups, function (index, groupid) { selectedGroups[String(groupid)] = true; });
       }
-      $ready.val('0');
-      $grouplist.html('loading grouplist...').attr('aria-busy', 'true');
-
       // The sesskey is always sent, because all sharing endpoints (view/category/item) require it.
       var params = {action: 'grouplist', sesskey: M.cfg.sesskey};
       if (type == 'cat_mod') {
@@ -613,6 +611,9 @@
 
         if (!$.empty(courses)) {
           $.each(courses, function (tmp, course) {
+            if (!course || !course.groups || typeof course.groups !== 'object') {
+              throw new Error('Missing group list');
+            }
             html += '<fieldset class="course-group"><legend class="course-group-title">';
             html += ($E.courseid == course.id ? '<b>' : '');
             html += course.name;
@@ -698,22 +699,40 @@
         // Open all shared courses.
         $('#sharing-grouplist .course-group').has('input:checked').addClass('course-group-open');
       }
-      $.getJSON(document.location.href, params).done(function (courses) {
-        if (!Array.isArray(courses)) {
-          return;
-        }
-        try {
-          renderGroups(courses);
-          // A failed or partial roster is unknown, never an explicit empty submitted audience.
-          $ready.val('1');
-        } catch (error) {
-          $ready.val('0');
-        }
-      }).fail(function () {
-        $ready.val('0');
-      }).always(function () {
-        $grouplist.attr('aria-busy', 'false');
-      });
+      function failed() {
+        // Discard partially rendered controls, retaining the submitted selection outside this container.
+        $grouplist.empty();
+        $ready.val($fallback.length ? '1' : '0');
+        $('<div class="alert alert-danger" role="alert"></div>')
+          .text(M.util.get_string('sharing_load_groups_error', 'block_exaport')).appendTo($grouplist);
+        $('<button type="button" class="btn btn-link"></button>').text(M.util.get_string('retry', 'moodle'))
+          .on('click', loadGroups).appendTo($grouplist);
+      }
+      function loadGroups() {
+        // Known submitted groups remain ordinary POST inputs while their permitted roster loads.
+        $ready.val($fallback.length ? '1' : '0');
+        $grouplist.text(M.util.get_string('loading', 'moodle')).attr('aria-busy', 'true');
+        $.getJSON(document.location.href, params).done(function (courses) {
+          if (!Array.isArray(courses)) {
+            failed();
+            return;
+          }
+          try {
+            renderGroups(courses);
+            // Hand ownership to the real checkboxes only after the complete render succeeds.
+            $fallback.remove();
+            $fallback = $();
+            restoreGroups = false;
+            $ready.val('1');
+            $root.find('.exaport-grouplist-incomplete').remove();
+          } catch (error) {
+            failed();
+          }
+        }).fail(failed).always(function () {
+          $grouplist.attr('aria-busy', 'false');
+        });
+      }
+      loadGroups();
     },
 
     popup: function (config) {

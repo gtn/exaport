@@ -277,7 +277,7 @@ if ($editform->is_cancelled()) {
     die("nosubmitbutton");
 } else if (($fromform = $editform->get_data()) && $allowedit) {
     require_sesskey();
-    block_exaport_require_loaded_share_users(
+    block_exaport_require_loaded_share_selection(
         (bool)optional_param('shareenabled', 0, PARAM_INT), optional_param('shareall', 0, PARAM_INT)
     );
 

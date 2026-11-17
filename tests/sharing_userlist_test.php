@@ -239,22 +239,106 @@ final class sharing_userlist_test extends \advanced_testcase {
         }
         $this->expectException(\moodle_exception::class);
         $this->expectExceptionMessage(get_string('sharing_users_not_ready', 'block_exaport'));
-        block_exaport_require_loaded_share_users(true, 0);
+        block_exaport_require_loaded_share_selection(true, 0);
     }
 
-    public function test_ready_marker_is_only_needed_when_saving_individual_user_shares(): void {
+    /** @dataProvider incomplete_forms */
+    #[DataProvider('incomplete_forms')]
+    public function test_an_unknown_active_group_selection_is_rejected_without_changes(?int $ready): void {
+        global $DB;
+        set_config('block_exaport_disable_sharegroups', 0);
+        $id = $this->entity_id('item');
+        $group = $this->getDataGenerator()->create_cohort();
+        cohort_add_member($group->id, $this->owner->id);
+        sharing_service::save_internal_shares('item', $id, true, 2, [], [], [$group->id]);
+        $beforeitem = $DB->get_record('block_exaportitem', ['id' => $id]);
+        $beforegroups = $DB->get_records('block_exaportitemgroupshar', ['itemid' => $id]);
+        unset($_POST['exaport_grouplist_ready'], $_GET['exaport_grouplist_ready']);
+        if ($ready !== null) {
+            $_POST['exaport_grouplist_ready'] = $ready;
+        }
+        $writes = $DB->perf_get_writes();
+        try {
+            block_exaport_require_loaded_share_selection(true, 2);
+            $this->fail('An unknown group selection was accepted as an empty audience');
+        } catch (\moodle_exception $error) {
+            $this->assertSame('sharing_groups_not_ready', $error->errorcode);
+        }
+        $this->assertSame($writes, $DB->perf_get_writes());
+        $this->assertEquals($beforeitem, $DB->get_record('block_exaportitem', ['id' => $id]));
+        $this->assertEquals($beforegroups, $DB->get_records('block_exaportitemgroupshar', ['itemid' => $id]));
+    }
+
+    public function test_a_ready_empty_group_selection_can_intentionally_remove_existing_groups(): void {
+        global $DB;
+        set_config('block_exaport_disable_sharegroups', 0);
+        $id = $this->entity_id('item');
+        $group = $this->getDataGenerator()->create_cohort();
+        cohort_add_member($group->id, $this->owner->id);
+        sharing_service::save_internal_shares('item', $id, true, 2, [], [], [$group->id]);
+        $_POST['exaport_grouplist_ready'] = 1;
+        block_exaport_require_loaded_share_selection(true, 2);
+        sharing_service::save_internal_shares('item', $id, true, 2, [], [], []);
+        $this->assertFalse($DB->record_exists('block_exaportitemgroupshar', ['itemid' => $id]));
+    }
+
+    public function test_only_the_active_enabled_picker_requires_a_ready_marker(): void {
         $_POST['exaport_userlist_ready'] = 0;
-        block_exaport_require_loaded_share_users(false, 0);
-        block_exaport_require_loaded_share_users(true, 1);
-        block_exaport_require_loaded_share_users(true, 2);
+        $_POST['exaport_grouplist_ready'] = 0;
+        block_exaport_require_loaded_share_selection(false, 0);
+        block_exaport_require_loaded_share_selection(false, 2);
+        block_exaport_require_loaded_share_selection(true, 1);
         $_POST['exaport_userlist_ready'] = 1;
-        block_exaport_require_loaded_share_users(true, 0);
+        block_exaport_require_loaded_share_selection(true, 0);
+        $_POST['exaport_grouplist_ready'] = 1;
+        $_POST['exaport_userlist_ready'] = 0;
+        block_exaport_require_loaded_share_selection(true, 2);
+        $this->assertTrue(true);
+    }
+
+    public function test_disabled_group_policy_is_not_blocked_and_still_preserves_existing_groups(): void {
+        global $DB;
+        set_config('block_exaport_disable_sharegroups', 0);
+        $id = $this->entity_id('item');
+        $group = $this->getDataGenerator()->create_cohort();
+        cohort_add_member($group->id, $this->owner->id);
+        sharing_service::save_internal_shares('item', $id, true, 2, [], [], [$group->id]);
+        $before = $DB->get_records('block_exaportitemgroupshar', ['itemid' => $id]);
+        set_config('block_exaport_disable_sharegroups', 1);
+        $_POST['exaport_grouplist_ready'] = 0;
+        block_exaport_require_loaded_share_selection(true, 2);
+        sharing_service::save_internal_shares('item', $id, true, 2, [], [], []);
+        $this->assertEquals($before, $DB->get_records('block_exaportitemgroupshar', ['itemid' => $id]));
+    }
+
+    public function test_readiness_does_not_grant_permission_to_change_a_foreign_entity(): void {
+        global $DB;
+        $id = $this->entity_id('item');
+        $before = $DB->get_record('block_exaportitem', ['id' => $id]);
+        $this->setUser($this->recipient);
+        $_POST['exaport_grouplist_ready'] = 1;
+        block_exaport_require_loaded_share_selection(true, 2);
+        try {
+            sharing_service::save_internal_shares('item', $id, true, 2);
+            $this->fail('A ready picker bypassed ownership checks');
+        } catch (\moodle_exception $error) {
+            $this->assertSame('bookmarknotfound', $error->errorcode);
+        }
+        $this->assertEquals($before, $DB->get_record('block_exaportitem', ['id' => $id]));
+    }
+
+    public function test_users_without_sharing_capability_are_not_blocked_by_picker_readiness(): void {
+        $this->setGuestUser();
+        $_POST['exaport_userlist_ready'] = 0;
+        $_POST['exaport_grouplist_ready'] = 0;
+        block_exaport_require_loaded_share_selection(true, 0);
+        block_exaport_require_loaded_share_selection(true, 2);
         $this->assertTrue(true);
     }
 
     public function test_invalid_mode_is_checked_like_the_normalized_user_mode(): void {
         $_POST['exaport_userlist_ready'] = 0;
         $this->expectException(\moodle_exception::class);
-        block_exaport_require_loaded_share_users(true, -1);
+        block_exaport_require_loaded_share_selection(true, -1);
     }
 }

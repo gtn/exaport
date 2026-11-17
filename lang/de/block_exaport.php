@@ -1086,6 +1086,8 @@ $string['settings_sharing_courses_with_block_only_description'] = 'Beschränkt d
 $string['sharing_load_more_users'] = 'Weitere Nutzer/innen laden …';
 $string['sharing_load_users_error'] = 'Die Nutzerliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';
 $string['sharing_users_not_ready'] = 'Die Empfängerliste ist noch nicht vollständig geladen. Bitte warten Sie oder laden Sie die Seite neu, bevor Sie speichern.';
+$string['sharing_load_groups_error'] = 'Die Gruppenliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';
+$string['sharing_groups_not_ready'] = 'Die Gruppenauswahl ist noch nicht geladen. Bitte warten Sie oder versuchen Sie es erneut, bevor Sie speichern.';
 
 $string['settings_enable_copy_root_naming'] = 'Kursbezogene Benennung kopierter Strukturen erlauben';
 $string['settings_enable_copy_root_naming_description'] = 'Erlaubt die Kursoption, beim Kopieren oder Wiederherstellen die oberste Kategorie der kopierten Struktur nach dem Zielkurs zu benennen. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.';

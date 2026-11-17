@@ -9,7 +9,7 @@
     <input type="hidden" id="alwaysnotifywhenshare" value="{{#alwaysnotify}}1{{/alwaysnotify}}{{^alwaysnotify}}0{{/alwaysnotify}}">
     {{! Only the successful initial user-list render marks this complete; it stays outside disabled settings. }}
     <input type="hidden" name="exaport_userlist_ready" value="0">
-    <input type="hidden" name="exaport_grouplist_ready" value="0">
+    <input type="hidden" name="exaport_grouplist_ready" value="{{#submittedgroupsknown}}1{{/submittedgroupsknown}}{{^submittedgroupsknown}}0{{/submittedgroupsknown}}">
 
     {{#showmaster}}
         <div class="exaport-sharing__master custom-control custom-switch">
@@ -99,6 +99,14 @@
                     </div>
                     {{#showgroups}}
                     <div class="exaport-sharing__audience" data-region="groups-settings">
+                        {{#submittedgroupsknown}}
+                            {{! Keep complete submitted choices available while the group roster loads. }}
+                            <div data-region="submitted-group-selection">
+                                {{#submittedgroups}}
+                                    <input type="hidden" name="sharegroups[{{.}}]" value="{{.}}">
+                                {{/submittedgroups}}
+                            </div>
+                        {{/submittedgroupsknown}}
                         <div id="sharing-grouplist" class="exaport-sharing__recipient-list" data-region="group-list">{{#str}} loading, core {{/str}}</div>
                     </div>
                     {{/showgroups}}

@@ -241,28 +241,18 @@ if ($existing) {
     $itemcontentaddurl = null;
 }
 
-$submittedpending = data_submitted() && optional_param('editorbaseline', '', PARAM_RAW) !== '';
+$submitted = data_submitted();
+$submittedpending = $submitted && optional_param('pendingeditor', 0, PARAM_BOOL);
 $pendingeditor = ($allowedit || $submittedpending) && in_array($action, ['add', 'edit'], true);
-$editorstate = null;
-$editorbaseline = optional_param('editorbaseline', '', PARAM_RAW);
-if ($pendingeditor) {
-    if ($editorbaseline === '') {
-        $opened = item_editor::open($existing ?: null, (int)$courseid, $exacompactive);
-        $editorstate = $opened['state'];
-        $editorbaseline = $opened['baseline'];
-    } else {
-        $editorstate = item_editor::initial_state($existing ?: null);
-    }
-}
-if ($pendingeditor && optional_param('editorbaseline', '', PARAM_RAW) !== '') {
-    try {
-        $initial = item_editor::read_baseline($editorbaseline, (int)$id, (int)$courseid);
-        foreach (POSSIBLE_IFRAME_FIELDS as $field) {
-            // Keep the original input names on a conflict rerender, even if an API changed its HTML mode.
-            $usetextareas[$field] = !empty($initial['textareas'][$field]);
+$editorstate = $pendingeditor ? item_editor::initial_state($existing ?: null) : null;
+if ($pendingeditor && $submittedpending) {
+    foreach (POSSIBLE_IFRAME_FIELDS as $field) {
+        // Rebuild the submitted input names after an error, even if the saved HTML mode changed.
+        if (isset($submitted->{$field . '_editor'})) {
+            $usetextareas[$field] = false;
+        } else if (isset($submitted->{$field})) {
+            $usetextareas[$field] = true;
         }
-    } catch (moodle_exception $exception) {
-        // The form validator will report an invalid baseline without accepting its values.
     }
 }
 
@@ -279,7 +269,7 @@ $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' 
         'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
         'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id),
         'itemeditsections' => $itemeditsections, 'pendingeditor' => $pendingeditor,
-        'editorstate' => $editorstate, 'editorbaseline' => $editorbaseline));
+        'editorstate' => $editorstate));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -309,7 +299,7 @@ if ($editform->is_cancelled()) {
             }, $exacompactive);
         $saved = true;
     } catch (moodle_exception $exception) {
-        // A last-moment conflict or quota change must not replace the submitted form with fresh defaults.
+        // A save error or quota change must not replace the submitted form with fresh defaults.
         $editform->set_editor_error($exception->getMessage());
     }
 

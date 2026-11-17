@@ -42,7 +42,7 @@ define(['jquery', 'block_exaport/item_competences', 'core_form/modalform'], func
     var roots = [];
     var modals = [];
     document.getElementById('qunit-fixture').innerHTML =
-      '<form><input name="editorbaseline" value="signed-baseline">' +
+      '<form><input name="competencesmodified" value="0">' +
       '<input name="competenceids" value="4"><section data-region="item-competences">' +
       '<div data-region="competence-summary">Accepted</div>' +
       '<button type="button" data-action="open-competence-picker">Choose</button></section></form>';
@@ -70,28 +70,37 @@ define(['jquery', 'block_exaport/item_competences', 'core_form/modalform'], func
       Competences.init({pending: true, itemId: 0, courseId: 1});
       document.addEventListener = originalListener;
       trigger.click();
+      assert.strictEqual(modals[0].config.args.pending, 1, 'the modal keeps pending submission semantics');
+      assert.strictEqual(form.querySelector('[name="competencesmodified"]').value, '0', 'opening is not an edit');
+      roots[0].dispatchEvent(new CustomEvent(modals[0].events.SERVER_VALIDATION_ERROR));
+      roots[0].dispatchEvent(new CustomEvent(modals[0].events.ERROR));
+      assert.strictEqual(form.querySelector('[name="competencesmodified"]').value, '0', 'failed Apply is not an edit');
       roots[0].remove(); // Core removes the modal when Escape closes it, even during Apply.
-      trigger.click();
+      assert.strictEqual(form.querySelector('[name="competencesmodified"]').value, '0', 'cancelling is not an edit');
 
+      var delayed = new CustomEvent(modals[0].events.FORM_SUBMITTED, {
+        cancelable: true, detail: {competenceids: [16],
+          content: '<div data-region="competence-summary">Abandoned selection</div>'}
+      });
+      roots[0].dispatchEvent(delayed);
+      assert.ok(delayed.defaultPrevented, 'core must not hide an already abandoned modal again');
+      assert.strictEqual(form.querySelector('[name="competencesmodified"]').value, '0',
+        'an abandoned response does not mark the selection modified');
+      assert.strictEqual(form.querySelector('[name="competenceids"]').value, '4',
+        'the delayed response cannot change the accepted selection');
+      assert.strictEqual(form.querySelector('[data-region="competence-summary"]').textContent,
+        'Accepted', 'the preview retains the accepted selection');
+
+      trigger.click();
       var accepted = new CustomEvent(modals[1].events.FORM_SUBMITTED, {
         cancelable: true, detail: {competenceids: [8, 12],
           content: '<div data-region="competence-summary">Current accepted selection</div>'}
       });
       roots[1].dispatchEvent(accepted);
       assert.notOk(accepted.defaultPrevented, 'a live modal can still apply');
+      assert.strictEqual(form.querySelector('[name="competencesmodified"]').value, '1', 'successful Apply records edit intent');
       assert.strictEqual(form.querySelector('[name="competenceids"]').value, '8,12');
       assert.strictEqual(form.dataset.formDirty, 'true');
-
-      var delayed = new CustomEvent(modals[0].events.FORM_SUBMITTED, {
-        cancelable: true, detail: {competenceids: [4],
-          content: '<div data-region="competence-summary">Abandoned selection</div>'}
-      });
-      roots[0].dispatchEvent(delayed);
-      assert.ok(delayed.defaultPrevented, 'core must not hide an already abandoned modal again');
-      assert.strictEqual(form.querySelector('[name="competenceids"]').value, '8,12',
-        'the delayed response cannot change the accepted selection');
-      assert.strictEqual(form.querySelector('[data-region="competence-summary"]').textContent,
-        'Current accepted selection', 'the preview retains the accepted selection');
     } finally {
       document.addEventListener = originalListener;
       Modal.prototype.show = originalShow;

@@ -4106,10 +4106,6 @@ return [
         'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.',
         'Some page changes are missing or invalid. Your changes have not been saved.',
     ],
-    'itemeditorconflict' => [
-        'Diese Seite wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie die aktuelle Seite in einem anderen Tab, bevor Sie diesen Editor neu laden.',
-        'This page changed while you were editing it. Your pending changes have been kept. Review the current page in another tab before reloading this editor.',
-    ],
     'itemeditorpendinghint' => [
         'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
         'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.',

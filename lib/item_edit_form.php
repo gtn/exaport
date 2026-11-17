@@ -194,15 +194,18 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
             if ($pendingeditor) {
                 $initialstate = $this->_customdata['editorstate'];
-                $baseline = $this->_customdata['editorbaseline'];
                 $statejson = $this->optional_param('contentblocks', json_encode($initialstate), PARAM_RAW);
-                foreach (['editorbaseline' => $baseline, 'contentblocks' => json_encode($initialstate),
+                foreach (['pendingeditor' => 1, 'competencesmodified' => 0] as $name => $default) {
+                    $mform->addElement('hidden', $name, $default);
+                    $mform->setType($name, PARAM_BOOL);
+                }
+                foreach (['contentblocks' => json_encode($initialstate),
                         'competenceids' => implode(',', $this->initial_competenceids())] as $name => $default) {
                     $mform->addElement('hidden', $name, $default);
                     $mform->setType($name, PARAM_RAW);
                 }
                 try {
-                    $state = \block_exaport\local\item_editor::display_state($statejson, $baseline,
+                    $state = \block_exaport\local\item_editor::display_state($statejson,
                         (int)($this->_customdata['current']->id ?? 0), (int)$this->_customdata['course']->id,
                         empty($this->_customdata['allowedit']));
                 } catch (\moodle_exception $exception) {
@@ -402,7 +405,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             }
             \block_exaport\local\item_editor::validate_request(
                 (int)($this->_customdata['current']->id ?? 0), (int)$this->_customdata['course']->id,
-                $this->optional_param('editorbaseline', '', PARAM_RAW),
                 $this->optional_param('contentblocks', '', PARAM_RAW),
                 $this->optional_param('competenceids', '', PARAM_RAW), $data,
                 !empty($this->_customdata['itemeditsections']['competences']));
@@ -412,7 +414,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         return $errors;
     }
 
-    /** Display a conflict discovered after validation without losing any submitted fields. */
+    /** Display a save error without losing any submitted fields. */
     public function set_editor_error(string $message): void {
         $this->_form->setElementError('editorcontent', $message);
     }

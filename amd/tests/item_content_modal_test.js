@@ -97,7 +97,6 @@ define(['jquery', 'block_exaport/item_content_modal', 'core_form/modalform'], fu
         var modals = [];
         var block = {key: 'new-first', id: 0, type: 'text', title: 'Accepted', modified: true};
         var row = this.row;
-        this.form.insertAdjacentHTML('afterbegin', '<input name="editorbaseline" value="signed-baseline">');
         this.form.querySelector('[name="contentblocks"]').value = JSON.stringify({blocks: [block], removed: []});
         this.section.querySelector('.exaport-item-content-rows').innerHTML = row(block.key, block.title);
         var trigger = this.section.querySelector('.exaport-item-content-edit');
@@ -125,6 +124,7 @@ define(['jquery', 'block_exaport/item_content_modal', 'core_form/modalform'], fu
             Content.init({pending: true, itemId: 0, courseId: 1});
             document.addEventListener = originalListener;
             trigger.click();
+            assert.strictEqual(modals[0].config.args.pending, 1, 'the modal keeps pending submission semantics');
             roots[0].remove(); // Core removes the modal when Escape closes it, even during Apply.
             trigger.click();
 

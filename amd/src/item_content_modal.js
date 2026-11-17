@@ -103,7 +103,6 @@ const open = (trigger, config) => {
         if (!block) {
             return;
         }
-        args.editorbaseline = form.querySelector('[name="editorbaseline"]').value;
         args.pendingblock = JSON.stringify(block);
         args.blockid = block.id;
     }

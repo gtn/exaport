@@ -34,8 +34,6 @@ class item_competences extends dynamic_form {
         $mform->setType('itemid', PARAM_INT);
         $mform->addElement('hidden', 'pending', $this->is_pending() ? 1 : 0);
         $mform->setType('pending', PARAM_BOOL);
-        $mform->addElement('hidden', 'editorbaseline', $this->optional_param('editorbaseline', '', PARAM_RAW));
-        $mform->setType('editorbaseline', PARAM_RAW);
         if ($this->is_pending()) {
             $mform->addElement('hidden', 'selectedids', $this->optional_param('selectedids', '', PARAM_RAW_TRIMMED));
             $mform->setType('selectedids', PARAM_RAW_TRIMMED);
@@ -62,9 +60,6 @@ class item_competences extends dynamic_form {
             $item = $this->is_pending()
                 ? item_editor::context((int)$data['itemid'], (int)$data['courseid'])
                 : block_exaport_get_editable_competence_item((int)$data['itemid'], (int)$data['courseid']);
-            if ($this->is_pending()) {
-                item_editor::read_baseline($data['editorbaseline'] ?? '', (int)$data['itemid'], (int)$data['courseid']);
-            }
             $ids = block_exaport_parse_competenceids($data['competenceids'] ?? '');
             block_exaport_validate_item_competenceids($item, $ids);
         } catch (\invalid_parameter_exception | \block_exacomp_permission_exception $exception) {
@@ -90,7 +85,6 @@ class item_competences extends dynamic_form {
         if ($this->is_pending()) {
             $itemid = $this->optional_param('itemid', 0, PARAM_INT);
             item_editor::context($itemid, $courseid);
-            item_editor::read_baseline($this->optional_param('editorbaseline', '', PARAM_RAW), $itemid, $courseid);
             return;
         }
         block_exaport_get_editable_competence_item(
@@ -112,7 +106,6 @@ class item_competences extends dynamic_form {
             'courseid' => $this->optional_param('courseid', 0, PARAM_INT),
             'itemid' => $itemid,
             'competenceids' => implode(',', $this->selection_for_picker($itemid)),
-            'editorbaseline' => $this->optional_param('editorbaseline', '', PARAM_RAW),
             'selectedids' => $this->optional_param('selectedids', '', PARAM_RAW_TRIMMED),
         ]);
     }
@@ -126,9 +119,6 @@ class item_competences extends dynamic_form {
         $item = $this->is_pending()
             ? item_editor::context((int)$data->itemid, (int)$data->courseid)
             : block_exaport_get_editable_competence_item((int)$data->itemid, (int)$data->courseid);
-        if ($this->is_pending()) {
-            item_editor::read_baseline($data->editorbaseline ?? '', (int)$data->itemid, (int)$data->courseid);
-        }
         $ids = block_exaport_parse_competenceids($data->competenceids ?? '');
         $tree = \block_exacomp\api::get_comp_tree_for_exaport($USER->id);
         $ids = block_exaport_validate_item_competenceids($item, $ids, $tree);
@@ -155,10 +145,9 @@ class item_competences extends dynamic_form {
         )];
     }
 
-    /** A missing baseline on a pending Apply must never demote it to an independent Save. */
+    /** Keep selection-bearing requests pending even if their explicit flag is lost. */
     private function is_pending(): bool {
         return (bool)$this->optional_param('pending', 0, PARAM_BOOL) ||
-            $this->optional_param('editorbaseline', '', PARAM_RAW) !== '' ||
             $this->optional_param('selectedids', null, PARAM_RAW_TRIMMED) !== null;
     }
 

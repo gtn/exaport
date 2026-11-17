@@ -1152,7 +1152,6 @@ $string['uploadtour_file_title'] = 'Ein Dokument hochladen';
 $string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.';
 
 $string['itemeditorinvalid'] = 'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.';
-$string['itemeditorconflict'] = 'Diese Seite wurde während Ihrer Bearbeitung geändert. Ihre noch nicht gespeicherten Änderungen bleiben erhalten. Prüfen Sie die aktuelle Seite in einem anderen Tab, bevor Sie diesen Editor neu laden.';
 $string['itemeditorpendinghint'] = 'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
 $string['itemeditorlocked'] = 'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.';
 $string['deletecontentblockpendingconfirm'] = 'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern der Seite wirksam. Abbrechen im Seitenformular verwirft die Entfernung.';

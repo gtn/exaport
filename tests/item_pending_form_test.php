@@ -36,14 +36,13 @@ final class item_pending_form_test extends \advanced_testcase {
             'textfieldoptions' => ['trusttext' => true, 'subdirs' => true, 'maxfiles' => 99,
                 'context' => \context_user::instance($USER->id)],
             'pendingeditor' => true, 'editorstate' => item_editor::initial_state($item),
-            'editorbaseline' => item_editor::baseline($item, SITEID, $competences),
             'itemeditsections' => ['mainsettings' => true, 'content' => true, 'competences' => $competences]];
     }
 
     private function values(array $custom): array {
         $data = ['id' => (int)($custom['current']->id ?? 0), 'courseid' => SITEID, 'action' => $custom['action'],
             'name' => $custom['current']->name ?? 'New item title', 'categoryids' => [],
-            'iconfile' => file_get_unused_draft_itemid(), 'editorbaseline' => $custom['editorbaseline'],
+            'iconfile' => file_get_unused_draft_itemid(), 'pendingeditor' => 1, 'competencesmodified' => 0,
             'contentblocks' => json_encode($custom['editorstate'], JSON_THROW_ON_ERROR), 'competenceids' => ''];
         foreach (['intro', 'project_description', 'project_process', 'project_result'] as $field) {
             $data[$field . '_editor'] = ['text' => '', 'format' => FORMAT_HTML, 'itemid' => 0];
@@ -86,7 +85,8 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertSame(1, $dom->query('//*[@id="id_itemcompetences"]')->length);
         $this->assertSame(1, $dom->query('//button[contains(@class,"exaport-item-content-add-button")]')->length);
         $this->assertSame(1, $dom->query('//*[@data-action="open-competence-picker"]')->length);
-        foreach (['name', 'categoryids[]', 'iconfile', 'contentblocks', 'competenceids', 'editorbaseline'] as $name) {
+        foreach (['name', 'categoryids[]', 'iconfile', 'contentblocks', 'competenceids',
+                'pendingeditor', 'competencesmodified'] as $name) {
             $this->assertGreaterThan(0, $dom->query('//*[@name="' . $name . '"]')->length, $name);
         }
         $this->assertSame(0, $DB->count_records('block_exaportitem'));
@@ -97,6 +97,7 @@ final class item_pending_form_test extends \advanced_testcase {
         $custom = $this->customdata();
         $posted = $this->values($custom);
         $posted['name'] = '';
+        $posted['competencesmodified'] = 1;
         $state = $this->file_state();
         $posted['contentblocks'] = json_encode($state, JSON_THROW_ON_ERROR);
         $form = $this->form($custom, $posted);
@@ -104,8 +105,8 @@ final class item_pending_form_test extends \advanced_testcase {
         $dom = $this->dom($form->render());
         $this->assertSame($posted['contentblocks'],
             $dom->query('//input[@name="contentblocks"]')->item(0)->getAttribute('value'));
-        $this->assertSame($posted['editorbaseline'],
-            $dom->query('//input[@name="editorbaseline"]')->item(0)->getAttribute('value'));
+        $this->assertSame('1', $dom->query('//input[@name="pendingeditor"]')->item(0)->getAttribute('value'));
+        $this->assertSame('1', $dom->query('//input[@name="competencesmodified"]')->item(0)->getAttribute('value'));
         $this->assertSame(1, $dom->query('//div[@data-block-key="new-file"]')->length);
         $files = \block_exaport\local\item_content_edit::draft_files($state['blocks'][0]['files_filemanager']);
         $this->assertSame('Pending bytes', reset($files)->get_content());

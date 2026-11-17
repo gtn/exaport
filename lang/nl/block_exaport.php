@@ -422,7 +422,6 @@ $string['uploadtour_file_title'] = 'Een document uploaden';
 $string['uploadtour_file_content'] = 'Kies + en daarna Bestand. Upload je document en kies Toepassen om terug te keren naar dit formulier. Kies Opslaan en sluiten om het object en de inhoud op te slaan.';
 
 $string['itemeditorinvalid'] = 'Sommige wijzigingen aan het object ontbreken of zijn ongeldig. Je wijzigingen zijn niet opgeslagen.';
-$string['itemeditorconflict'] = 'Dit object is gewijzigd terwijl je het bewerkte. Je nog niet opgeslagen wijzigingen zijn behouden. Bekijk het huidige object in een ander tabblad voordat je deze editor opnieuw laadt.';
 $string['itemeditorpendinghint'] = 'Wijzigingen aan inhoud en competenties worden samen met dit object opgeslagen. Toepassen werkt het formulier bij; Opslaan slaat alles samen op. Annuleren verwerpt nog niet opgeslagen wijzigingen.';
 $string['itemeditorlocked'] = 'Dit object kan niet meer worden bewerkt. Je nog niet opgeslagen wijzigingen worden hieronder getoond, maar er is niets opgeslagen.';
 $string['deletecontentblockpendingconfirm'] = 'Dit inhoudsblok verwijderen? De verwijdering wordt pas doorgevoerd wanneer je het object opslaat. Annuleren op het objectformulier verwerpt de verwijdering.';

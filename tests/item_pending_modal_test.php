@@ -43,11 +43,11 @@ final class item_pending_modal_test extends \advanced_testcase {
         return $response;
     }
 
-    private function args(string $type, ?string $baseline = null, ?array $state = null): array {
+    private function args(string $type, ?array $state = null): array {
         $state = $state ?? ['id' => 0, 'key' => 'new-' . $type, 'type' => $type,
             'title' => 'Pending ' . $type, 'modified' => true];
         return ['itemid' => 0, 'courseid' => SITEID, 'blockid' => $state['id'],
-            'contenttype' => $type, 'operation' => 'save', 'editorbaseline' => $baseline ?? item_editor::baseline(null, SITEID, false),
+            'contenttype' => $type, 'operation' => 'save', 'pending' => 1,
             'pendingblock' => json_encode($state, JSON_THROW_ON_ERROR)];
     }
 
@@ -107,9 +107,8 @@ final class item_pending_modal_test extends \advanced_testcase {
     }
 
     /** Keep metadata minimal while exercising the real final block/file commit. */
-    private function commit_block(?\stdClass $item, string $baseline, array $state): int {
+    private function commit_block(?\stdClass $item, array $state): int {
         $data = (object)['id' => (int)($item->id ?? 0), 'courseid' => SITEID, 'name' => 'Text modal fixture',
-            'editorbaseline' => $baseline,
             'contentblocks' => json_encode(['blocks' => [$state], 'removed' => []], JSON_THROW_ON_ERROR),
             'competenceids' => ''];
         return item_editor::commit((int)$data->id, SITEID, $data, static function(\stdClass $metadata): int {
@@ -145,7 +144,7 @@ final class item_pending_modal_test extends \advanced_testcase {
         $this->assertSame(0, $state['id']);
         $this->assertStringContainsString('evidence.txt', $applied['result']['content']);
 
-        $reopenargs = $this->args('file', $args['editorbaseline'], $state);
+        $reopenargs = $this->args('file', $state);
         $reopened = $this->request(item_content::class, $reopenargs, false);
         $working = (int)$this->value($reopened['html'], 'files_filemanager');
         $this->assertNotSame($draftid, $working);
@@ -167,7 +166,7 @@ final class item_pending_modal_test extends \advanced_testcase {
         $this->upload($draftid);
         $state = ['id' => 0, 'key' => 'new-cancel', 'type' => 'file', 'title' => 'Accepted',
             'modified' => true, 'files_filemanager' => $draftid];
-        $args = $this->args('file', null, $state);
+        $args = $this->args('file', $state);
         $opened = $this->request(item_content::class, $args, false);
         $working = (int)$this->value($opened['html'], 'files_filemanager');
         $this->upload($working, 'cancelled.txt', 'Discarded modal upload');
@@ -237,8 +236,7 @@ final class item_pending_modal_test extends \advanced_testcase {
         $original = '<p>Original saved text</p>';
         $block = $item ? block_exaport_create_content_block((int)$item->id, 'text', 'Original', '', [
             'content' => $original, 'contentformat' => FORMAT_HTML]) : null;
-        $baseline = item_editor::baseline($item, SITEID, false);
-        $args = $this->args('text', $baseline, $block ? item_content_edit::from_record($block) : null);
+        $args = $this->args('text', $block ? item_content_edit::from_record($block) : null);
         $args['itemid'] = (int)($item->id ?? 0);
         $opened = $this->request(item_content::class, $args, false);
         $fields = $this->submitted_fields($opened['html']);
@@ -263,7 +261,7 @@ final class item_pending_modal_test extends \advanced_testcase {
             $this->assertSame(0, $DB->count_records('block_exaportitem'));
             $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
         }
-        $itemid = $this->commit_block($item, $baseline, $state);
+        $itemid = $this->commit_block($item, $state);
         $savedblocks = block_exaport_get_item_content_blocks($itemid);
         $this->assertCount(1, $savedblocks);
         $this->assertSame('<p>Accepted pending text</p>', $savedblocks[0]->content);
@@ -280,8 +278,7 @@ final class item_pending_modal_test extends \advanced_testcase {
             'filearea' => 'item_content_text', 'itemid' => $block->id, 'filepath' => '/nested/',
             'filename' => 'image.png', 'source' => 'image.png', 'userid' => $USER->id,
         ], 'Nested imported image bytes');
-        $baseline = item_editor::baseline($item, SITEID, false);
-        $args = $this->args('text', $baseline, item_content_edit::from_record($block));
+        $args = $this->args('text', item_content_edit::from_record($block));
         $args['itemid'] = (int)$item->id;
         $opened = $this->request(item_content::class, $args, false);
         $fields = $this->submitted_fields($opened['html']);
@@ -300,7 +297,7 @@ final class item_pending_modal_test extends \advanced_testcase {
         $working['content_editor']['text'] .= '<p>Second media edit</p>';
         $again = $this->request(item_content::class, $working);
         $this->assertTrue($again['submitted']);
-        $this->commit_block($item, $baseline, $again['result']['block']);
+        $this->commit_block($item, $again['result']['block']);
         $content = $DB->get_field('block_exaportitemblock', 'content', ['id' => $block->id]);
         $this->assertStringContainsString('@@PLUGINFILE@@/nested/image.png', $content);
         $this->assertStringContainsString('Accepted media edit', $content);
@@ -367,7 +364,7 @@ final class item_pending_modal_test extends \advanced_testcase {
     public function test_new_competence_selection_is_pending_and_rejects_inaccessible_ids(): void {
         global $DB;
         set_config('block_exaport_enable_interaction_competences', 1);
-        $args = ['itemid' => 0, 'courseid' => SITEID, 'editorbaseline' => item_editor::baseline(null, SITEID, true),
+        $args = ['itemid' => 0, 'courseid' => SITEID, 'pending' => 1,
             'selectedids' => ''];
         $accepted = $this->request(item_competences::class, $args + ['competenceids' => '']);
         $this->assertTrue($accepted['submitted']);
@@ -416,8 +413,7 @@ final class item_pending_modal_test extends \advanced_testcase {
         $this->assertContains($descriptorid, block_exaport_competence_tree_descriptorids(
             \block_exacomp\api::get_comp_tree_for_exaport($owner->id)));
 
-        $args = ['itemid' => 0, 'courseid' => $course->id,
-            'editorbaseline' => item_editor::baseline(null, (int)$course->id, true), 'selectedids' => ''];
+        $args = ['itemid' => 0, 'courseid' => $course->id, 'pending' => 1, 'selectedids' => ''];
         $opened = $this->request(item_competences::class, $args, false);
         $this->assertStringContainsString('Visible competency', $opened['html']);
         $applied = $this->request(item_competences::class, $args + ['competenceids' => (string)$descriptorid]);
@@ -429,10 +425,9 @@ final class item_pending_modal_test extends \advanced_testcase {
         $this->assertSame(0, $DB->count_records(BLOCK_EXACOMP_DB_COMPETENCE_USER_MM, ['eportfolioitem' => 1]));
 
         $data = (object)['id' => 0, 'courseid' => $course->id, 'name' => 'New item with competencies',
-            'editorbaseline' => $args['editorbaseline'],
             'contentblocks' => json_encode(item_editor::initial_state(null), JSON_THROW_ON_ERROR),
-            'competenceids' => implode(',', $applied['result']['competenceids'])];
-        $plan = item_editor::validate_request(0, (int)$course->id, $data->editorbaseline,
+            'competenceids' => implode(',', $applied['result']['competenceids']), 'competencesmodified' => 1];
+        $plan = item_editor::validate_request(0, (int)$course->id,
             $data->contentblocks, $data->competenceids, (array)$data, true);
         $this->assertNull($plan['item']);
         $this->assertSame([$descriptorid], $plan['competenceids']);
@@ -471,9 +466,8 @@ final class item_pending_modal_test extends \advanced_testcase {
             $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
                 ['activityid' => $itemid, 'compid' => $id, 'eportfolioitem' => 1]);
         }
-        $item = $DB->get_record('block_exaportitem', ['id' => $itemid]);
         $args = ['itemid' => $itemid, 'courseid' => SITEID,
-            'editorbaseline' => item_editor::baseline($item, SITEID, true), 'selectedids' => implode(',', $ids)];
+            'pending' => 1, 'selectedids' => implode(',', $ids)];
         $accepted = $this->request(item_competences::class, $args + ['competenceids' => (string)$ids[0]]);
         $this->assertTrue($accepted['submitted']);
         $this->assertSame([$ids[0]], $accepted['result']['competenceids']);
@@ -494,24 +488,47 @@ final class item_pending_modal_test extends \advanced_testcase {
         $this->assertStringNotContainsString('Inaccessible choice', $rejected['html']);
     }
 
-    public function test_missing_pending_baseline_cannot_switch_content_to_immediate_save(): void {
+    public static function pending_content_markers(): array {
+        return ['explicit flag and state' => [1], 'block state alone' => [0]];
+    }
+
+    /** @dataProvider pending_content_markers */
+    public function test_pending_content_markers_stage_existing_changes_until_main_save(int $pending): void {
+        global $DB, $USER;
+        $itemid = $DB->insert_record('block_exaportitem', ['userid' => $USER->id,
+            'courseid' => SITEID, 'name' => 'Saved item', 'type' => 'note']);
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+        $block = block_exaport_create_link_content_block((int)$itemid, 'Original', 'https://example.test/original');
+        $state = item_content_edit::from_record($block);
+        $args = array_replace($this->args('link', $state), ['itemid' => $itemid,
+            'title' => 'Pending title', 'url' => 'https://example.test/changed', 'pending' => $pending]);
+        $response = $this->request(item_content::class, $args);
+        $this->assertTrue($response['submitted']);
+        $this->assertSame('Pending title', $response['result']['block']['title']);
+        $this->assertSame('Original', $DB->get_field('block_exaportitemblock', 'title', ['id' => $block->id]));
+        $this->commit_block($item, $response['result']['block']);
+        $this->assertSame('Pending title', $DB->get_field('block_exaportitemblock', 'title', ['id' => $block->id]));
+        $this->assertSame('https://example.test/changed', $DB->get_field('block_exaportitemblock', 'url', ['id' => $block->id]));
+    }
+
+    public function test_explicit_pending_content_without_block_state_cannot_save_immediately(): void {
         global $DB, $USER;
         $itemid = $DB->insert_record('block_exaportitem', ['userid' => $USER->id,
             'courseid' => SITEID, 'name' => 'Saved item', 'type' => 'note']);
         $block = block_exaport_create_link_content_block((int)$itemid, 'Original', 'https://example.test/original');
-        $state = \block_exaport\local\item_content_edit::from_record($block);
-        $args = array_replace($this->args('link', '', $state), ['itemid' => $itemid,
-            'title' => 'Must not save', 'url' => 'https://example.test/changed', 'pending' => 1]);
+        $args = ['itemid' => $itemid, 'courseid' => SITEID, 'blockid' => $block->id,
+            'contenttype' => 'link', 'operation' => 'save', 'pending' => 1,
+            'title' => 'Must not save', 'url' => 'https://example.test/changed'];
         try {
             $this->request(item_content::class, $args);
-            $this->fail('A pending submit without its baseline was accepted');
+            $this->fail('A pending submit without block state was accepted');
         } catch (\moodle_exception $exception) {
             $this->assertSame('itemeditorinvalid', $exception->errorcode);
         }
         $this->assertSame('Original', $DB->get_field('block_exaportitemblock', 'title', ['id' => $block->id]));
     }
 
-    public function test_missing_pending_baseline_cannot_switch_competences_to_immediate_save(): void {
+    public function test_pending_competence_markers_wait_for_main_save(): void {
         global $DB, $USER;
         set_config('block_exaport_enable_interaction_competences', 1);
         $itemid = $DB->insert_record('block_exaportitem', ['userid' => $USER->id,
@@ -519,14 +536,25 @@ final class item_pending_modal_test extends \advanced_testcase {
         $id = (int)$DB->insert_record(BLOCK_EXACOMP_DB_DESCRIPTORS, ['title' => 'Retained choice']);
         $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
             ['activityid' => $itemid, 'compid' => $id, 'eportfolioitem' => 1]);
-        try {
-            $this->request(item_competences::class, ['itemid' => $itemid, 'courseid' => SITEID,
-                'pending' => 1, 'selectedids' => (string)$id, 'competenceids' => '', 'editorbaseline' => '']);
-            $this->fail('A pending submit without its baseline was accepted');
-        } catch (\moodle_exception $exception) {
-            $this->assertSame('itemeditorinvalid', $exception->errorcode);
-        }
+        $response = $this->request(item_competences::class, ['itemid' => $itemid, 'courseid' => SITEID,
+            'pending' => 1, 'selectedids' => (string)$id, 'competenceids' => '']);
+        $this->assertTrue($response['submitted']);
+        $this->assertSame([], $response['result']['competenceids']);
         $this->assertTrue($DB->record_exists(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+            ['activityid' => $itemid, 'compid' => $id, 'eportfolioitem' => 1]));
+        $withoutflag = $this->request(item_competences::class, ['itemid' => $itemid, 'courseid' => SITEID,
+            'pending' => 0, 'selectedids' => (string)$id, 'competenceids' => '']);
+        $this->assertTrue($withoutflag['submitted']);
+        $this->assertTrue($DB->record_exists(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+            ['activityid' => $itemid, 'compid' => $id, 'eportfolioitem' => 1]));
+        $item = $DB->get_record('block_exaportitem', ['id' => $itemid], '*', MUST_EXIST);
+        $data = (object)['id' => $itemid, 'courseid' => SITEID, 'name' => $item->name,
+            'contentblocks' => json_encode(item_editor::initial_state($item), JSON_THROW_ON_ERROR),
+            'competenceids' => '', 'competencesmodified' => 1];
+        item_editor::commit((int)$itemid, SITEID, $data, static function(\stdClass $metadata): int {
+            return (int)$metadata->id;
+        }, true);
+        $this->assertFalse($DB->record_exists(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
             ['activityid' => $itemid, 'compid' => $id, 'eportfolioitem' => 1]));
     }
 }

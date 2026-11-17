@@ -63,7 +63,6 @@ export const init = config => {
         const args = {courseid: config.courseId, itemid: config.itemId};
         if (config.pending) {
             args.pending = 1;
-            args.editorbaseline = form.querySelector('[name="editorbaseline"]').value;
             args.selectedids = form.querySelector('[name="competenceids"]').value;
         }
         const modalForm = new ModalForm({
@@ -83,6 +82,8 @@ export const init = config => {
                 if (config.pending) {
                     // The main form owns the accepted selection; reopening must use it, not stored assignments.
                     form.querySelector('[name="competenceids"]').value = submitted.detail.competenceids.join(',');
+                    // Opening or cancelling the picker must not overwrite assignments changed elsewhere.
+                    form.querySelector('[name="competencesmodified"]').value = '1';
                     FormChangeChecker.markFormAsDirty(form);
                 }
                 replaceSummary(section, submitted.detail.content);

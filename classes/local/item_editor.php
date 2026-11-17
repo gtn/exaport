@@ -11,8 +11,8 @@ require_once(__DIR__ . '/../../lib/item_competence_helpers.php');
 /**
  * Coordinates one form submission without creating unfinished item records.
  *
- * The browser owns its working values; the encrypted baseline contains only trusted
- * identities and fingerprints. Neither modal Apply nor preview rendering writes blocks.
+ * The browser owns working values and native draft IDs. Save writes only touched blocks
+ * and explicit removals, using current permissions and records; later saves win.
  *
  * @package block_exaport
  * @copyright 2026 GTN GmbH
@@ -21,6 +21,10 @@ require_once(__DIR__ . '/../../lib/item_competence_helpers.php');
 final class item_editor {
     private const FIELDS = ['name', 'intro', 'project_description', 'project_process', 'project_result', 'langid'];
     private const EDITORS = ['intro', 'project_description', 'project_process', 'project_result'];
+    private const MAX_JSON_BYTES = 2097152;
+    private const EXTRA_JSON_BYTES = 1048576;
+    private const MIN_BLOCK_LIMIT = 200;
+    private const EXTRA_BLOCKS = 100;
 
     /** Authorize a saved item, or authorize the context of a genuinely new item. */
     public static function context(int $itemid, int $courseid): ?\stdClass {
@@ -39,99 +43,22 @@ final class item_editor {
         return null;
     }
 
-    /** Open the displayed state and its fingerprints from the same supported block records. */
-    public static function open(?\stdClass $item, int $courseid, bool $competencesenabled): array {
+    /** Initial values do not prepare files until the learner opens a block's modal. */
+    public static function initial_state(?\stdClass $item): array {
         $blocks = $item ? block_exaport_get_item_content_blocks((int)$item->id) : [];
-        return ['state' => self::initial_state($item, $blocks),
-            'baseline' => self::baseline($item, $courseid, $competencesenabled, $blocks)];
-    }
-
-    /** Initial values; optional records let the caller share one trusted opening snapshot. */
-    public static function initial_state(?\stdClass $item, ?array $blocks = null): array {
-        $blocks = $item ? ($blocks ?? block_exaport_get_item_content_blocks((int)$item->id)) : [];
         return ['blocks' => array_map([item_content_edit::class, 'from_record'], $blocks), 'removed' => []];
     }
 
-    /** Record selected IDs, preserving Exacomp's native policy for former assignments. */
-    public static function competence_ids(?\stdClass $item): array {
-        global $DB;
-        if (!$item || !block_exaport_check_competence_interaction()) {
-            return [];
-        }
-        $ids = block_exaport_normalize_competenceids($DB->get_fieldset_select(
-            BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY, 'compid', 'activityid = ? AND eportfolioitem = 1', [$item->id]));
-        sort($ids, SORT_NUMERIC);
-        return $ids;
-    }
-
-    /** Native encryption authenticates the small baseline; uploaded bytes stay in the File API. */
-    public static function baseline(?\stdClass $item, int $courseid, bool $competencesenabled,
-            ?array $records = null): string {
-        global $USER;
-        self::context((int)($item->id ?? 0), $courseid);
-        // A second row read could authenticate a concurrent edit which the opening form never showed.
-        $records = $item ? ($records ?? block_exaport_get_item_content_blocks((int)$item->id)) : [];
-        $blocks = [];
-        foreach ($records as $block) {
-            $blocks[(int)$block->id] = ['type' => $block->type, 'hash' => self::block_hash($item, $block)];
-        }
-        $state = self::initial_state($item, $records);
-        $textareas = [];
-        foreach (self::EDITORS as $field) {
-            $textareas[$field] = $item && !empty($item->{$field}) && preg_match('/<iframe/i', $item->{$field}) === 1;
-        }
-        return \core\encryption::encrypt(json_encode([
-            'itemid' => (int)($item->id ?? 0), 'courseid' => $courseid, 'userid' => (int)$USER->id,
-            'session' => hash('sha256', sesskey()), 'created' => time(), 'nonce' => bin2hex(random_bytes(16)),
-            'metadata' => $item ? self::metadata_hash($item) : '', 'blocks' => $blocks,
-            'competenceids' => self::competence_ids($item), 'competencesenabled' => $competencesenabled,
-            'textareas' => $textareas,
-            'maxblocks' => max(200, count($blocks) + 100),
-            'maxbytes' => max(2097152, strlen(json_encode($state)) + 1048576),
-        ], JSON_THROW_ON_ERROR));
-    }
-
-    /** A baseline is usable only in the session and item context that issued it. */
-    public static function read_baseline(string $token, int $itemid, int $courseid): array {
-        global $USER;
-        try {
-            if ($token === '' || strlen($token) > 2097152) {
-                self::invalid();
-            }
-            $base = json_decode(\core\encryption::decrypt($token), true, 32, JSON_THROW_ON_ERROR);
-            if (!is_array($base) || ($base['itemid'] ?? -1) !== $itemid || ($base['courseid'] ?? -1) !== $courseid ||
-                    ($base['userid'] ?? 0) !== (int)$USER->id ||
-                    !hash_equals($base['session'] ?? '', hash('sha256', sesskey())) ||
-                    ($base['created'] ?? 0) < time() - DAYSECS || !isset($base['blocks'], $base['nonce'])) {
-                self::invalid();
-            }
-            return $base;
-        } catch (\Throwable $exception) {
-            self::invalid();
-        }
-    }
-
-    /** Validate identity before a modal loads any saved data or any user's draft files. */
-    public static function pending_seed(string $json, string $token, int $itemid, int $courseid): array {
+    /** Reauthorize identity before a modal reads saved values or the submitter's drafts. */
+    public static function pending_seed(string $json, int $itemid, int $courseid): array {
         $item = self::context($itemid, $courseid);
-        $base = self::read_baseline($token, $itemid, $courseid);
-        try {
-            $raw = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $exception) {
-            self::invalid();
-        }
-        if (!is_array($raw) || strlen($json) > $base['maxbytes']) {
-            self::invalid();
-        }
-        $block = self::identify($raw, $item, $base);
-        if ($block && !hash_equals($base['blocks'][(int)$block->id]['hash'], self::block_hash($item, $block))) {
-            self::conflict();
-        }
+        [$raw] = self::decode_json($json, $item);
+        $block = self::identify($raw, $item);
         return item_content_edit::normalise($raw, $item, $block, false, false);
     }
 
-    /** Rebuild safe previews from pending values after normal form validation fails. */
-    public static function display_state(string $json, string $token, int $itemid, int $courseid,
+    /** Rebuild safe previews from submitted working values after form validation fails. */
+    public static function display_state(string $json, int $itemid, int $courseid,
             bool $readonly = false): array {
         global $DB, $USER;
         if ($readonly && $itemid) {
@@ -139,120 +66,77 @@ final class item_editor {
             if (!isloggedin() || isguestuser()) {
                 throw new \moodle_exception('nopermissions', 'error');
             }
-            // A review can lock the item after the editor was opened. Its owner may
-            // still view and copy their pending values; no write path uses this bypass.
+            // A review can lock an already open form. Its owner may still copy pending values;
+            // no write path uses this presentation-only bypass of the editability check.
             $item = $DB->get_record('block_exaportitem', ['id' => $itemid, 'userid' => $USER->id], '*', MUST_EXIST);
         } else {
             $item = self::context($itemid, $courseid);
         }
-        $base = self::read_baseline($token, $itemid, $courseid);
-        $state = self::decode_state($json, $base);
+        $state = self::decode_state($json, $item);
         $blocks = [];
         foreach ($state['blocks'] as $raw) {
-            $block = self::identify($raw, $item, $base, true);
+            $block = self::identify($raw, $item, true);
             if (!$block && !empty($raw['id'])) {
-                if (empty($raw['modified'])) {
-                    continue; // An untouched concurrent deletion is not an instruction to recreate it.
+                if (!self::boolean($raw['modified'])) {
+                    continue; // An untouched deletion is not an instruction to recreate the block.
                 }
-                // Only presentation identity is reconstructed from our authenticated baseline.
-                // A missing dirty row remains visible for copying; final Save still rejects it.
-                $identity = (object)['id' => (int)$raw['id'], 'itemid' => (int)$item->id,
-                    'type' => $base['blocks'][(int)$raw['id']]['type']];
+                // Keep deleted pending text visible for copying. This identity authorizes no saved
+                // file access, and final Save still rejects the missing row.
+                $identity = (object)['id' => (int)$raw['id'], 'itemid' => (int)$item->id, 'type' => $raw['type']];
                 $blocks[] = item_content_edit::normalise($raw, $item, $identity, false, false);
                 continue;
             }
-            $blocks[] = $block && empty($raw['modified']) ? item_content_edit::from_record($block) :
+            $blocks[] = $block && !self::boolean($raw['modified']) ? item_content_edit::from_record($block) :
                 item_content_edit::normalise($raw, $item, $block, false, false);
         }
         return ['blocks' => $blocks, 'removed' => $state['removed']];
     }
 
-    /** Normalize and reauthorize the complete request; reusable by form validation and commit. */
-    public static function validate_request(int $itemid, int $courseid, string $token, string $json,
+    /** Validate the complete request against current records; the form and commit share this boundary. */
+    public static function validate_request(int $itemid, int $courseid, string $json,
             string $competencecsv, array $metadata, bool $competencesenabled): array {
-        global $SESSION;
-        $base = self::read_baseline($token, $itemid, $courseid);
-        $completed = $SESSION->block_exaport_item_saves[$base['nonce']] ?? null;
-        if ($completed) {
-            if (!hash_equals($completed['hash'], self::request_hash($token, $json, $competencecsv, $metadata)) ||
-                    ($completed['drafts'] ?? null) !== self::request_drafts($json, $metadata)) {
-                self::conflict();
-            }
-            // Moodle validates the parent form before commit() sees a repeated POST. Do not
-            // reject the caller's own successful save as an intervening metadata change.
-            return ['replayid' => (int)$completed['id']];
-        }
         $item = self::context($itemid, $courseid);
-        $state = self::decode_state($json, $base);
-        if ($item && !hash_equals($base['metadata'], self::metadata_hash($item))) {
-            self::conflict();
-        }
+        $state = self::decode_state($json, $item);
         $changes = [];
         $originals = [];
         foreach ($state['blocks'] as $raw) {
-            $block = self::identify($raw, $item, $base, empty($raw['modified']));
-            if (!empty($raw['id']) && empty($raw['modified'])) {
-                continue;
+            $modified = self::boolean($raw['modified']);
+            $block = self::identify($raw, $item, !$modified);
+            if (!empty($raw['id']) && !$modified) {
+                continue; // Untouched values never overwrite another tab's saved changes.
             }
-            if ($block && !hash_equals($base['blocks'][(int)$block->id]['hash'], self::block_hash($item, $block))) {
-                self::conflict();
-            }
-            $normal = item_content_edit::normalise($raw, $item, $block, false);
-            $changes[] = $normal;
+            $changes[] = item_content_edit::normalise($raw, $item, $block, false);
             if ($block) {
                 $originals[(int)$block->id] = $block;
             }
         }
         $removed = [];
         foreach ($state['removed'] as $id) {
-            $raw = ['id' => $id, 'key' => 'block-' . $id, 'type' => $base['blocks'][$id]['type'] ?? ''];
-            $block = self::identify($raw, $item, $base);
-            if (!hash_equals($base['blocks'][$id]['hash'], self::block_hash($item, $block))) {
-                self::conflict();
-            }
-            $removed[$id] = $block;
+            $removed[$id] = self::saved_block((int)$id, $item);
         }
         $competenceids = null;
-        if ($competencesenabled) {
-            $ids = block_exaport_parse_competenceids($competencecsv);
-            sort($ids, SORT_NUMERIC);
-            if ($ids !== $base['competenceids']) {
-                if (empty($base['competencesenabled']) || self::competence_ids($item) !== $base['competenceids']) {
-                    self::conflict();
-                }
-                $competenceids = block_exaport_validate_item_competenceids($item, $ids);
+        if (self::boolean($metadata['competencesmodified'] ?? false)) {
+            if (!$competencesenabled || !block_exaport_check_competence_interaction()) {
+                throw new \moodle_exception('nopermissions', 'error');
             }
+            // Only an applied picker selection replaces assignments. Opening/saving other fields
+            // leaves current assignments alone, including changes made through another path.
+            $competenceids = block_exaport_validate_item_competenceids($item,
+                block_exaport_parse_competenceids($competencecsv));
         }
-        $plan = ['item' => $item, 'base' => $base, 'changes' => $changes, 'originals' => $originals,
+        $plan = ['item' => $item, 'changes' => $changes, 'originals' => $originals,
             'removed' => $removed, 'competenceids' => $competenceids];
         self::validate_quota($item, $plan, $metadata);
         return $plan;
     }
 
-    /**
-     * Atomically save metadata and pending changes. The callback reuses the existing item add/edit functions.
-     *
-     * App writers also update the parent before its blocks. A parent write acquires that row's DB lock;
-     * checking fingerprints afterwards observes any app transaction that had already acquired it.
-     */
+    /** Save metadata and touched blocks together; the callback reuses the existing item add/edit functions. */
     public static function commit(int $itemid, int $courseid, \stdClass $data, callable $callback,
             bool $competencesenabled): int {
-        global $DB, $SESSION, $USER;
-        if ($competencesenabled && !property_exists($data, 'competenceids')) {
+        global $DB, $USER;
+        if (!isset($data->contentblocks) || !is_string($data->contentblocks) ||
+                ($competencesenabled && (!property_exists($data, 'competenceids') || !is_string($data->competenceids)))) {
             self::invalid();
-        }
-        $base = self::read_baseline((string)$data->editorbaseline, $itemid, $courseid);
-        $requesthash = self::request_hash((string)$data->editorbaseline, (string)$data->contentblocks,
-            (string)($data->competenceids ?? ''), (array)$data);
-        $nonce = $base['nonce'];
-        $completed = $SESSION->block_exaport_item_saves[$nonce] ?? null;
-        if ($completed) {
-            if (!hash_equals($completed['hash'], $requesthash) || !$DB->record_exists('block_exaportitem',
-                    ['id' => $completed['id'], 'userid' => $USER->id]) ||
-                    ($completed['drafts'] ?? null) !== self::request_drafts((string)$data->contentblocks, (array)$data)) {
-                self::conflict();
-            }
-            return (int)$completed['id'];
         }
         $lock = \core\lock\lock_config::get_lock_factory('block_exaport')->get_lock('itemquota:' . $USER->id, 10);
         if (!$lock) {
@@ -264,8 +148,8 @@ final class item_editor {
                 if ($itemid) {
                     self::lock_item($itemid);
                 }
-                $plan = self::validate_request($itemid, $courseid, (string)$data->editorbaseline,
-                    (string)$data->contentblocks, (string)($data->competenceids ?? ''), (array)$data, $competencesenabled);
+                $plan = self::validate_request($itemid, $courseid, $data->contentblocks,
+                    (string)($data->competenceids ?? ''), (array)$data, $competencesenabled);
                 self::guard_files($plan['item'], array_merge(array_values($plan['originals']), array_values($plan['removed'])));
                 $result = $callback($data);
                 $savedid = (int)($result ?: $data->id);
@@ -279,20 +163,11 @@ final class item_editor {
                 if ($plan['competenceids'] !== null) {
                     block_exaport_sync_item_competences($item, $plan['competenceids']);
                 }
-                // Snapshot after all File API normalization, while a failed lookup
-                // can still roll back the save rather than strand a completed POST.
-                $draftsnapshot = self::request_drafts((string)$data->contentblocks, (array)$data);
                 $transaction->allow_commit();
+                return $savedid;
             } catch (\Throwable $exception) {
                 $transaction->rollback($exception);
             }
-            // This is a small cache of completed saves, never the pending editor state. Moodle's
-            // session lock serialises browser retries; a repeated POST returns its already saved item.
-            $SESSION->block_exaport_item_saves = array_filter($SESSION->block_exaport_item_saves ?? [],
-                static function(array $entry): bool { return $entry['created'] >= time() - DAYSECS; });
-            $SESSION->block_exaport_item_saves[$nonce] = ['id' => $savedid, 'hash' => $requesthash,
-                'drafts' => $draftsnapshot, 'created' => time()];
-            return $savedid;
         } finally {
             $lock->release();
         }
@@ -336,73 +211,98 @@ final class item_editor {
         }
     }
 
-    /** Strict schema bounds are independent of the number or size of uploaded file bytes. */
-    private static function decode_state(string $json, array $base): array {
+    /** Bound submitted JSON while allowing large existing items to retain their current content. */
+    private static function decode_json(string $json, ?\stdClass $item): array {
+        $current = self::initial_state($item);
+        $maxbytes = max(self::MAX_JSON_BYTES, strlen(json_encode($current, JSON_THROW_ON_ERROR)) + self::EXTRA_JSON_BYTES);
+        if ($json === '' || strlen($json) > $maxbytes) {
+            self::invalid();
+        }
         try {
-            if ($json === '' || strlen($json) > $base['maxbytes']) {
-                self::invalid();
-            }
-            $state = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
-            if (!is_array($state) || !isset($state['blocks'], $state['removed']) ||
-                    !is_array($state['blocks']) || !array_is_list($state['blocks']) ||
-                    !is_array($state['removed']) || !array_is_list($state['removed']) ||
-                    count($state['blocks']) > $base['maxblocks'] || count($state['removed']) > count($base['blocks'])) {
-                self::invalid();
-            }
-            $keys = [];
-            $ids = [];
-            foreach ($state['blocks'] as $raw) {
-                if (!is_array($raw) || !isset($raw['key']) || !is_string($raw['key']) || isset($keys[$raw['key']])) {
-                    self::invalid();
-                }
-                $keys[$raw['key']] = true;
-                $id = self::integer($raw['id'] ?? null);
-                if ($id && isset($ids[$id])) {
-                    self::invalid();
-                }
-                if ($id) {
-                    $ids[$id] = true;
-                }
-            }
-            $removed = [];
-            foreach ($state['removed'] as $id) {
-                $id = self::integer($id);
-                if (!$id || !isset($base['blocks'][$id]) || isset($ids[$id]) || isset($removed[$id])) {
-                    self::invalid();
-                }
-                $removed[$id] = true;
-            }
-            return $state;
+            $value = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
         } catch (\JsonException $exception) {
             self::invalid();
         }
+        if (!is_array($value)) {
+            self::invalid();
+        }
+        return [$value, max(self::MIN_BLOCK_LIMIT, count($current['blocks']) + self::EXTRA_BLOCKS)];
     }
 
-    /** Client identities never grant access to records outside the signed initial set. */
-    private static function identify(array $raw, ?\stdClass $item, array $base, bool $allowmissing = false): ?\stdClass {
-        global $DB;
+    /** Duplicate or contradictory identities are invalid even though untouched values are not saved. */
+    private static function decode_state(string $json, ?\stdClass $item): array {
+        [$state, $maxblocks] = self::decode_json($json, $item);
+        if (!isset($state['blocks'], $state['removed']) ||
+                !is_array($state['blocks']) || !array_is_list($state['blocks']) ||
+                !is_array($state['removed']) || !array_is_list($state['removed']) ||
+                count($state['blocks']) > $maxblocks || count($state['removed']) > $maxblocks) {
+            self::invalid();
+        }
+        $keys = [];
+        $ids = [];
+        foreach ($state['blocks'] as $raw) {
+            if (!is_array($raw) || !isset($raw['key']) || !is_string($raw['key']) || isset($keys[$raw['key']])) {
+                self::invalid();
+            }
+            $keys[$raw['key']] = true;
+            $id = self::integer($raw['id'] ?? null);
+            self::boolean($raw['modified'] ?? null);
+            if ($id && isset($ids[$id])) {
+                self::invalid();
+            }
+            if ($id) {
+                $ids[$id] = true;
+            }
+        }
+        $removed = [];
+        foreach ($state['removed'] as $id) {
+            $id = self::integer($id);
+            if (!$id || isset($ids[$id]) || isset($removed[$id])) {
+                self::invalid();
+            }
+            $removed[$id] = true;
+        }
+        return $state;
+    }
+
+    /** Client IDs identify only current blocks belonging to the authorized item. */
+    private static function identify(array $raw, ?\stdClass $item, bool $allowmissing = false): ?\stdClass {
         $id = self::integer($raw['id'] ?? null);
         $key = $raw['key'] ?? '';
+        if (!in_array($raw['type'] ?? '', block_exaport_item_content_types(), true)) {
+            self::invalid();
+        }
         if (!$id) {
-            if (!is_string($key) || !preg_match('/\Anew-[A-Za-z0-9_-]{1,100}\z/', $key) ||
-                    !in_array($raw['type'] ?? '', block_exaport_item_content_types(), true)) {
+            if (!is_string($key) || !preg_match('/\Anew-[A-Za-z0-9_-]{1,80}\z/', $key)) {
                 self::invalid();
             }
             return null;
         }
-        if (!$item || $key !== 'block-' . $id || !isset($base['blocks'][$id]) ||
-                ($raw['type'] ?? '') !== $base['blocks'][$id]['type']) {
+        if ($key !== 'block-' . $id) {
+            self::invalid();
+        }
+        $block = self::saved_block($id, $item, $allowmissing);
+        if ($block && $block->type !== $raw['type']) {
+            self::invalid();
+        }
+        return $block;
+    }
+
+    /** A missing untouched row may be omitted, but a foreign existing ID is always invalid. */
+    private static function saved_block(int $id, ?\stdClass $item, bool $allowmissing = false): ?\stdClass {
+        global $DB;
+        if (!$item) {
             self::invalid();
         }
         $block = $DB->get_record('block_exaportitemblock', ['id' => $id, 'itemid' => $item->id]);
         if (!$block) {
-            if ($allowmissing) {
+            if ($allowmissing && !$DB->record_exists('block_exaportitemblock', ['id' => $id])) {
                 return null;
             }
-            self::conflict();
+            self::invalid();
         }
-        if ($block->type !== $raw['type']) {
-            self::conflict();
+        if (!in_array($block->type, block_exaport_item_content_types(), true)) {
+            self::invalid();
         }
         return $block;
     }
@@ -513,47 +413,6 @@ final class item_editor {
             get_file_storage()->get_area_files(\context_user::instance($USER->id)->id, 'user', 'draft', $id, 'id', false))) : 0;
     }
 
-    /** Fingerprints contain saved references, never the changing contents of a linked CV source. */
-    private static function block_hash(\stdClass $item, \stdClass $block): string {
-        return hash('sha256', json_encode([(array)$block,
-            self::files_hash((int)$item->userid, 'item_content_file', (int)$block->id),
-            self::files_hash((int)$item->userid, 'item_content_text', (int)$block->id)], JSON_THROW_ON_ERROR));
-    }
-
-    private static function metadata_hash(\stdClass $item): string {
-        global $DB, $CFG;
-        $values = [];
-        foreach (self::FIELDS as $field) {
-            $values[$field] = (string)($item->{$field} ?? '');
-        }
-        // The existing metadata saver also writes the form's navigation course.
-        // Detect an API course change before that older value can overwrite it.
-        $values['courseid'] = (int)$item->courseid;
-        $values['categories'] = array_map('intval', $DB->get_fieldset_select('block_exaportitemcate', 'cateid', 'itemid = ?', [$item->id]));
-        sort($values['categories'], SORT_NUMERIC);
-        $values['tags'] = !empty($CFG->usetags) ? array_values(\core_tag_tag::get_item_tags_array('block_exaport',
-            'block_exaportitem', $item->id, \core_tag_tag::BOTH_STANDARD_AND_NOT)) : [];
-        sort($values['tags'], SORT_STRING);
-        $values['shareall'] = (int)($item->shareall ?? 0);
-        $values['users'] = $DB->get_records('block_exaportitemshar', ['itemid' => $item->id], 'userid', 'userid,notify');
-        $values['groups'] = $DB->get_fieldset_select('block_exaportitemgroupshar', 'groupid', 'itemid = ?', [$item->id]);
-        sort($values['groups'], SORT_NUMERIC);
-        foreach (self::parent_areas((int)$item->id) as [$area, $id]) {
-            $values[$area] = self::files_hash((int)$item->userid, $area, $id);
-        }
-        return hash('sha256', json_encode($values, JSON_THROW_ON_ERROR));
-    }
-
-    private static function files_hash(int $userid, string $area, int $id): array {
-        $result = [];
-        foreach (get_file_storage()->get_area_files(\context_user::instance($userid)->id,
-                'block_exaport', $area, $id, 'filepath,filename', false) as $file) {
-            $result[] = [$file->get_filepath(), $file->get_filename(), $file->get_contenthash(),
-                $file->get_source(), $file->get_author(), $file->get_license()];
-        }
-        return $result;
-    }
-
     private static function parent_areas(int $id): array {
         $areas = [['item_iconfile', $id]];
         foreach (self::EDITORS as $field) {
@@ -562,74 +421,11 @@ final class item_editor {
         return $areas;
     }
 
-    /** Hash business inputs, not Moodle's submission marker or values added by the save callback. */
-    private static function request_hash(string $token, string $json, string $competences, array $data): string {
-        $values = ['baseline' => $token, 'blocks' => $json, 'competences' => $competences];
-        foreach (self::FIELDS as $field) {
-            $values[$field] = (string)($data[$field] ?? '');
-            if (isset($data[$field . '_editor'])) {
-                $values[$field . '_editor'] = $data[$field . '_editor'];
-            }
-        }
-        $categories = array_values(array_unique(array_filter(array_map('intval',
-            (array)($data['categoryids'] ?? [])), static function(int $id): bool { return $id > 0; })));
-        sort($categories, SORT_NUMERIC);
-        $values['categoryids'] = $categories;
-        $values['tags'] = (array)($data['tags'] ?? []);
-        $values['iconfile'] = (int)($data['iconfile'] ?? 0);
-        foreach (['shareenabled', 'shareall'] as $field) {
-            $values[$field] = (int)($data[$field] ?? optional_param($field, 0, PARAM_INT));
-        }
-        foreach (['shareusers', 'notifyusers', 'sharegroups'] as $field) {
-            $values[$field] = (array)($data[$field] ?? optional_param_array($field, [], PARAM_INT));
-        }
-        return hash('sha256', json_encode($values, JSON_THROW_ON_ERROR));
-    }
-
-    /**
-     * A draft ID names mutable files. A browser Back edit can replace bytes without
-     * changing any submitted field. Save the final logical draft contents separately
-     * from the business-input hash: native editor merging may add files during Save,
-     * so a pre-save fingerprint would incorrectly reject an otherwise identical retry.
-     */
-    private static function request_drafts(string $json, array $data): array {
-        global $USER;
-        $ids = [];
-        if (!empty($data['iconfile'])) {
-            $ids[self::integer($data['iconfile'])] = true;
-        }
-        foreach (self::EDITORS as $field) {
-            if (!empty($data[$field . '_editor']['itemid'])) {
-                $ids[self::integer($data[$field . '_editor']['itemid'])] = true;
-            }
-        }
-        try {
-            $state = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $exception) {
+    private static function boolean($value): bool {
+        if (!in_array($value, [true, false, 0, 1, '0', '1'], true)) {
             self::invalid();
         }
-        foreach ($state['blocks'] ?? [] as $block) {
-            $id = $block['type'] === 'file' ? ($block['files_filemanager'] ?? 0) :
-                ($block['type'] === 'text' ? ($block['content_editor']['itemid'] ?? 0) : 0);
-            if ($id) {
-                $ids[self::integer($id)] = true;
-            }
-        }
-        ksort($ids, SORT_NUMERIC);
-        $result = [];
-        $context = \context_user::instance($USER->id);
-        foreach ($ids as $id => $unused) {
-            $files = [];
-            foreach (get_file_storage()->get_area_files($context->id, 'user', 'draft', $id,
-                    'filepath,filename', false) as $file) {
-                // Source wrappers, IDs and timestamps can be normalized by Moodle.
-                // These values describe the content/metadata the user actually edits.
-                $files[] = [$file->get_filepath(), $file->get_filename(), $file->get_contenthash(),
-                    (int)$file->get_filesize(), $file->get_author(), $file->get_license()];
-            }
-            $result[$id] = hash('sha256', json_encode($files, JSON_THROW_ON_ERROR));
-        }
-        return $result;
+        return $value === true || $value === 1 || $value === '1';
     }
 
     private static function integer($value): int {
@@ -643,7 +439,4 @@ final class item_editor {
         throw new \moodle_exception('itemeditorinvalid', 'block_exaport');
     }
 
-    private static function conflict(): void {
-        throw new \moodle_exception('itemeditorconflict', 'block_exaport');
-    }
 }

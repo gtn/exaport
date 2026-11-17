@@ -46,8 +46,6 @@ class item_content extends dynamic_form {
         $mform->setType('contenttype', PARAM_ALPHA);
         $mform->addElement('hidden', 'pending', $this->is_pending() ? 1 : 0);
         $mform->setType('pending', PARAM_BOOL);
-        $mform->addElement('hidden', 'editorbaseline', $this->optional_param('editorbaseline', '', PARAM_RAW));
-        $mform->setType('editorbaseline', PARAM_RAW);
         $mform->addElement('hidden', 'pendingblock', $this->optional_param('pendingblock', '', PARAM_RAW));
         $mform->setType('pendingblock', PARAM_RAW);
 
@@ -175,7 +173,6 @@ class item_content extends dynamic_form {
     protected function check_access_for_dynamic_submission(): void {
         require_capability('block/exaport:use', $this->get_context_for_dynamic_submission());
         if ($this->is_pending()) {
-            // The signed baseline authorizes creation without inventing an item database record.
             $this->pending_state();
             return;
         }
@@ -221,7 +218,6 @@ class item_content extends dynamic_form {
                 ? item_content_edit::prepare($seed, $item, $block) : [];
             $this->set_data((object)array_merge($values, (array)$data, [
                 'title' => $values['title'] ?? $seed['title'],
-                'editorbaseline' => $this->optional_param('editorbaseline', '', PARAM_RAW),
                 'pendingblock' => $this->optional_param('pendingblock', '', PARAM_RAW),
             ]));
             return;
@@ -315,7 +311,6 @@ class item_content extends dynamic_form {
     /** A pending modal belongs to a main form; ordinary standalone forms save explicitly. */
     private function is_pending(): bool {
         return (bool)$this->optional_param('pending', 0, PARAM_BOOL) ||
-            $this->optional_param('editorbaseline', '', PARAM_RAW) !== '' ||
             $this->optional_param('pendingblock', '', PARAM_RAW) !== '';
     }
 
@@ -327,19 +322,18 @@ class item_content extends dynamic_form {
             : block_exaport_get_editable_content_item($itemid, $courseid);
     }
 
-    /** Match form identifiers against the signed main-form baseline and stable editor key. */
+    /** Match submitted block identifiers against its current authorized parent and content type. */
     private function pending_state(?array $data = null): array {
         $read = function(string $name, $default, string $type) use ($data) {
             return $data !== null && array_key_exists($name, $data)
                 ? $data[$name] : $this->optional_param($name, $default, $type);
         };
         $json = $read('pendingblock', '', PARAM_RAW);
-        $baseline = $read('editorbaseline', '', PARAM_RAW);
-        if (!is_string($json) || !is_string($baseline)) {
+        if (!is_string($json)) {
             throw new \moodle_exception('itemeditorinvalid', 'block_exaport');
         }
         $state = item_editor::pending_seed(
-            $json, $baseline,
+            $json,
             (int)$read('itemid', 0, PARAM_INT), (int)$read('courseid', 0, PARAM_INT)
         );
         if ($state['type'] !== $this->get_content_type() ||

@@ -64,7 +64,7 @@ class pending_item_content_blocks extends item_content_blocks {
             // Unchanged rows are read from the server. A submitted presentation
             // value must never select another saved block's files or CV sources.
             // A dirty block deleted by another client still has useful pending
-            // text/drafts. Show that working copy while final Save reports the conflict.
+            // text/drafts. Show that working copy while final Save reports the missing block.
             $block = $saved ? clone $saved : (object)['id' => $id, 'itemid' => (int)($item->id ?? 0)];
             $block->editorstored = (bool)$saved;
             $block->editorpending = !$saved || !empty($state['modified']);

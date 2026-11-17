@@ -1189,7 +1189,6 @@ $string['uploadtour_file_title'] = 'Upload a document';
 $string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.';
 
 $string['itemeditorinvalid'] = 'Some page changes are missing or invalid. Your changes have not been saved.';
-$string['itemeditorconflict'] = 'This page changed while you were editing it. Your pending changes have been kept. Review the current page in another tab before reloading this editor.';
 $string['itemeditorpendinghint'] = 'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.';
 $string['itemeditorlocked'] = 'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.';
 $string['deletecontentblockpendingconfirm'] = 'Remove this content block? The removal takes effect when you save the page. Cancel on the page form discards the removal.';

@@ -48,9 +48,8 @@ final class item_editor_test extends \advanced_testcase {
         return (object)array_replace([
             'id' => (int)($item->id ?? 0), 'courseid' => SITEID,
             'name' => $item->name ?? 'Created item',
-            'editorbaseline' => item_editor::baseline($item, SITEID, false),
             'contentblocks' => json_encode($state ?? item_editor::initial_state($item), JSON_THROW_ON_ERROR),
-            'competenceids' => '',
+            'competenceids' => '', 'competencesmodified' => 0,
         ], $metadata);
     }
 
@@ -73,7 +72,7 @@ final class item_editor_test extends \advanced_testcase {
     }
 
     private function validate(\stdClass $data): array {
-        return item_editor::validate_request((int)$data->id, SITEID, $data->editorbaseline,
+        return item_editor::validate_request((int)$data->id, SITEID,
             $data->contentblocks, $data->competenceids, (array)$data, false);
     }
 
@@ -166,39 +165,64 @@ final class item_editor_test extends \advanced_testcase {
         $this->assertCount(3, block_exaport_get_item_content_blocks((int)$item->id));
     }
 
-    public function test_a_concurrently_changed_dirty_block_is_rejected_without_overwrite(): void {
+    public function test_the_last_save_wins_for_a_touched_block(): void {
         global $DB;
         $item = $this->item();
         $block = block_exaport_create_link_content_block((int)$item->id, 'A', 'https://example.test/original');
-        $state = item_editor::initial_state($item);
-        $state['blocks'][0]['modified'] = true;
-        $state['blocks'][0]['url'] = 'https://example.test/browser';
-        $data = $this->request($item, $state);
-        $DB->set_field('block_exaportitemblock', 'url', 'https://example.test/app', ['id' => $block->id]);
-        try {
-            item_editor::commit((int)$item->id, SITEID, $data, $this->metadata_save(), false);
-            $this->fail('Concurrent block edit was overwritten');
-        } catch (\moodle_exception $error) {
-            $this->assertSame('itemeditorconflict', $error->errorcode);
-        }
-        $this->assertSame('https://example.test/app', $DB->get_field('block_exaportitemblock', 'url', ['id' => $block->id]));
-        $pending = json_decode($data->contentblocks, true, 32, JSON_THROW_ON_ERROR);
-        $this->assertSame('https://example.test/browser', $pending['blocks'][0]['url']);
+        $first = item_editor::initial_state($item);
+        $last = $first;
+        $first['blocks'][0]['modified'] = true;
+        $first['blocks'][0]['url'] = 'https://example.test/first';
+        $last['blocks'][0]['modified'] = true;
+        $last['blocks'][0]['url'] = 'https://example.test/last';
+        // Both forms opened before either Save. The later touched value deliberately replaces the first.
+        item_editor::commit((int)$item->id, SITEID, $this->request($item, $first), $this->metadata_save(), false);
+        item_editor::commit((int)$item->id, SITEID, $this->request($item, $last), $this->metadata_save(), false);
+        $this->assertSame('https://example.test/last', $DB->get_field('block_exaportitemblock', 'url', ['id' => $block->id]));
     }
 
-    public function test_a_concurrently_changed_parent_is_rejected_without_overwrite(): void {
+    public function test_the_last_touched_file_save_replaces_newer_saved_bytes(): void {
+        global $USER;
+        $item = $this->item();
+        $original = $this->upload('document.txt', 'Original bytes');
+        $block = item_content_edit::save($item, $this->file_state($original));
+        $first = item_editor::initial_state($item);
+        $last = $first;
+        $first['blocks'][0]['modified'] = true;
+        $first['blocks'][0]['files_filemanager'] = (int)$this->upload('document.txt', 'First replacement')->get_itemid();
+        $last['blocks'][0]['modified'] = true;
+        $last['blocks'][0]['files_filemanager'] = (int)$this->upload('document.txt', 'Last replacement')->get_itemid();
+        item_editor::commit((int)$item->id, SITEID, $this->request($item, $first), $this->metadata_save(), false);
+        item_editor::commit((int)$item->id, SITEID, $this->request($item, $last), $this->metadata_save(), false);
+        $files = block_exaport_get_item_content_files((int)$USER->id, (int)$block->id);
+        $this->assertCount(1, $files);
+        $this->assertSame('Last replacement', reset($files)->get_content());
+    }
+
+    public function test_saving_another_block_preserves_untouched_changes_from_the_first_tab(): void {
+        global $DB;
+        $item = $this->item();
+        $a = block_exaport_create_link_content_block((int)$item->id, 'A', 'https://example.test/a');
+        $b = block_exaport_create_link_content_block((int)$item->id, 'B', 'https://example.test/b');
+        $first = item_editor::initial_state($item);
+        $second = $first;
+        $first['blocks'][0]['modified'] = true;
+        $first['blocks'][0]['url'] = 'https://example.test/updated-a';
+        $second['blocks'][1]['modified'] = true;
+        $second['blocks'][1]['url'] = 'https://example.test/updated-b';
+        item_editor::commit((int)$item->id, SITEID, $this->request($item, $first), $this->metadata_save(), false);
+        item_editor::commit((int)$item->id, SITEID, $this->request($item, $second), $this->metadata_save(), false);
+        $this->assertSame('https://example.test/updated-a', $DB->get_field('block_exaportitemblock', 'url', ['id' => $a->id]));
+        $this->assertSame('https://example.test/updated-b', $DB->get_field('block_exaportitemblock', 'url', ['id' => $b->id]));
+    }
+
+    public function test_submitted_metadata_overwrites_a_newer_saved_value(): void {
         global $DB;
         $item = $this->item();
         $data = $this->request($item, null, ['name' => 'Browser title']);
         $DB->set_field('block_exaportitem', 'name', 'App title', ['id' => $item->id]);
-        try {
-            item_editor::commit((int)$item->id, SITEID, $data, $this->metadata_save(), false);
-            $this->fail('Concurrent item title was overwritten');
-        } catch (\moodle_exception $error) {
-            $this->assertSame('itemeditorconflict', $error->errorcode);
-        }
-        $this->assertSame('App title', $DB->get_field('block_exaportitem', 'name', ['id' => $item->id]));
-        $this->assertSame('Browser title', $data->name);
+        item_editor::commit((int)$item->id, SITEID, $data, $this->metadata_save(), false);
+        $this->assertSame('Browser title', $DB->get_field('block_exaportitem', 'name', ['id' => $item->id]));
     }
 
     public function test_missing_malformed_duplicate_and_unknown_id_state_is_rejected(): void {
@@ -218,30 +242,90 @@ final class item_editor_test extends \advanced_testcase {
         }
     }
 
-    public function test_a_concurrently_changed_item_course_is_rejected(): void {
+    public function test_current_owned_records_are_used_without_an_opening_course_snapshot(): void {
         global $DB;
         $item = $this->item();
         $data = $this->request($item);
         $course = $this->getDataGenerator()->create_course();
         $DB->set_field('block_exaportitem', 'courseid', $course->id, ['id' => $item->id]);
-        $this->expectException(\moodle_exception::class);
-        $this->expectExceptionMessage(get_string('itemeditorconflict', 'block_exaport'));
-        $this->validate($data);
+        $this->assertSame((int)$course->id, (int)$this->validate($data)['item']->courseid);
     }
 
-    public function test_baseline_cannot_be_reused_for_another_item_or_user(): void {
+    public function test_foreign_block_ids_are_rejected_for_edits_untouched_rows_and_removals(): void {
         $item = $this->item();
         $other = $this->item('Other');
-        $data = $this->request($item);
-        try {
-            item_editor::read_baseline($data->editorbaseline, (int)$other->id, SITEID);
-            $this->fail('A baseline from another item was accepted');
-        } catch (\moodle_exception $error) {
-            $this->assertSame('itemeditorinvalid', $error->errorcode);
+        $foreign = block_exaport_create_link_content_block((int)$other->id, 'Other block', 'https://example.test/');
+        $raw = item_content_edit::from_record($foreign);
+        foreach ([false, true] as $modified) {
+            $raw['modified'] = $modified;
+            $data = $this->request($item, ['blocks' => [$raw], 'removed' => []]);
+            try {
+                $this->validate($data);
+                $this->fail('A foreign block was accepted');
+            } catch (\moodle_exception $error) {
+                $this->assertSame('itemeditorinvalid', $error->errorcode);
+            }
         }
+        foreach ([$item, null] as $target) {
+            $data = $this->request($target, ['blocks' => [], 'removed' => [(int)$foreign->id]]);
+            try {
+                $this->validate($data);
+                $this->fail('A foreign removal was accepted');
+            } catch (\moodle_exception $error) {
+                $this->assertSame('itemeditorinvalid', $error->errorcode);
+            }
+        }
+    }
+
+    public function test_item_ownership_is_rechecked_on_final_save(): void {
+        $data = $this->request($this->item());
         $this->setUser($this->getDataGenerator()->create_user());
         $this->expectException(\moodle_exception::class);
         $this->validate($data);
+    }
+
+    public function test_missing_untouched_rows_are_skipped_but_touched_rows_are_invalid(): void {
+        global $DB;
+        $item = $this->item();
+        $block = block_exaport_create_link_content_block((int)$item->id, 'A', 'https://example.test/original');
+        $state = item_editor::initial_state($item);
+        $DB->delete_records('block_exaportitemblock', ['id' => $block->id]);
+        $this->assertSame([], $this->validate($this->request($item, $state))['changes']);
+        $this->assertSame([], item_editor::display_state(json_encode($state), (int)$item->id, SITEID)['blocks']);
+        $state['blocks'][0]['modified'] = true;
+        $state['blocks'][0]['url'] = 'https://example.test/pending';
+        $preview = item_editor::display_state(json_encode($state), (int)$item->id, SITEID);
+        $this->assertSame('https://example.test/pending', $preview['blocks'][0]['url']);
+        foreach ([$state, ['blocks' => [], 'removed' => [(int)$block->id]]] as $invalid) {
+            try {
+                $this->validate($this->request($item, $invalid));
+                $this->fail('A missing touched block was accepted');
+            } catch (\moodle_exception $error) {
+                $this->assertSame('itemeditorinvalid', $error->errorcode);
+            }
+        }
+    }
+
+    public function test_new_items_and_changed_types_cannot_reuse_saved_block_identities(): void {
+        $item = $this->item();
+        $block = block_exaport_create_link_content_block((int)$item->id, 'A', 'https://example.test/');
+        $raw = item_content_edit::from_record($block);
+        $invalid = [$this->request(null, ['blocks' => [$raw], 'removed' => []])];
+        $wrongtype = $raw;
+        $wrongtype['type'] = 'text';
+        $wrongkey = $raw;
+        $wrongkey['key'] = 'new-forged';
+        foreach ([$wrongtype, $wrongkey] as $entry) {
+            $invalid[] = $this->request($item, ['blocks' => [$entry], 'removed' => []]);
+        }
+        foreach ($invalid as $data) {
+            try {
+                $this->validate($data);
+                $this->fail('A saved block identity was changed');
+            } catch (\moodle_exception $error) {
+                $this->assertSame('itemeditorinvalid', $error->errorcode);
+            }
+        }
     }
 
     public function test_new_teacher_review_rejects_an_already_open_editor(): void {
@@ -308,33 +392,6 @@ final class item_editor_test extends \advanced_testcase {
         $this->assertSame('Unopened original bytes', reset($files)->get_content());
     }
 
-    public function test_repeated_identical_post_returns_the_committed_item_without_duplicate_blocks(): void {
-        global $DB;
-        $upload = $this->upload('once.txt', 'Saved once');
-        $data = $this->request(null, ['blocks' => [$this->file_state($upload)], 'removed' => []]);
-        $retry = clone $data;
-        $first = item_editor::commit(0, SITEID, $data, $this->metadata_save(), false);
-        // A real browser retry passes main-form validation before the controller calls commit again.
-        $this->assertIsArray($this->validate($retry));
-        $this->assertSame($first, item_editor::commit(0, SITEID, $retry, $this->metadata_save(), false));
-        $this->assertSame(1, $DB->count_records('block_exaportitem'));
-        $this->assertSame(1, $DB->count_records('block_exaportitemblock'));
-    }
-
-    public function test_reusing_a_completed_token_for_different_changes_is_a_conflict(): void {
-        global $DB;
-        $data = $this->request(null);
-        $retry = clone $data;
-        item_editor::commit(0, SITEID, $data, $this->metadata_save(), false);
-        $retry->name = 'Different changes after the first Save';
-        try {
-            $this->validate($retry);
-            $this->fail('A completed token was reused for different changes');
-        } catch (\moodle_exception $error) {
-            $this->assertSame('itemeditorconflict', $error->errorcode);
-        }
-        $this->assertSame(1, $DB->count_records('block_exaportitem'));
-    }
 
     /** Exercise native editor saves as well as the ordinary metadata fixture. */
     private function metadata_and_editors_save(): callable {
@@ -428,69 +485,69 @@ final class item_editor_test extends \advanced_testcase {
         $this->assertSame(0, $DB->count_records('block_exaportitem'));
     }
 
-    public function test_completed_save_rejects_changed_thumbnail_bytes_under_the_same_draft_id(): void {
-        global $DB, $USER;
-        $bytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jfmcAAAAASUVORK5CYII=');
-        $png = $this->upload('thumbnail.png', $bytes, 'image/png');
-        $data = $this->request(null, null, ['iconfile' => (int)$png->get_itemid()]);
-        $retry = clone $data;
-        $id = item_editor::commit(0, SITEID, $data, $this->metadata_save(), false);
-        $png->delete();
-        get_file_storage()->create_file_from_string([
-            'contextid' => \context_user::instance($USER->id)->id, 'component' => 'user', 'filearea' => 'draft',
-            'itemid' => (int)$png->get_itemid(), 'filepath' => '/', 'filename' => 'thumbnail.png',
-            'userid' => $USER->id, 'mimetype' => 'image/png',
-            'source' => serialize((object)['source' => 'thumbnail.png']),
-        ], $bytes . "\n");
-        foreach (['validation', 'commit'] as $stage) {
+
+
+    public function test_untouched_competencies_preserve_current_assignments_and_applied_empty_clears_them(): void {
+        global $DB;
+        set_config('block_exaport_enable_interaction_competences', 1);
+        if (!block_exaport_check_competence_interaction()) {
+            $this->markTestSkipped('Exacomp is needed for competency assignments.');
+        }
+        $item = $this->item();
+        $data = $this->request($item, null, ['competenceids' => '11', 'competencesmodified' => 0]);
+        // A different path changed the assignments after the form opened. No picker Apply means no sync.
+        $DB->insert_record(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+            ['activityid' => $item->id, 'compid' => 22, 'eportfolioitem' => 1]);
+        item_editor::commit((int)$item->id, SITEID, $data, $this->metadata_save(), true);
+        $this->assertEquals([22], $DB->get_fieldset_select(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+            'compid', 'activityid = ? AND eportfolioitem = 1', [$item->id]));
+        $clear = $this->request($item, null, ['competenceids' => '', 'competencesmodified' => 1]);
+        item_editor::commit((int)$item->id, SITEID, $clear, $this->metadata_save(), true);
+        $this->assertFalse($DB->record_exists(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+            ['activityid' => $item->id, 'eportfolioitem' => 1]));
+    }
+
+    public function test_a_modified_picker_cannot_enable_disabled_competency_interaction(): void {
+        $data = $this->request($this->item(), null, ['competencesmodified' => 1]);
+        foreach ([false, true] as $enabled) {
             try {
-                if ($stage === 'validation') {
-                    $this->validate($retry);
-                } else {
-                    item_editor::commit(0, SITEID, $retry, $this->metadata_save(), false);
-                }
-                $this->fail('A changed draft was mistaken for an identical completed POST');
+                item_editor::validate_request((int)$data->id, SITEID, $data->contentblocks,
+                    '', (array)$data, $enabled);
+                $this->fail('A submitted flag enabled disabled competency interaction');
             } catch (\moodle_exception $error) {
-                $this->assertSame('itemeditorconflict', $error->errorcode);
+                $this->assertSame('nopermissions', $error->errorcode);
             }
         }
-        $this->assertSame(1, $DB->count_records('block_exaportitem'));
-        $saved = get_file_storage()->get_file(\context_user::instance($USER->id)->id,
-            'block_exaport', 'item_iconfile', $id, '/', 'thumbnail.png');
-        $this->assertSame($bytes, $saved->get_content());
     }
 
-    public function test_completed_save_with_pasted_editor_files_still_accepts_an_identical_retry(): void {
-        global $DB;
-        $primary = $this->upload('primary.txt', 'Primary');
-        $pasted = $this->upload('pasted.txt', 'Pasted');
-        $url = \moodle_url::make_draftfile_url((int)$pasted->get_itemid(), '/', 'pasted.txt')->out(false);
-        $data = $this->request(null, null, [
-            'intro_editor' => ['text' => '<a href="' . $url . '">Pasted</a>',
-                'format' => FORMAT_HTML, 'itemid' => (int)$primary->get_itemid()],
-        ]);
-        $retry = clone $data;
-        $id = item_editor::commit(0, SITEID, $data, $this->metadata_and_editors_save(), false);
-        $this->assertIsArray($this->validate($retry));
-        $this->assertSame($id, item_editor::commit(0, SITEID, $retry, $this->metadata_and_editors_save(), false));
-        $this->assertSame(1, $DB->count_records('block_exaportitem'));
-    }
-
-    public function test_opening_state_and_baseline_share_the_original_block_snapshot(): void {
+    public function test_large_existing_items_fit_server_derived_limits_but_unbounded_growth_does_not(): void {
         global $DB;
         $item = $this->item();
-        $block = block_exaport_create_link_content_block((int)$item->id, 'A', 'https://example.test/original');
-        $records = block_exaport_get_item_content_blocks((int)$item->id);
-        $state = item_editor::initial_state($item, $records);
-        $DB->set_field('block_exaportitemblock', 'url', 'https://example.test/concurrent', ['id' => $block->id]);
-        $baseline = item_editor::baseline($item, SITEID, false, $records);
-        $this->assertSame('https://example.test/original', $state['blocks'][0]['url']);
-        try {
-            item_editor::pending_seed(json_encode($state['blocks'][0], JSON_THROW_ON_ERROR),
-                $baseline, (int)$item->id, SITEID);
-            $this->fail('A newer fingerprint authenticated the stale opening state');
-        } catch (\moodle_exception $error) {
-            $this->assertSame('itemeditorconflict', $error->errorcode);
+        block_exaport_create_content_block((int)$item->id, 'text', 'Large legacy text', '',
+            ['content' => str_repeat('x', 3 * 1024 * 1024)]);
+        $links = [];
+        foreach (range(1, 204) as $index) {
+            $links[] = (object)['itemid' => $item->id, 'type' => 'link', 'sortorder' => $index,
+                'title' => 'Legacy ' . $index, 'url' => 'https://example.test/', 'content' => '',
+                'contentformat' => FORMAT_HTML, 'timecreated' => 1, 'timemodified' => 1];
+        }
+        $DB->insert_records('block_exaportitemblock', $links);
+        $state = item_editor::initial_state($item);
+        $this->assertCount(205, $state['blocks']);
+        $this->assertSame([], $this->validate($this->request($item, $state))['changes']);
+        $tooMany = $state;
+        foreach (range(1, 101) as $index) {
+            $tooMany['blocks'][] = ['id' => 0, 'key' => 'new-extra-' . $index, 'type' => 'link',
+                'title' => '', 'url' => 'https://example.test/', 'modified' => true];
+        }
+        $tooLarge = $state + ['padding' => str_repeat('p', 1048577)];
+        foreach ([$tooMany, $tooLarge] as $invalid) {
+            try {
+                $this->validate($this->request($item, $invalid));
+                $this->fail('An oversized submitted collection was accepted');
+            } catch (\moodle_exception $error) {
+                $this->assertSame('itemeditorinvalid', $error->errorcode);
+            }
         }
     }
 }

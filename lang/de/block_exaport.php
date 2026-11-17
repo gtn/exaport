@@ -1138,15 +1138,15 @@ $string['linkedbadgeissued'] = 'Verliehen: {$a}';
 $string['linkedbadgeexpires'] = 'Gültig bis: {$a}';
 
 // Document-upload User tours.
-$string['uploadtour_create_name'] = 'Exaport: Ein Objekt zum Hochladen eines Dokuments erstellen';
-$string['uploadtour_create_description'] = 'Erklärt, warum Dokumente erst nach dem Speichern eines neuen Portfolio-Objekts hinzugefügt werden.';
+$string['uploadtour_create_name'] = 'Exaport: Eine Seite zum Hochladen eines Dokuments erstellen';
+$string['uploadtour_create_description'] = 'Erklärt, warum Dokumente erst nach dem Speichern einer neuen Portfolio-Seite hinzugefügt werden.';
 $string['uploadtour_title_title'] = 'Mit einem Titel beginnen';
-$string['uploadtour_title_content'] = 'Geben Sie Ihrem Objekt einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern des Objekts hinzu.';
+$string['uploadtour_title_content'] = 'Geben Sie Ihrer Seite einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern der Seite hinzu.';
 $string['uploadtour_save_title'] = 'Zuerst speichern, dann hochladen';
-$string['uploadtour_save_content'] = 'Wählen Sie "Speichern und weiter bearbeiten", um das Objekt zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.';
+$string['uploadtour_save_content'] = 'Wählen Sie "Speichern und weiter bearbeiten", um die Seite zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.';
 $string['uploadtour_content_name'] = 'Exaport: Dokumente unter Inhalt hinzufügen';
-$string['uploadtour_content_description'] = 'Zeigt, wo Dokumente in einem gespeicherten, bearbeitbaren Portfolio-Objekt hochgeladen werden.';
+$string['uploadtour_content_description'] = 'Zeigt, wo Dokumente auf einer gespeicherten, bearbeitbaren Portfolio-Seite hochgeladen werden.';
 $string['uploadtour_content_title'] = 'Hier werden Dokumente hinzugefügt';
-$string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie diesem Objekt Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten des Objekts ergänzen.';
+$string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie dieser Seite Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten der Seite ergänzen.';
 $string['uploadtour_file_title'] = 'Datei zum Hochladen eines Dokuments wählen';
-$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie das Objekt fertig bearbeitet haben.';
+$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie die Seite fertig bearbeitet haben.';

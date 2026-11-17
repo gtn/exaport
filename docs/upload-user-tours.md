@@ -4,17 +4,17 @@ Exaport uses Moodle's native User tours tool to explain the document-upload
 workflow. Both guides have two steps and use Moodle's native tour navigation and
 End tour controls. They do not submit forms or upload files for the user.
 
-* **Create an object to upload a document** appears on the add-object page. It
+* **Create a page to upload a document** appears on the page creation form. It
   points to the title and **Save and keep editing**, explaining that documents
-  are added after the object has been saved.
-* **Add documents through Content** appears on the edit-object page when the
+  are added after the page has been saved.
+* **Add documents through Content** appears in the page editor when the
   Content add button is available. It points to Content and the **+** button,
   explaining how to choose **File** and save the upload dialog.
 
 The guides apply across courses, including creation in Shared Categories. The
-second guide is excluded when an object cannot be edited. Assignment imports,
+second guide is excluded when a page cannot be edited. Assignment imports,
 read-only shared-item pages and other Exaport pages are outside their URL
-matches. The permanent hint on the new-object form also explains where to
+matches. The permanent hint on the page creation form also explains where to
 upload documents.
 
 ## Administration and completion

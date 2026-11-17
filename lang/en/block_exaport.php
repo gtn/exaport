@@ -1175,15 +1175,15 @@ $string['linkedbadgeissued'] = 'Awarded: {$a}';
 $string['linkedbadgeexpires'] = 'Expires: {$a}';
 
 // Document-upload User tours.
-$string['uploadtour_create_name'] = 'Exaport: Create an object to upload a document';
-$string['uploadtour_create_description'] = 'Explains why documents are added after saving a new portfolio object.';
+$string['uploadtour_create_name'] = 'Exaport: Create a page to upload a document';
+$string['uploadtour_create_description'] = 'Explains why documents are added after saving a new portfolio page.';
 $string['uploadtour_title_title'] = 'Start with a title';
-$string['uploadtour_title_content'] = 'Give your object a title and select its category. You will add your document after saving the object.';
+$string['uploadtour_title_content'] = 'Give your page a title and select its category. You will add your document after saving the page.';
 $string['uploadtour_save_title'] = 'Save first, then upload';
-$string['uploadtour_save_content'] = 'Choose "Save and keep editing" to create the object and open its Content section. The icon image field is for a thumbnail; add documents through Content.';
+$string['uploadtour_save_content'] = 'Choose "Save and keep editing" to create the page and open its Content section. The icon image field is for a thumbnail; add documents through Content.';
 $string['uploadtour_content_name'] = 'Exaport: Add documents through Content';
-$string['uploadtour_content_description'] = 'Shows where to upload documents in a saved, editable portfolio object.';
+$string['uploadtour_content_description'] = 'Shows where to upload documents to a saved, editable portfolio page.';
 $string['uploadtour_content_title'] = 'Your documents go here';
-$string['uploadtour_content_content'] = 'Use Content to add documents, text and links to this object. You can add more content later by editing the object.';
+$string['uploadtour_content_content'] = 'Use Content to add documents, text and links to this page. You can add more content later by editing the page.';
 $string['uploadtour_file_title'] = 'Choose File to upload a document';
-$string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and save the file dialog. Content is saved immediately; use "Save and close" when you have finished editing the object.';
+$string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and save the file dialog. Content is saved immediately; use "Save and close" when you have finished editing the page.';

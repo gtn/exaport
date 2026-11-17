@@ -4051,36 +4051,36 @@ return [
     'linkedbadgeexpires' => ['Gültig bis: {$a}', 'Expires: {$a}'],
     // Document-upload User tours.
     'uploadtour_create_name' => [
-        'Exaport: Ein Objekt zum Hochladen eines Dokuments erstellen',
-        'Exaport: Create an object to upload a document',
+        'Exaport: Eine Seite zum Hochladen eines Dokuments erstellen',
+        'Exaport: Create a page to upload a document',
     ],
     'uploadtour_create_description' => [
-        'Erklärt, warum Dokumente erst nach dem Speichern eines neuen Portfolio-Objekts hinzugefügt werden.',
-        'Explains why documents are added after saving a new portfolio object.',
+        'Erklärt, warum Dokumente erst nach dem Speichern einer neuen Portfolio-Seite hinzugefügt werden.',
+        'Explains why documents are added after saving a new portfolio page.',
     ],
     'uploadtour_title_title' => ['Mit einem Titel beginnen', 'Start with a title'],
     'uploadtour_title_content' => [
-        'Geben Sie Ihrem Objekt einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern des Objekts hinzu.',
-        'Give your object a title and select its category. You will add your document after saving the object.',
+        'Geben Sie Ihrer Seite einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern der Seite hinzu.',
+        'Give your page a title and select its category. You will add your document after saving the page.',
     ],
     'uploadtour_save_title' => ['Zuerst speichern, dann hochladen', 'Save first, then upload'],
     'uploadtour_save_content' => [
-        'Wählen Sie "Speichern und weiter bearbeiten", um das Objekt zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.',
-        'Choose "Save and keep editing" to create the object and open its Content section. The icon image field is for a thumbnail; add documents through Content.',
+        'Wählen Sie "Speichern und weiter bearbeiten", um die Seite zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.',
+        'Choose "Save and keep editing" to create the page and open its Content section. The icon image field is for a thumbnail; add documents through Content.',
     ],
     'uploadtour_content_name' => ['Exaport: Dokumente unter Inhalt hinzufügen', 'Exaport: Add documents through Content'],
     'uploadtour_content_description' => [
-        'Zeigt, wo Dokumente in einem gespeicherten, bearbeitbaren Portfolio-Objekt hochgeladen werden.',
-        'Shows where to upload documents in a saved, editable portfolio object.',
+        'Zeigt, wo Dokumente auf einer gespeicherten, bearbeitbaren Portfolio-Seite hochgeladen werden.',
+        'Shows where to upload documents to a saved, editable portfolio page.',
     ],
     'uploadtour_content_title' => ['Hier werden Dokumente hinzugefügt', 'Your documents go here'],
     'uploadtour_content_content' => [
-        'Unter Inhalt fügen Sie diesem Objekt Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten des Objekts ergänzen.',
-        'Use Content to add documents, text and links to this object. You can add more content later by editing the object.',
+        'Unter Inhalt fügen Sie dieser Seite Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten der Seite ergänzen.',
+        'Use Content to add documents, text and links to this page. You can add more content later by editing the page.',
     ],
     'uploadtour_file_title' => ['Datei zum Hochladen eines Dokuments wählen', 'Choose File to upload a document'],
     'uploadtour_file_content' => [
-        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie das Objekt fertig bearbeitet haben.',
-        'Choose +, then File. Upload your document and save the file dialog. Content is saved immediately; use "Save and close" when you have finished editing the object.',
+        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie die Seite fertig bearbeitet haben.',
+        'Choose +, then File. Upload your document and save the file dialog. Content is saved immediately; use "Save and close" when you have finished editing the page.',
     ],
 ];

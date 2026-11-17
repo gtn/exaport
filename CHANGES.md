@@ -1,6 +1,7 @@
 ### v5.2 (2026111601) ###
 * Content and competency changes now remain pending until the main item Save, including when creating an item.
 * Save only applied content blocks and competency selections, preserving untouched changes from other clients. Later saves replace earlier edits to the same block.
+* Keep submitted sharing choices when the item form is redisplayed after a validation or quota error.
 * Revised upload tours explain the new workflow and are shown again to users who completed the original guides.
 
 ### v5.2 (2026111600) ###

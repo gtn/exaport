@@ -123,6 +123,109 @@ final class sharing_userlist_test extends \advanced_testcase {
         }
     }
 
+    /** Flatten the selected-only course groups without counting repeated course membership twice. */
+    private function selected_users(array $courses): array {
+        $users = [];
+        foreach ($courses as $course) {
+            foreach ($course->users ?? [] as $user) {
+                $users[$user->id] = $user;
+            }
+        }
+        return $users;
+    }
+
+    public function test_new_item_override_preserves_selected_users_and_roles_without_saving(): void {
+        global $DB;
+        set_config('sharing_courses_with_block_only', 1, 'block_exaport');
+        $writes = $DB->perf_get_writes();
+        $courses = array_column(block_exaport_get_sharing_userlist('item', 0,
+            [$this->recipient->id, (string)$this->recipient->id, $this->outside->id], [$this->recipient->id]), null, 'id');
+        $this->assertEquals([$this->recipient->id], array_column($courses[$this->coursea->id]->users, 'id'));
+        $this->assertSame('student', $courses[$this->coursea->id]->users[0]->rolename);
+        $this->assertFalse($courses[$this->coursea->id]->users_complete);
+        $this->assertArrayNotHasKey($this->courseb->id, $courses);
+        $this->assertEquals([$this->outside->id], array_column($courses[-1]->users, 'id'));
+        $selected = $this->selected_users($courses);
+        $this->assertCount(2, $selected);
+        $this->assertTrue($selected[$this->recipient->id]->notify_user);
+        $this->assertFalse($selected[$this->outside->id]->notify_user);
+        $this->assertArrayNotHasKey($this->unselected->id, $selected);
+        $this->assertSame($writes, $DB->perf_get_writes());
+        $this->assertFalse($DB->record_exists('block_exaportitemshar', []));
+        $this->assertFalse($DB->record_exists('block_exaportitem', []));
+    }
+
+    public function test_existing_override_replaces_displayed_recipients_and_notify_flags_only(): void {
+        global $DB;
+        $id = $this->entity_id('item');
+        sharing_service::save_internal_shares('item', $id, true, 0,
+            [$this->recipient->id, $this->outside->id], [$this->recipient->id]);
+        $before = $DB->get_records('block_exaportitemshar', ['itemid' => $id], 'userid');
+        $writes = $DB->perf_get_writes();
+        $selected = $this->selected_users(block_exaport_get_sharing_userlist('item', $id,
+            [$this->outside->id, $this->unselected->id], [$this->outside->id, $this->recipient->id]));
+        $this->assertEqualsCanonicalizing([$this->outside->id, $this->unselected->id], array_keys($selected));
+        $this->assertTrue($selected[$this->outside->id]->notify_user);
+        $this->assertFalse($selected[$this->unselected->id]->notify_user);
+        $this->assertSame($writes, $DB->perf_get_writes());
+        $this->assertEquals($before, $DB->get_records('block_exaportitemshar', ['itemid' => $id], 'userid'));
+        // The ordinary endpoint/default call still reads the real saved selection.
+        $saved = $this->selected_users(block_exaport_get_sharing_userlist('item', $id));
+        $this->assertEqualsCanonicalizing([$this->recipient->id, $this->outside->id], array_keys($saved));
+        $this->assertTrue($saved[$this->recipient->id]->notify_user);
+        $this->assertFalse($saved[$this->outside->id]->notify_user);
+    }
+
+    public function test_an_explicit_empty_override_does_not_restore_saved_recipients(): void {
+        global $DB;
+        $id = $this->entity_id('category');
+        sharing_service::save_internal_shares('category', $id, true, 0, [$this->recipient->id]);
+        $before = $DB->get_records('block_exaportcatshar', ['catid' => $id]);
+        $writes = $DB->perf_get_writes();
+        $courses = block_exaport_get_sharing_userlist('category', $id, [], [$this->recipient->id]);
+        $this->assertSame([], $this->selected_users($courses));
+        foreach ($courses as $course) {
+            $this->assertFalse($course->has_shared_users);
+        }
+        $this->assertSame($writes, $DB->perf_get_writes());
+        $this->assertEquals($before, $DB->get_records('block_exaportcatshar', ['catid' => $id]));
+    }
+
+    public function test_foreign_entity_overrides_do_not_bypass_the_existing_owner_check(): void {
+        global $DB;
+        foreach (['category', 'view', 'item'] as $type) {
+            $this->setUser($this->owner);
+            $id = $this->entity_id($type);
+            $config = block_exaport_get_sharing_entity_config($type);
+            sharing_service::save_internal_shares($type, $id, true, 0, [$this->outside->id]);
+            $before = $DB->get_records($config->usersharetable, [$config->idfield => $id]);
+            $this->setUser($this->recipient);
+            $this->assertSame([], $this->selected_users(block_exaport_get_sharing_userlist(
+                $type, $id, [$this->outside->id], [$this->outside->id])));
+            $this->assertEquals($before, $DB->get_records($config->usersharetable, [$config->idfield => $id]));
+        }
+    }
+
+    public function test_an_override_still_requires_internal_sharing_capability(): void {
+        $this->setGuestUser();
+        $this->expectException(\required_capability_exception::class);
+        block_exaport_get_sharing_userlist('item', 0, [$this->recipient->id]);
+    }
+
+    public function test_override_names_are_escaped_and_unknown_or_deleted_users_are_omitted(): void {
+        global $DB;
+        $DB->set_field('user', 'firstname', '<img src=x onerror=alert(1)>', ['id' => $this->outside->id]);
+        $deleted = $this->getDataGenerator()->create_user();
+        $DB->set_field('user', 'deleted', 1, ['id' => $deleted->id]);
+        $selected = $this->selected_users(block_exaport_get_sharing_userlist('item', 0,
+            [$this->outside->id, (string)$this->outside->id, $deleted->id, PHP_INT_MAX, 0, -1, 'invalid',
+                [$this->recipient->id]], [$this->outside->id, $deleted->id]));
+        $this->assertSame([(int)$this->outside->id], array_keys($selected));
+        $this->assertStringContainsString('&lt;img', $selected[$this->outside->id]->name);
+        $this->assertStringNotContainsString('<img', $selected[$this->outside->id]->name);
+        $this->assertTrue($selected[$this->outside->id]->notify_user);
+    }
+
     public static function incomplete_forms(): array {
         return ['missing marker' => [null], 'loading or failed' => [0]];
     }

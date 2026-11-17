@@ -269,17 +269,30 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $hasusers = $itemid > 0 && $DB->record_exists('block_exaportitemshar', ['itemid' => $itemid]);
             $hasgroups = $itemid > 0 && $DB->record_exists('block_exaportitemgroupshar', ['itemid' => $itemid]);
             $shareenabled = $itemshareall > 0 || $hasusers || $hasgroups;
+            $shareconfigured = $shareenabled;
+            $submittedsharing = null;
+            $sharing = $this->submitted_sharing();
+            if ($sharing !== null) {
+                $shareenabled = $sharing['enabled'];
+                $itemshareall = $sharing['mode'];
+                $submittedsharing = json_encode([
+                    'users' => $sharing['users'], 'notify' => $sharing['notify'], 'groups' => $sharing['groups'],
+                    'courses' => $sharing['users'] === null ? null : block_exaport_get_sharing_userlist(
+                        'item', $itemid, $sharing['users'], $sharing['notify']),
+                ], JSON_THROW_ON_ERROR);
+            }
             $sharedusers = $itemid > 0 ? $DB->get_records_menu('block_exaportitemshar',
                 ['itemid' => $itemid], null, 'userid, userid AS tmp') : [];
             $mform->addElement('html', '<script>var sharedusersarr = ' . json_encode(array_values($sharedusers)) . ';</script>');
             $sharingform = new \block_exaport\output\sharing_form([
                 'componentid' => 'item-sharing',
                 'enabled' => $shareenabled,
-                'configured' => $shareenabled,
+                'configured' => $shareconfigured,
                 'showinternal' => true,
                 'showeveryone' => block_exaport_shareall_enabled(),
                 'mode' => $itemshareall,
                 'alwaysnotify' => (bool)get_config('block_exaport', 'alwaysnotifywhenshare'),
+                'submittedsharing' => $submittedsharing,
             ]);
             $sharinghtml = $OUTPUT->render_from_template(
                 'block_exaport/sharing_form',
@@ -379,6 +392,25 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->addElement('html', get_string("isgraded", "block_exacomp"));
             }
         }
+    }
+
+    /** Restore only this submitted form; unloaded pickers are unknown, not empty audiences. */
+    private function submitted_sharing(): ?array {
+        $source = $this->_ajaxformdata ?: $_POST;
+        if (($source['_qf__' . $this->_formname] ?? 0) != 1 ||
+                !confirm_sesskey($source['sesskey'] ?? '')) {
+            return null;
+        }
+        $ids = static function(string $name) use ($source): array {
+            $values = \block_exaport\param::clean_array($source[$name] ?? [], PARAM_INT);
+            return array_values(array_unique(array_filter($values, static function(int $id): bool { return $id > 0; })));
+        };
+        $mode = clean_param($source['shareall'] ?? 0, PARAM_INT);
+        $users = clean_param($source['exaport_userlist_ready'] ?? 0, PARAM_INT) === 1 ? $ids('shareusers') : null;
+        return ['enabled' => (bool)clean_param($source['shareenabled'] ?? 0, PARAM_BOOL),
+            'mode' => in_array($mode, [0, 1, 2], true) ? $mode : 0, 'users' => $users,
+            'notify' => $users === null ? null : array_values(array_intersect($ids('notifyusers'), $users)),
+            'groups' => clean_param($source['exaport_grouplist_ready'] ?? 0, PARAM_INT) === 1 ? $ids('sharegroups') : null];
     }
 
     /** Return trusted persisted selections without creating an item for the new-item form. */

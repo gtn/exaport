@@ -73,6 +73,186 @@ final class item_pending_form_test extends \advanced_testcase {
             'modified' => true, 'files_filemanager' => $draft]], 'removed' => []];
     }
 
+    private function sharing_fixture(bool $saved): array {
+        global $DB, $USER;
+        set_config('block_exaport_disable_shareall', 0);
+        set_config('block_exaport_disable_sharegroups', 0);
+        $recipient = $this->getDataGenerator()->create_user(['firstname' => 'New recipient']);
+        $previous = $this->getDataGenerator()->create_user(['firstname' => 'Previous recipient']);
+        $group = $this->getDataGenerator()->create_cohort();
+        cohort_add_member($group->id, $USER->id);
+        $item = null;
+        if ($saved) {
+            $id = $DB->insert_record('block_exaportitem', ['userid' => $USER->id, 'courseid' => SITEID,
+                'name' => 'Saved sharing', 'type' => 'note', 'shareall' => 0]);
+            $item = $DB->get_record('block_exaportitem', ['id' => $id], '*', MUST_EXIST);
+            $DB->insert_record('block_exaportitemshar', ['itemid' => $id, 'userid' => $previous->id, 'notify' => 1]);
+        }
+        return [$this->customdata($item), $recipient, $previous, $group];
+    }
+
+    private function sharing_bridge(\DOMXPath $dom): array {
+        $root = $dom->query('//*[@id="item-sharing"]')->item(0);
+        return json_decode($root->getAttribute('data-submitted-sharing'), true, 32, JSON_THROW_ON_ERROR);
+    }
+
+    public static function sharing_error_contexts(): array {
+        return ['new name error' => [false, false], 'saved name error' => [true, false],
+            'new quota error' => [false, true], 'saved quota error' => [true, true]];
+    }
+
+    /** @dataProvider sharing_error_contexts */
+    public function test_failed_save_restores_submitted_users_notifications_and_groups(bool $saved, bool $quota): void {
+        global $DB;
+        [$custom, $recipient, $previous, $group] = $this->sharing_fixture($saved);
+        $posted = $this->values($custom) + ['shareenabled' => 1, 'shareall' => 0,
+            'exaport_userlist_ready' => 1, 'exaport_grouplist_ready' => 1,
+            'shareusers' => [$recipient->id => $recipient->id], 'notifyusers' => [$recipient->id => $recipient->id],
+            'sharegroups' => [$group->id => $group->id]];
+        if ($quota) {
+            set_config('block_exaport_userquota', 1);
+            $posted['contentblocks'] = json_encode($this->file_state(), JSON_THROW_ON_ERROR);
+        } else {
+            $posted['name'] = '';
+        }
+        $form = $this->form($custom, $posted);
+        $this->assertNull($form->get_data());
+        $dom = $this->dom($form->render());
+        $this->assertSame(1, $dom->query('//input[@name="shareenabled"][@checked]')->length);
+        $this->assertSame(1, $dom->query('//input[@name="shareall"][@value="0"][@checked]')->length);
+        $this->assertSame($saved ? '1' : '0', $dom->query('//*[@id="item-sharing"]')->item(0)->getAttribute('data-configured'));
+        $bridge = $this->sharing_bridge($dom);
+        $this->assertSame([(int)$recipient->id], $bridge['users']);
+        $this->assertSame([(int)$recipient->id], $bridge['notify']);
+        $this->assertSame([(int)$group->id], $bridge['groups']);
+        $rows = array_merge(...array_map(static function(array $course): array { return $course['users'] ?? []; }, $bridge['courses']));
+        $this->assertSame([(int)$recipient->id], array_unique(array_column($rows, 'id')));
+        $this->assertTrue($rows[0]['notify_user']);
+        if ($saved) {
+            $this->assertTrue($DB->record_exists('block_exaportitemshar',
+                ['itemid' => $custom['current']->id, 'userid' => $previous->id]));
+        } else {
+            $this->assertSame(0, $DB->count_records('block_exaportitem'));
+        }
+    }
+
+    public static function sharing_clear_contexts(): array {
+        return ['new off' => [false, false], 'saved off' => [true, false],
+            'new empty users' => [false, true], 'saved empty users' => [true, true]];
+    }
+
+    /** @dataProvider sharing_clear_contexts */
+    public function test_failed_save_preserves_sharing_off_and_explicit_empty_users(bool $saved, bool $enabled): void {
+        [$custom] = $this->sharing_fixture($saved);
+        $posted = $this->values($custom) + ['exaport_userlist_ready' => 1, 'exaport_grouplist_ready' => 1];
+        $posted['name'] = '';
+        if ($enabled) {
+            $posted['shareenabled'] = 1;
+            $posted['shareall'] = 0;
+        }
+        $form = $this->form($custom, $posted);
+        $this->assertNull($form->get_data());
+        $dom = $this->dom($form->render());
+        $this->assertSame($enabled ? 1 : 0, $dom->query('//input[@name="shareenabled"][@checked]')->length);
+        $bridge = $this->sharing_bridge($dom);
+        $this->assertSame([], $bridge['users']);
+        $this->assertSame([], $bridge['notify']);
+        $this->assertSame([], $bridge['groups']);
+        foreach ($bridge['courses'] as $course) {
+            $this->assertEmpty($course['users'] ?? []);
+        }
+    }
+
+    public static function sharing_unknown_user_modes(): array {
+        return ['users' => [0], 'everyone' => [1], 'groups' => [2]];
+    }
+
+    /** @dataProvider sharing_unknown_user_modes */
+    public function test_incomplete_user_list_restores_controls_without_claiming_an_empty_selection(int $mode): void {
+        [$custom, $recipient, , $group] = $this->sharing_fixture(true);
+        $posted = $this->values($custom) + ['shareenabled' => 1, 'shareall' => $mode,
+            'exaport_userlist_ready' => 0, 'exaport_grouplist_ready' => 1,
+            'shareusers' => [$recipient->id => $recipient->id], 'sharegroups' => [$group->id => $group->id]];
+        $posted['name'] = '';
+        $form = $this->form($custom, $posted);
+        $this->assertNull($form->get_data());
+        $dom = $this->dom($form->render());
+        $this->assertSame(1, $dom->query('//input[@name="shareenabled"][@checked]')->length);
+        $this->assertSame(1, $dom->query('//input[@name="shareall"][@value="' . $mode . '"][@checked]')->length);
+        $bridge = $this->sharing_bridge($dom);
+        $this->assertNull($bridge['users']);
+        $this->assertNull($bridge['notify']);
+        $this->assertNull($bridge['courses']);
+        $this->assertSame([(int)$group->id], $bridge['groups']);
+    }
+
+    public static function sharing_unknown_group_contexts(): array {
+        $cases = [];
+        foreach (['users' => 0, 'everyone' => 1, 'groups' => 2] as $name => $mode) {
+            $cases[$name . ' missing marker'] = [$mode, null];
+            $cases[$name . ' loading marker'] = [$mode, 0];
+        }
+        return $cases;
+    }
+
+    /** @dataProvider sharing_unknown_group_contexts */
+    public function test_incomplete_group_list_is_unknown_in_every_audience(int $mode, ?int $ready): void {
+        global $DB;
+        [$custom, , , $group] = $this->sharing_fixture(true);
+        $DB->insert_record('block_exaportitemgroupshar', ['itemid' => $custom['current']->id, 'groupid' => $group->id]);
+        $posted = $this->values($custom) + ['shareenabled' => 1, 'shareall' => $mode, 'exaport_userlist_ready' => 1,
+            'sharegroups' => [$group->id => $group->id]];
+        $posted['name'] = '';
+        if ($ready !== null) {
+            $posted['exaport_grouplist_ready'] = $ready;
+        }
+        $form = $this->form($custom, $posted);
+        $this->assertNull($form->get_data());
+        $dom = $this->dom($form->render());
+        $this->assertSame(1, $dom->query('//input[@name="shareall"][@value="' . $mode . '"][@checked]')->length);
+        $bridge = $this->sharing_bridge($dom);
+        $this->assertNull($bridge['groups']);
+        $this->assertSame([], $bridge['users']);
+        $this->assertTrue($DB->record_exists('block_exaportitemgroupshar',
+            ['itemid' => $custom['current']->id, 'groupid' => $group->id]));
+    }
+
+    public function test_sharing_restore_does_not_fill_missing_post_controls_from_query_parameters(): void {
+        [$custom, $recipient, , $group] = $this->sharing_fixture(false);
+        $_GET = ['shareenabled' => 1, 'shareall' => 2, 'exaport_userlist_ready' => 1, 'exaport_grouplist_ready' => 1,
+            'shareusers' => [$recipient->id => $recipient->id], 'notifyusers' => [$recipient->id => $recipient->id],
+            'sharegroups' => [$group->id => $group->id]];
+        $posted = $this->values($custom);
+        $posted['name'] = '';
+        $form = $this->form($custom, $posted);
+        $this->assertNull($form->get_data());
+        $dom = $this->dom($form->render());
+        $this->assertSame(0, $dom->query('//input[@name="shareenabled"][@checked]')->length);
+        $this->assertSame(1, $dom->query('//input[@name="shareall"][@value="0"][@checked]')->length);
+        $bridge = $this->sharing_bridge($dom);
+        $this->assertNull($bridge['users']);
+        $this->assertNull($bridge['notify']);
+        $this->assertNull($bridge['groups']);
+
+        // Completed but omitted checkbox sets mean an explicit empty selection, even with stale URL values.
+        $posted['exaport_userlist_ready'] = $posted['exaport_grouplist_ready'] = 1;
+        $form = $this->form($custom, $posted);
+        $this->assertNull($form->get_data());
+        $bridge = $this->sharing_bridge($this->dom($form->render()));
+        $this->assertSame([], $bridge['users']);
+        $this->assertSame([], $bridge['notify']);
+        $this->assertSame([], $bridge['groups']);
+    }
+
+    public function test_unsubmitted_sharing_parameters_do_not_replace_saved_defaults(): void {
+        $custom = $this->customdata();
+        $form = new \block_exaport_item_edit_form('/blocks/exaport/item.php', $custom, 'post', '', [], true,
+            ['shareenabled' => 1, 'shareall' => 1, 'exaport_userlist_ready' => 1]);
+        $dom = $this->dom($form->render());
+        $this->assertSame(0, $dom->query('//input[@name="shareenabled"][@checked]')->length);
+        $this->assertSame('', $dom->query('//*[@id="item-sharing"]')->item(0)->getAttribute('data-submitted-sharing'));
+    }
+
     public function test_creation_offers_content_and_competencies_before_an_item_exists(): void {
         global $DB;
         set_config('block_exaport_enable_interaction_competences', 1);

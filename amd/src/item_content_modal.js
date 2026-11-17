@@ -116,6 +116,11 @@ const open = (trigger, config) => {
     });
 
     modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, event => {
+        // A slow Apply can finish after Escape has closed and removed its modal.
+        if (config.pending && !event.currentTarget.isConnected) {
+            event.preventDefault();
+            return;
+        }
         if (section) {
             try {
                 if (config.pending) {

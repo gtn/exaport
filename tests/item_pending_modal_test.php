@@ -11,6 +11,7 @@ require_once(__DIR__ . '/../lib/item_competence_helpers.php');
 
 use block_exaport\form\item_content;
 use block_exaport\form\item_competences;
+use block_exaport\local\item_content_edit;
 use block_exaport\local\item_editor;
 
 /** Exercise the actual modal classes through Moodle's dynamic-form external service. */
@@ -60,6 +61,65 @@ final class item_pending_modal_test extends \advanced_testcase {
             }
         }
         $this->fail('Missing registered form field: ' . $name);
+    }
+
+    /** Serialize the rendered successful controls, including only draft IDs the browser actually receives. */
+    private function submitted_fields(string $html): array {
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($html);
+        $xpath = new \DOMXPath($dom);
+        $pairs = [];
+        foreach ($xpath->query('//form//input|//form//textarea|//form//select') as $control) {
+            $name = $control->getAttribute('name');
+            $type = strtolower($control->getAttribute('type'));
+            if ($name === '' || $control->hasAttribute('disabled') ||
+                    in_array($type, ['submit', 'button', 'reset', 'file'], true) ||
+                    (in_array($type, ['checkbox', 'radio'], true) && !$control->hasAttribute('checked'))) {
+                continue;
+            }
+            if ($control->tagName === 'select') {
+                $values = [];
+                foreach ($control->getElementsByTagName('option') as $option) {
+                    if ($option->hasAttribute('selected')) {
+                        $values[] = $option->getAttribute('value');
+                    }
+                }
+                if (!$values && !$control->hasAttribute('multiple')) {
+                    $first = $control->getElementsByTagName('option')->item(0);
+                    $values = $first ? [$first->getAttribute('value')] : [];
+                }
+            } else {
+                $values = [$control->tagName === 'textarea' ? $control->textContent : $control->getAttribute('value')];
+            }
+            foreach ($values as $value) {
+                $pairs[] = rawurlencode($name) . '=' . rawurlencode($value);
+            }
+        }
+        parse_str(implode('&', $pairs), $fields);
+        return $fields;
+    }
+
+    private function saved_item(): \stdClass {
+        global $DB, $USER;
+        $id = $DB->insert_record('block_exaportitem', ['userid' => $USER->id, 'courseid' => SITEID,
+            'name' => 'Text modal fixture', 'type' => 'note']);
+        return $DB->get_record('block_exaportitem', ['id' => $id], '*', MUST_EXIST);
+    }
+
+    /** Keep metadata minimal while exercising the real final block/file commit. */
+    private function commit_block(?\stdClass $item, string $baseline, array $state): int {
+        $data = (object)['id' => (int)($item->id ?? 0), 'courseid' => SITEID, 'name' => 'Text modal fixture',
+            'editorbaseline' => $baseline,
+            'contentblocks' => json_encode(['blocks' => [$state], 'removed' => []], JSON_THROW_ON_ERROR),
+            'competenceids' => ''];
+        return item_editor::commit((int)$data->id, SITEID, $data, static function(\stdClass $metadata): int {
+            global $DB, $USER;
+            if (!$metadata->id) {
+                $metadata->id = (int)$DB->insert_record('block_exaportitem', ['userid' => $USER->id,
+                    'courseid' => SITEID, 'name' => $metadata->name, 'type' => 'note']);
+            }
+            return (int)$metadata->id;
+        }, false);
     }
 
     private function upload(int $draftid, string $name = 'evidence.txt', string $bytes = 'Uploaded evidence'): \stored_file {
@@ -164,6 +224,92 @@ final class item_pending_modal_test extends \advanced_testcase {
             $this->assertSame('Applied ' . $type, $response['result']['block']['title']);
             $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
         }
+    }
+
+    public static function fileless_text_contexts(): array {
+        return ['saved item' => [true], 'new item' => [false]];
+    }
+
+    /** @dataProvider fileless_text_contexts */
+    public function test_fileless_text_apply_reopen_and_cancel_keep_the_accepted_text(bool $saved): void {
+        global $DB;
+        $item = $saved ? $this->saved_item() : null;
+        $original = '<p>Original saved text</p>';
+        $block = $item ? block_exaport_create_content_block((int)$item->id, 'text', 'Original', '', [
+            'content' => $original, 'contentformat' => FORMAT_HTML]) : null;
+        $baseline = item_editor::baseline($item, SITEID, false);
+        $args = $this->args('text', $baseline, $block ? item_content_edit::from_record($block) : null);
+        $args['itemid'] = (int)($item->id ?? 0);
+        $opened = $this->request(item_content::class, $args, false);
+        $fields = $this->submitted_fields($opened['html']);
+        $fields['title'] = 'Accepted title';
+        $fields['content_editor']['text'] = '<p>Accepted pending text</p>';
+        $applied = $this->request(item_content::class, $fields);
+        $this->assertTrue($applied['submitted']);
+        $state = $applied['result']['block'];
+        $args['pendingblock'] = json_encode($state, JSON_THROW_ON_ERROR);
+        $reopened = $this->request(item_content::class, $args, false);
+        $this->assertSame('<p>Accepted pending text</p>', $this->value($reopened['html'], 'content_editor[text]'));
+        $working = $this->submitted_fields($reopened['html']);
+        $this->assertGreaterThan(0, (int)$working['content_editor']['itemid']);
+        $this->assertSame([], item_content_edit::draft_files((int)$working['content_editor']['itemid']));
+        $working['content_editor']['text'] = '<p>Cancelled local edit</p>';
+        // Closing the dialog never submits these controls; reopen from the last accepted block.
+        $aftercancel = $this->request(item_content::class, $args, false);
+        $this->assertSame('<p>Accepted pending text</p>', $this->value($aftercancel['html'], 'content_editor[text]'));
+        if ($block) {
+            $this->assertSame($original, $DB->get_field('block_exaportitemblock', 'content', ['id' => $block->id]));
+        } else {
+            $this->assertSame(0, $DB->count_records('block_exaportitem'));
+            $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
+        }
+        $itemid = $this->commit_block($item, $baseline, $state);
+        $savedblocks = block_exaport_get_item_content_blocks($itemid);
+        $this->assertCount(1, $savedblocks);
+        $this->assertSame('<p>Accepted pending text</p>', $savedblocks[0]->content);
+    }
+
+    public function test_rendered_text_form_preserves_nested_imported_media_through_apply_reopen_and_commit(): void {
+        global $DB, $USER;
+        $item = $this->saved_item();
+        $html = '<p><img src="@@PLUGINFILE@@/nested/image.png"></p>';
+        $block = block_exaport_create_content_block((int)$item->id, 'text', 'Imported media', '', [
+            'content' => $html, 'contentformat' => FORMAT_HTML]);
+        $file = get_file_storage()->create_file_from_string([
+            'contextid' => \context_user::instance($USER->id)->id, 'component' => 'block_exaport',
+            'filearea' => 'item_content_text', 'itemid' => $block->id, 'filepath' => '/nested/',
+            'filename' => 'image.png', 'source' => 'image.png', 'userid' => $USER->id,
+        ], 'Nested imported image bytes');
+        $baseline = item_editor::baseline($item, SITEID, false);
+        $args = $this->args('text', $baseline, item_content_edit::from_record($block));
+        $args['itemid'] = (int)$item->id;
+        $opened = $this->request(item_content::class, $args, false);
+        $fields = $this->submitted_fields($opened['html']);
+        $fields['content_editor']['text'] .= '<p>Accepted media edit</p>';
+        $applied = $this->request(item_content::class, $fields);
+        $this->assertTrue($applied['submitted']);
+        $accepted = $applied['result']['block'];
+        $args['pendingblock'] = json_encode($accepted, JSON_THROW_ON_ERROR);
+        $reopened = $this->request(item_content::class, $args, false);
+        $working = $this->submitted_fields($reopened['html']);
+        $this->assertNotSame((int)$accepted['content_editor']['itemid'], (int)$working['content_editor']['itemid']);
+        $this->assertStringContainsString('/' . $working['content_editor']['itemid'] . '/nested/image.png',
+            $working['content_editor']['text']);
+        $this->assertStringContainsString('Accepted media edit', $working['content_editor']['text']);
+        $this->assertSame($html, $DB->get_field('block_exaportitemblock', 'content', ['id' => $block->id]));
+        $working['content_editor']['text'] .= '<p>Second media edit</p>';
+        $again = $this->request(item_content::class, $working);
+        $this->assertTrue($again['submitted']);
+        $this->commit_block($item, $baseline, $again['result']['block']);
+        $content = $DB->get_field('block_exaportitemblock', 'content', ['id' => $block->id]);
+        $this->assertStringContainsString('@@PLUGINFILE@@/nested/image.png', $content);
+        $this->assertStringContainsString('Accepted media edit', $content);
+        $this->assertStringContainsString('Second media edit', $content);
+        $this->assertStringNotContainsString('draftfile.php', $content);
+        $retained = get_file_storage()->get_file($file->get_contextid(), 'block_exaport', 'item_content_text',
+            $block->id, '/nested/', 'image.png');
+        $this->assertSame((int)$file->get_id(), (int)$retained->get_id());
+        $this->assertSame('Nested imported image bytes', $retained->get_content());
     }
 
     public function test_cv_apply_reads_current_source_and_rejects_a_deleted_selection(): void {

@@ -74,6 +74,11 @@ export const init = config => {
             returnFocus: trigger,
         });
         modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, submitted => {
+            // A slow Apply can finish after Escape has closed and removed its modal.
+            if (config.pending && !submitted.currentTarget.isConnected) {
+                submitted.preventDefault();
+                return;
+            }
             try {
                 if (config.pending) {
                     // The main form owns the accepted selection; reopening must use it, not stored assignments.

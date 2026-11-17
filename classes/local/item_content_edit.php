@@ -140,18 +140,28 @@ final class item_content_edit {
             $isfile = $state['type'] === 'file';
             $accepted = $isfile ? (int)$state['files_filemanager'] : (int)$state['content_editor']['itemid'];
             $draftid = 0;
-            if ($accepted > 0 && !empty($state['modified'])) {
+            if (!empty($state['modified']) && ($accepted > 0 || !$isfile)) {
                 $draftid = file_get_unused_draft_itemid();
+                if (!$isfile) {
+                    self::validate_editor_files($accepted, $item, $block);
+                }
                 // Copying into a fresh draft preserves the original-file source metadata. Preparing a
                 // draft from another draft would wrap that metadata again and disturb unchanged files.
-                file_merge_draft_area_into_draft_area($accepted, $draftid);
+                $files = $accepted > 0 ? get_file_storage()->get_area_files(
+                    $context->id, 'user', 'draft', $accepted) : [];
+                if ($files) {
+                    file_merge_draft_area_into_draft_area($accepted, $draftid);
+                } else if ($isfile) {
+                    self::invalid();
+                }
                 if (!$isfile) {
+                    // Plain text can have a draft number without a file area. Its accepted text still wins.
                     $text = file_rewrite_urls_to_pluginfile($state['content_editor']['text'], $accepted);
                     $data['content_editor']['text'] = file_rewrite_pluginfile_urls($text, 'draftfile.php',
                         $context->id, 'user', 'draft', $draftid);
                 }
             } else {
-                $text = !$isfile ? (string)($block->content ?? $state['content_editor']['text']) : null;
+                $text = !$isfile ? $state['content_editor']['text'] : null;
                 $prepared = file_prepare_draft_area($draftid, $context->id, 'block_exaport',
                     $isfile ? 'item_content_file' : 'item_content_text', $block ? (int)$block->id : null,
                     ['subdirs' => true], $text);

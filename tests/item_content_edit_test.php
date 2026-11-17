@@ -164,6 +164,47 @@ final class item_content_edit_test extends \advanced_testcase {
         $this->assertSame('Imported image bytes', $retained->get_content());
     }
 
+    public static function unavailable_text_drafts(): array {
+        return ['expired area' => ['expired'], 'foreign area' => ['foreign'], 'no draft' => ['none']];
+    }
+
+    /** @dataProvider unavailable_text_drafts */
+    public function test_modified_text_never_restores_saved_media_from_an_unavailable_working_draft(string $kind): void {
+        global $USER;
+        $item = $this->item();
+        $block = block_exaport_create_content_block((int)$item->id, 'text', 'Retained media', '', [
+            'content' => '<p><img src="@@PLUGINFILE@@/image.png"></p>', 'contentformat' => FORMAT_HTML]);
+        $context = \context_user::instance($USER->id);
+        $original = get_file_storage()->create_file_from_string([
+            'contextid' => $context->id, 'component' => 'block_exaport', 'filearea' => 'item_content_text',
+            'itemid' => $block->id, 'filepath' => '/', 'filename' => 'image.png', 'userid' => $USER->id,
+        ], 'Saved media must remain unchanged');
+        $state = item_content_edit::from_record($block);
+        $state['modified'] = true;
+        $state['content_editor'] = ['text' => '<p>Accepted working text</p>', 'format' => FORMAT_HTML,
+            'itemid' => $kind === 'none' ? 0 : file_get_unused_draft_itemid()];
+        if ($kind === 'foreign') {
+            $other = $this->getDataGenerator()->create_user();
+            get_file_storage()->create_file_from_string([
+                'contextid' => \context_user::instance($other->id)->id, 'component' => 'user', 'filearea' => 'draft',
+                'itemid' => $state['content_editor']['itemid'], 'filepath' => '/', 'filename' => 'private.txt',
+                'userid' => $other->id,
+            ], 'Foreign private bytes');
+        }
+        try {
+            $working = item_content_edit::prepare($state, $item, $block);
+            $this->assertSame([], $this->draft_files((int)$working['content_editor']['itemid']));
+            $this->assertSame('<p>Accepted working text</p>', $working['content_editor']['text']);
+            item_content_edit::normalise($working, $item, $block);
+            $this->fail('Unavailable retained-media drafts must not become a replacement of saved files');
+        } catch (\moodle_exception $error) {
+            $this->assertSame('itemeditorinvalid', $error->errorcode);
+        }
+        $this->assertSame('Saved media must remain unchanged', $original->get_content());
+        $this->assertCount(1, get_file_storage()->get_area_files($context->id, 'block_exaport',
+            'item_content_text', $block->id, 'id', false));
+    }
+
     public function test_text_editor_cannot_attach_an_unrelated_draft_file(): void {
         $file = $this->draft();
         $state = $this->state('text') + ['content_editor' => ['text' => '<p>Text</p>',

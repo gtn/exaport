@@ -67,6 +67,11 @@ class item_content extends dynamic_form {
             $mform->addElement('editor', 'content_editor', get_string('blockcontent', 'block_exaport'), null,
                 block_exaport_item_content_editor_options());
             $mform->setType('content_editor', PARAM_RAW);
+            if ($this->is_pending()) {
+                // maxfiles=0 hides Moodle's draft-ID input; retain imported media without enabling uploads.
+                $mform->addElement('hidden', 'content_editor[itemid]', 0);
+                $mform->setType('content_editor[itemid]', PARAM_INT);
+            }
         } else if ($type === 'link') {
             $mform->addElement('url', 'url', get_string('url', 'block_exaport'), ['size' => 60]);
             $mform->setType('url', PARAM_URL);

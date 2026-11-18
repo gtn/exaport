@@ -1,3 +1,6 @@
+### v5.2 (2026111802) ###
+* Remove Exaport-owned Exacomp links on uninstall so reinstalled items do not inherit old competencies.
+
 ### v5.2 (2026111800) ###
 * Clarify content-dialog actions and upload instructions in English, German, Dutch and French; show saving guidance in field help.
 * Use one upload tour for creating and editing items, with shared completion.

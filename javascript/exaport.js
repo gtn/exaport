@@ -89,7 +89,8 @@
     return true;
   };
 
-  // PHP emits this escaped JSON only when redisplaying a submitted sharing form.
+  // After an error, PHP embeds the submitted choices so the picker can restore them.
+  // Save still submits the current form inputs, including any further changes.
   function getSubmittedSharing($root) {
     var value = $root.attr('data-submitted-sharing');
     return value === undefined ? null : JSON.parse(value);
@@ -485,6 +486,8 @@
         if ((!$master.length || $master.is(':checked')) && (!$internal.length || $internal.is(':checked')) &&
             mode === '0' && !initialLoaded) {
           event.preventDefault();
+          // Keep Moodle's unsaved-change warning active when Save is blocked.
+          event.stopPropagation();
           showNotReady();
         }
       });

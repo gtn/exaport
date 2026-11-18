@@ -58,9 +58,23 @@ define(['block_exaport/sharing_form', 'core/notification', 'core/str'],
             '<div data-region="submitted-group-selection"><input type="hidden" name="sharegroups[22]" value="22"></div>' +
             '</div>';
         const form = root.closest('form');
+        // Moodle's document listener marks even prevented submissions as submitted.
+        const markSubmitted = event => {
+            if (event.target === form) {
+                form.dataset.formSubmitted = 'true';
+            }
+        };
+        document.addEventListener('submit', markSubmitted);
         const submit = submitter => {
+            form.dataset.formSubmitted = 'false';
+            form.dataset.formDirty = 'true';
             const event = new SubmitEvent('submit', {bubbles: true, cancelable: true, submitter});
             form.dispatchEvent(event);
+            assert.strictEqual(form.dataset.formSubmitted, event.defaultPrevented ? 'false' : 'true',
+                'only an allowed submission reaches Moodle\'s submitted marker');
+            if (event.defaultPrevented) {
+                assert.strictEqual(form.dataset.formDirty, 'true', 'blocked Save keeps the unsaved work dirty');
+            }
             return event.defaultPrevented;
         };
 
@@ -85,6 +99,8 @@ define(['block_exaport/sharing_form', 'core/notification', 'core/str'],
             master.dispatchEvent(new Event('change', {bubbles: true}));
             assert.false(submit(), 'sharing off can still Save');
             assert.false(new FormData(form).has('sharegroups[22]'), 'sharing off disables the fallback with the settings');
+        }).finally(function() {
+            document.removeEventListener('submit', markSubmitted);
         });
     });
 

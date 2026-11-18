@@ -120,16 +120,44 @@ define(['jquery', 'core/str'], function($, Str) {
 
     QUnit.test('normal GET still loads saved recipients and blocks Save on an initial request failure', function(assert) {
         this.show();
-        window.ExabisEportfolio.load_userlist('cat_mod');
-        this.requests[0].response.reject();
-        assert.strictEqual(this.root.find('[name="exaport_userlist_ready"]').val(), '0');
-        var submit = $.Event('submit');
-        this.form.triggerHandler(submit);
-        assert.ok(submit.isDefaultPrevented(), 'an unavailable selection cannot silently remove saved shares');
-        this.root.find('#sharing-userlist button').trigger('click');
-        this.requests[1].response.resolve([course(11, [user(4, true, true)])]);
-        assert.strictEqual(this.root.find('[name="exaport_userlist_ready"]').val(), '1');
-        assert.ok(this.root.find('.shareusers[value="4"]').prop('checked'));
+        var form = this.form[0];
+        var cancel = $('<button type="submit" name="cancel">Cancel</button>').appendTo(form)[0];
+        // Use a bubbling event: triggerHandler cannot reach Moodle's document-level submitted marker.
+        var markSubmitted = function(event) {
+            if (event.target === form) {
+                form.dataset.formSubmitted = 'true';
+            }
+        };
+        document.addEventListener('submit', markSubmitted);
+        var submit = function(submitter) {
+            form.dataset.formSubmitted = 'false';
+            form.dataset.formDirty = 'true';
+            var event = new SubmitEvent('submit', {bubbles: true, cancelable: true, submitter: submitter});
+            form.dispatchEvent(event);
+            assert.strictEqual(form.dataset.formSubmitted, event.defaultPrevented ? 'false' : 'true',
+                'only an allowed submission reaches Moodle\'s submitted marker');
+            if (event.defaultPrevented) {
+                assert.strictEqual(form.dataset.formDirty, 'true', 'blocked Save keeps the unsaved work dirty');
+            }
+            return event.defaultPrevented;
+        };
+        try {
+            window.ExabisEportfolio.load_userlist('cat_mod');
+            this.requests[0].response.reject();
+            assert.strictEqual(this.root.find('[name="exaport_userlist_ready"]').val(), '0');
+            assert.true(submit(), 'an unavailable selection cannot silently remove saved shares');
+            assert.false(submit(cancel), 'Cancel still reaches the ordinary submission handlers');
+            this.root.find('[name="shareenabled"]').prop('checked', false);
+            assert.false(submit(), 'sharing off can Save without a loaded user list');
+            this.root.find('[name="shareenabled"]').prop('checked', true);
+            this.root.find('#sharing-userlist button').trigger('click');
+            this.requests[1].response.resolve([course(11, [user(4, true, true)])]);
+            assert.strictEqual(this.root.find('[name="exaport_userlist_ready"]').val(), '1');
+            assert.ok(this.root.find('.shareusers[value="4"]').prop('checked'));
+            assert.false(submit(), 'a loaded selection still reaches the ordinary submission handlers');
+        } finally {
+            document.removeEventListener('submit', markSubmitted);
+        }
     });
 
     QUnit.test('incomplete submitted course data never becomes ready or falls back to saved recipients', function(assert) {

@@ -65,6 +65,8 @@ const initialiseRoot = (root, loaderType) => {
         if (internalEnabled && mode === '2' && groups.length &&
                 $root.find('[name="exaport_grouplist_ready"]').val() !== '1') {
             event.preventDefault();
+            // Keep Moodle's unsaved-change warning active when Save is blocked.
+            event.stopPropagation();
             groups.find('.exaport-grouplist-incomplete').remove();
             $('<div class="alert alert-warning exaport-grouplist-incomplete"' +
                 ' role="alert" tabindex="-1"></div>')

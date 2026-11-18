@@ -271,6 +271,8 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $shareenabled = $itemshareall > 0 || $hasusers || $hasgroups;
             $shareconfigured = $shareenabled;
             $submittedsharing = null;
+            // Start with saved settings. After a rejected submit, redisplay the user's
+            // submitted choices instead; this changes the form, not the stored shares.
             $sharing = $this->submitted_sharing();
             if ($sharing !== null) {
                 $shareenabled = $sharing['enabled'];

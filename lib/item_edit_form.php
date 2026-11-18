@@ -183,11 +183,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             }
         }
 
-        $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,
-            array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
-                'accepted_types' => array('image', 'web_image')));
-        $mform->add_exaport_help_button('iconfile', 'iconfile');
-
         if ($sections['content']) {
             // Keep Content in its own fieldset while using normal form columns inside it.
             $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
@@ -231,7 +226,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $html = $renderer->render_from_template('block_exaport/item_content_blocks',
                     array_merge($contentsection->export_for_template($renderer), ['embedded' => true]));
             }
-            // Use the normal Moodle label/help/control columns, just like the thumbnail row above.
+            // Use the normal Moodle label/help/control columns.
             $mform->addElement('static', 'editorcontent', get_string('viewcontent', 'block_exaport'), $html);
             // Fill the control's flex column without constraining the outer row's native gutter width.
             $mform->getElement('editorcontent')->updateAttributes(['class' => 'flex-grow-1']);
@@ -265,6 +260,12 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->add_exaport_help_button($textareafield . '_editor', 'forms.item.' . $textareafield . '_editor');
             }
         }
+
+        // Keep the optional preview image with metadata rather than document uploads.
+        $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,
+            array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
+                'accepted_types' => array('image', 'web_image')));
+        $mform->add_exaport_help_button('iconfile', 'iconfile');
 
         // Sharing (direct item share: users and groups/cohorts).
         if (has_capability('block/exaport:shareintern', context_system::instance())) {

@@ -1,6 +1,7 @@
 ### v5.2 (2026111800) ###
 * Use one upload tour for creating and editing pages, replacing the two previous tours on upgrade.
 * Keep Content in its own expanded section with standard Moodle form columns; move thumbnail guidance into its field help in English, German, Dutch and French.
+* Place the optional item Thumbnail at the end of Metadata, after Results and learnings.
 
 ### v5.2 (2026111601) ###
 * Clarify content-dialog actions, move saving guidance into standard Moodle help, and improve localized upload tours.

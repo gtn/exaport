@@ -10,8 +10,8 @@ document, choose **Add** in the dialog and save the page to keep the upload.
 
 Content dialogs use **Add** for new blocks and **Apply changes** for edits.
 The main **Save** saves the page, content and competencies together. Cancelling
-the main form discards its pending changes. Thumbnail guidance is in that field's
-own help icon, so the tour does not refer to an optional field.
+the main form discards its pending changes. Thumbnail is at the end of Metadata,
+with guidance in its own help icon, so the tour does not refer to an optional field.
 
 The guide applies across courses, including creation in Shared Categories. Its
 item-page URL match and Content add-button filter exclude read-only pages and

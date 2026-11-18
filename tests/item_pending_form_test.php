@@ -363,8 +363,13 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertStringNotContainsString(trim(strip_tags($help->text)), $controls->textContent);
     }
 
-    public function test_thumbnail_help_uses_the_actual_field_label(): void {
+    public function test_thumbnail_is_last_in_metadata_and_help_uses_the_actual_field_label(): void {
         $dom = $this->dom($this->form($this->customdata())->render());
+        $row = $dom->query('//*[@id="fitem_id_iconfile"]')->item(0);
+        $this->assertNotNull($row);
+        $this->assertSame(1, $dom->query('ancestor::fieldset[@id="id_itemmetadata"]', $row)->length);
+        $this->assertSame(1, $dom->query('preceding-sibling::*[1][@id="fitem_id_project_result_editor"]', $row)->length);
+        $this->assertSame(0, $dom->query('following-sibling::*[starts-with(@id, "fitem_id_")]', $row)->length);
         $icons = $dom->query('//*[@id="fitem_id_iconfile"]//div[contains(@class, "col-form-label")]'
             . '//a[@data-toggle="popover" or @data-bs-toggle="popover"]');
         $this->assertSame(1, $icons->length);

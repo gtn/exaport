@@ -768,7 +768,7 @@ return [
         'Submit',
     ],
     'saveitem' => [
-        'Speichern und schließen',
+        'Speichern',
         'Save and close',
     ],
     'saveandkeepediting' => [
@@ -4075,7 +4075,7 @@ return [
         'Upload a document',
     ],
     'uploadtour_title_content' => [
-        'Wählen Sie unter Inhalt zuerst + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Ihr Dokument wird erst gespeichert, wenn Sie die Seite speichern. Das Symbolbild dient als Vorschaubild.',
+        'Wählen Sie unter Inhalt + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Übernehmen, um zum Formular zurückzukehren. Die Datei wird erst gespeichert, wenn Sie die Seite speichern. Das Feld Miniaturansicht dient nur für ein Vorschaubild der Seite.',
         'In Content, choose +, then File. Upload your document and choose Apply to return to this form. Your document is only saved when you save the page. The icon image field is for a thumbnail.',
     ],
     'uploadtour_save_title' => [
@@ -4083,7 +4083,7 @@ return [
         'Save your page',
     ],
     'uploadtour_save_content' => [
-        'Dateien und Inhalte werden erst gespeichert, wenn Sie die Seite speichern. Wählen Sie Speichern und schließen, um alles einschließlich der Kompetenzen zu speichern. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.',
+        'Geben Sie Ihrer Seite einen Titel und wählen Sie Speichern. Damit speichern Sie die Seite und ihre Inhalte. Abbrechen verwirft Ihre ungespeicherten Änderungen.',
         'Files and content are saved only when you save the page. Choose Save and close to save everything, including competencies. Cancel on this form discards unsaved changes.',
     ],
     'uploadtour_content_name' => [
@@ -4107,7 +4107,7 @@ return [
         'Upload a document',
     ],
     'uploadtour_file_content' => [
-        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.',
+        'Wählen Sie + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Übernehmen, um zum Formular zurückzukehren. Wählen Sie anschließend Speichern, um die Seite und ihre Inhalte zu speichern.',
         'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.',
     ],
     'itemeditorinvalid' => [

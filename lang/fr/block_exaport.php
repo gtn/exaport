@@ -62,7 +62,7 @@ $string['explainingshared'] = 'Ces participants ont partagé des liens, fichiers
 $string['explainingsharefile'] = 'Pour permettre à un participant de voir le fichier, cliquez sur son nom, puis cliquez sur Enregistrer les modifications. Vous pouvez choisir plusieurs participants.';
 $string['explainingsharenote'] = 'Pour permettre à un participant de voir la note, cliquez sur son nom, puis cliquez sur Enregistrer les modifications. Vous pouvez choisir plusieurs participants.';
 $string['file'] = 'Fichier';
-$string['iconfile'] = 'Image qui servira d\'icône à la catégorie';
+$string['iconfile'] = 'Miniature';
 $string['firstnameshared'] = 'Prénom';
 $string['go'] = 'Allez!';
 $string['hidesummary'] = '(cacher le résumé)';
@@ -587,3 +587,20 @@ $string['views_skipped'] = 'Views skipped (already exist): {$a}';
 
 $string['settings_starter_view_templates'] = 'Starter View Templates';
 $string['settings_starter_view_templates_description'] = 'JSON array of starter view templates. Each template must have "name" and "views" (array of view objects with name, description, and share_to_teachers).';
+
+// Document-upload workflow.
+$string['saveitem'] = 'Sauvegarder';
+
+// Document-upload User tours.
+$string['uploadtour_create_name'] = 'Exaport : Ajouter un document';
+$string['uploadtour_create_description'] = 'Explique où ajouter des documents et comment enregistrer un artefact et son contenu.';
+$string['uploadtour_title_title'] = 'Ajouter un document';
+$string['uploadtour_title_content'] = 'Dans Contenu, cliquez sur +, puis sur Fichier. Ajoutez votre document, puis cliquez sur Appliquer pour revenir au formulaire. Le document n\'est enregistré que lorsque vous sauvegardez l\'artefact. Le champ Miniature sert uniquement à ajouter une image d\'aperçu.';
+$string['uploadtour_save_title'] = 'Sauvegarder votre artefact';
+$string['uploadtour_save_content'] = 'Renseignez le champ Titre, puis cliquez sur Sauvegarder pour enregistrer l\'artefact et son contenu. Cliquez sur Annuler pour quitter ce formulaire sans enregistrer vos modifications.';
+$string['uploadtour_content_name'] = 'Exaport : Ajouter des documents dans Contenu';
+$string['uploadtour_content_description'] = 'Explique comment ajouter des documents et enregistrer les modifications du contenu.';
+$string['uploadtour_content_title'] = 'Ajouter du contenu à votre artefact';
+$string['uploadtour_content_content'] = 'Utilisez Contenu pour ajouter des documents, du texte et des liens. Vos modifications ne sont enregistrées que lorsque vous sauvegardez l\'artefact. Cliquez sur Annuler pour quitter ce formulaire sans enregistrer vos modifications.';
+$string['uploadtour_file_title'] = 'Ajouter un document';
+$string['uploadtour_file_content'] = 'Cliquez sur +, puis sur Fichier. Ajoutez votre document, puis cliquez sur Appliquer pour revenir au formulaire. Cliquez ensuite sur Sauvegarder pour enregistrer l\'artefact et son contenu.';

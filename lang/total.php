@@ -391,6 +391,10 @@ return [
         'Miniaturansicht',
         'Thumbnail',
     ],
+    'iconfile_help' => [
+        'Dieses Feld dient nur für ein Vorschaubild.',
+        'Use this field for a preview image.',
+    ],
     'firstnameshared' => [
         'Familienname',
         'First Name',
@@ -4075,8 +4079,8 @@ return [
         'Upload a document',
     ],
     'uploadtour_title_content' => [
-        'Wählen Sie unter Inhalt + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Hinzufügen. Speichern Sie anschließend die Seite. Das Feld Miniaturansicht dient nur für ein Vorschaubild.',
-        'In Content, choose +, then File. Upload your file and choose Add. Save the page to keep your changes. Use Thumbnail for a preview image.',
+        'Wählen Sie unter Inhalt + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Hinzufügen. Speichern Sie anschließend die Seite.',
+        'In Content, choose +, then File. Upload your file and choose Add. Save the page to keep your changes.',
     ],
     'uploadtour_save_title' => [
         'Ihre Seite speichern',

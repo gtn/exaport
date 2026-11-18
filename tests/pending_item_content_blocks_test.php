@@ -45,6 +45,15 @@ final class pending_item_content_blocks_test extends \advanced_testcase {
         $this->assertSame(0, $DB->count_records('block_exaportitemblock'));
     }
 
+    public function test_only_embedded_content_omits_standalone_section_margins(): void {
+        global $USER;
+        $pending = pending_item_content_blocks::render_section(['blocks' => [], 'removed' => []], null, SITEID);
+        $this->assertStringContainsString('class="exaport-item-content-section"', $pending);
+        $saved = new \block_exaport\output\item_content_blocks([], null, (int)$USER->id, false);
+        $standalone = $this->renderer()->render($saved);
+        $this->assertStringContainsString('class="exaport-item-content-section mt-4 mb-4"', $standalone);
+    }
+
     public function test_pending_file_preview_uses_owned_draft_bytes_and_stable_key(): void {
         global $DB, $USER;
         $draftid = file_get_unused_draft_itemid();

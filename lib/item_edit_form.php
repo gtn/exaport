@@ -186,14 +186,10 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,
             array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
                 'accepted_types' => array('image', 'web_image')));
-        $mform->add_exaport_help_button('iconfile', 'forms.item.iconfile');
+        $mform->add_exaport_help_button('iconfile', 'iconfile');
 
         if ($sections['content']) {
-            $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
-            $mform->setExpanded('itemcontent', true);
-
             if ($pendingeditor) {
-                $mform->addHelpButton('itemcontent', 'itemeditorpendinghint', 'block_exaport');
                 $initialstate = $this->_customdata['editorstate'];
                 $statejson = $this->optional_param('contentblocks', json_encode($initialstate), PARAM_RAW);
                 foreach (['pendingeditor' => 1, 'competencesmodified' => 0] as $name => $default) {
@@ -216,8 +212,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $html = \block_exaport\output\pending_item_content_blocks::render_section($state,
                     $this->_customdata['current'] ?: null, (int)$this->_customdata['course']->id,
                     !empty($this->_customdata['allowedit']));
-                $mform->addElement('static', 'editorcontent', '', $html);
-                $mform->getElement('editorcontent')->updateAttributes(['class' => 'w-100']);
             } else {
                 $contentblocks = $this->_customdata['itemcontentblocks'];
                 $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
@@ -229,7 +223,16 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                     true,
                     false
                 );
-                $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
+                $renderer = $PAGE->get_renderer('block_exaport');
+                $html = $renderer->render_from_template('block_exaport/item_content_blocks',
+                    array_merge($contentsection->export_for_template($renderer), ['embedded' => true]));
+            }
+            // Use the normal Moodle label/help/control columns, just like the thumbnail row above.
+            $mform->addElement('static', 'editorcontent', get_string('viewcontent', 'block_exaport'), $html);
+            // Fill the control's flex column without constraining the outer row's native gutter width.
+            $mform->getElement('editorcontent')->updateAttributes(['class' => 'flex-grow-1']);
+            if ($pendingeditor) {
+                $mform->addHelpButton('editorcontent', 'itemeditorpendinghint', 'block_exaport');
             }
         }
 

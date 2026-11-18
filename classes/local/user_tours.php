@@ -19,11 +19,11 @@ final class user_tours {
 
     /** Increase only the revision of a guide that should be replaced and shown again. */
     private const TOURS = [
-        // The pending editor changes both workflows. Replacements must be offered even
-        // to users who completed the original "save first" or immediate-save guides.
-        'upload-create' => ['file' => 'create_item.json', 'version' => 2],
-        'upload-content' => ['file' => 'add_file.json', 'version' => 2],
+        'item-content' => ['file' => 'item_content.json', 'version' => 1],
     ];
+
+    /** Keep obsolete identities recognisable so upgrades and uninstall remove their native completion data. */
+    private const RETIRED_TOURS = ['upload-create', 'upload-content'];
 
     /**
      * Add new guides and replace only guides with an older installed revision.
@@ -36,7 +36,7 @@ final class user_tours {
     public static function register(): void {
         global $DB;
 
-        $signature = hash('sha256', json_encode(self::TOURS));
+        $signature = hash('sha256', json_encode([self::TOURS, self::RETIRED_TOURS]));
         if (get_config('block_exaport', self::SIGNATURE_CONFIG) === $signature || !self::is_available()) {
             return;
         }
@@ -63,7 +63,8 @@ final class user_tours {
                 $pending = self::TOURS;
                 foreach (self::managed_tours() as $tour) {
                     $identity = $tour->get_config('block_exaport_tour');
-                    if ((int)$tour->get_config('block_exaport_tour_version', 0) < self::TOURS[$identity]['version']) {
+                    if (in_array($identity, self::RETIRED_TOURS, true) ||
+                            (int)$tour->get_config('block_exaport_tour_version', 0) < self::TOURS[$identity]['version']) {
                         // Moodle removes this tour's steps and completion preferences with it.
                         $tour->remove();
                     } else {
@@ -120,7 +121,8 @@ final class user_tours {
         foreach ($DB->get_records('tool_usertours_tours', null, 'id') as $record) {
             $config = json_decode($record->configdata);
             $identity = $config->block_exaport_tour ?? null;
-            if (is_string($identity) && isset(self::TOURS[$identity])) {
+            if (is_string($identity) &&
+                    (isset(self::TOURS[$identity]) || in_array($identity, self::RETIRED_TOURS, true))) {
                 $managed[(int)$record->id] = \tool_usertours\tour::load_from_record($record);
             }
         }

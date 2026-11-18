@@ -1,18 +1,18 @@
 {
   "name": "uploadtour_create_name,block_exaport",
   "description": "uploadtour_create_description,block_exaport",
-  "pathmatch": "/blocks/exaport/item.php%action=add%",
+  "pathmatch": "/blocks/exaport/item.php%",
   "enabled": 1,
   "endtourlabel": "",
   "displaystepnumbers": true,
-  "configdata": "{\"placement\":\"bottom\",\"orphan\":false,\"backdrop\":true,\"reflex\":false,\"filtervalues\":{\"cssselector\":[\"#exaport button.exaport-item-content-add-button\"]},\"block_exaport_tour\":\"upload-create\"}",
+  "configdata": "{\"placement\":\"bottom\",\"orphan\":false,\"backdrop\":true,\"reflex\":false,\"filtervalues\":{\"cssselector\":[\"#exaport button.exaport-item-content-add-button\"]},\"block_exaport_tour\":\"item-content\"}",
   "steps": [
     {
       "title": "uploadtour_title_title,block_exaport",
       "content": "uploadtour_title_content,block_exaport",
       "contentformat": 1,
       "targettype": 0,
-      "targetvalue": "#exaport #id_itemcontent",
+      "targetvalue": "#exaport #fitem_id_editorcontent",
       "sortorder": 0,
       "configdata": "{}"
     },

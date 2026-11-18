@@ -91,6 +91,8 @@ class pending_item_content_blocks extends item_content_blocks {
     /** Export the existing markup with stable editor keys and no immediate-save links. */
     public function export_for_template($output): array {
         $data = parent::export_for_template($output);
+        // The enclosing Moodle form row supplies spacing for pending content.
+        $data['embedded'] = true;
         foreach ($data['blocks'] as $index => &$row) {
             $row['key'] = (string)$this->states[$index]['key'];
             // The modal is part of this form. A fallback URL must not bypass its

@@ -333,12 +333,22 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertSame(0, $dom->query('//*[@data-region="submitted-group-selection"]')->length);
     }
 
-    public function test_pending_save_guidance_is_native_help_beside_the_content_heading(): void {
+    public function test_content_uses_a_normal_labelled_form_row_with_native_help(): void {
         $form = $this->form($this->customdata());
         $dom = $this->dom($form->render());
-        $icons = $dom->query('//*[@id="id_itemcontent"]/div[.//h3]/a'
-            . '[@data-toggle="popover" or @data-bs-toggle="popover"]');
+        $row = $dom->query('//*[@id="fitem_id_editorcontent"]')->item(0);
+        $this->assertNotNull($row);
+        $label = $dom->query('./div[contains(@class, "col-form-label")]', $row)->item(0);
+        $controls = $dom->query('./div[contains(@class, "felement")]', $row)->item(0);
+        $this->assertNotNull($label);
+        $this->assertNotNull($controls);
+        $this->assertStringContainsString(get_string('viewcontent', 'block_exaport'), $label->textContent);
+        $icons = $dom->query('.//a[@data-toggle="popover" or @data-bs-toggle="popover"]', $label);
         $this->assertSame(1, $icons->length);
+        $this->assertSame(1, $dom->query('.//section[contains(@class, "exaport-item-content-section")]', $controls)->length);
+        $this->assertSame(1, $dom->query('ancestor::fieldset[@id="id_mainsettings"]', $row)->length);
+        $this->assertSame(0, $dom->query('//*[@id="id_itemcontent" or @id="id_itemcontentcontainer"]')->length);
+        $this->assertSame(0, $dom->query('.//h2 | .//h3', $row)->length);
 
         // Moodle 4.5 and 5.2 use different Bootstrap attribute names for the same native help icon.
         $icon = $icons->item(0);
@@ -347,8 +357,17 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertSame(trim($help->text . ' ' . ($help->completedoclink ?? '')), trim($content));
         $this->assertSame(0, $dom->query('//*[@id="fitem_id_editorpendinghint"]'
             . ' | //*[@id="id_editorpendinghint"] | //*[@name="editorpendinghint"]')->length);
-        $container = $dom->query('//*[@id="id_itemcontentcontainer"]')->item(0);
-        $this->assertStringNotContainsString(trim(strip_tags($help->text)), $container->textContent);
+        $this->assertStringNotContainsString(trim(strip_tags($help->text)), $controls->textContent);
+    }
+
+    public function test_thumbnail_help_uses_the_actual_field_label(): void {
+        $dom = $this->dom($this->form($this->customdata())->render());
+        $icons = $dom->query('//*[@id="fitem_id_iconfile"]//div[contains(@class, "col-form-label")]'
+            . '//a[@data-toggle="popover" or @data-bs-toggle="popover"]');
+        $this->assertSame(1, $icons->length);
+        $help = get_formatted_help_string('iconfile', 'block_exaport', false);
+        $content = $icons->item(0)->getAttribute('data-bs-content') ?: $icons->item(0)->getAttribute('data-content');
+        $this->assertSame(trim($help->text . ' ' . ($help->completedoclink ?? '')), trim($content));
     }
 
     public function test_creation_offers_content_and_competencies_before_an_item_exists(): void {
@@ -359,7 +378,7 @@ final class item_pending_form_test extends \advanced_testcase {
         }
         $form = $this->form($this->customdata(null, true));
         $dom = $this->dom($form->render());
-        $this->assertSame(1, $dom->query('//*[@id="id_itemcontent"]')->length);
+        $this->assertSame(1, $dom->query('//*[@id="fitem_id_editorcontent"]')->length);
         $this->assertSame(1, $dom->query('//*[@id="id_itemcompetences"]')->length);
         $this->assertSame(1, $dom->query('//button[contains(@class,"exaport-item-content-add-button")]')->length);
         $this->assertSame(1, $dom->query('//*[@data-action="open-competence-picker"]')->length);

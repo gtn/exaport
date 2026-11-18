@@ -391,6 +391,10 @@ return [
         'Miniaturansicht',
         'Thumbnail',
     ],
+    'iconfile_help' => [
+        'Dieses Feld dient nur für ein Vorschaubild.',
+        'Use this field for a preview image.',
+    ],
     'firstnameshared' => [
         'Familienname',
         'First Name',
@@ -768,7 +772,7 @@ return [
         'Submit',
     ],
     'saveitem' => [
-        'Speichern und schließen',
+        'Speichern',
         'Save and close',
     ],
     'saveandkeepediting' => [
@@ -776,8 +780,8 @@ return [
         'Save and keep editing',
     ],
     'contentaftersave' => [
-        'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie die Seite, um alle Änderungen gemeinsam zu speichern.',
-        'Add documents through Content: choose +, then File. Apply updates the form; save the page to save all changes together.',
+        'Speichern Sie die Seite. Anschließend können Sie unter Inhalt Dateien hinzufügen.',
+        'Save the page, then add files under Content.',
     ],
     'disableditemwriteapi' => [
         'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.',
@@ -3814,7 +3818,7 @@ return [
         'Content added.',
     ],
     'editcontentblock' => [
-        null,
+        'Inhalt bearbeiten',
         'Edit content',
     ],
     'deletecontentblock' => [
@@ -4075,16 +4079,16 @@ return [
         'Upload a document',
     ],
     'uploadtour_title_content' => [
-        'Wählen Sie unter Inhalt zuerst + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Ihr Dokument wird erst gespeichert, wenn Sie die Seite speichern. Das Symbolbild dient als Vorschaubild.',
-        'In Content, choose +, then File. Upload your document and choose Apply to return to this form. Your document is only saved when you save the page. The icon image field is for a thumbnail.',
+        'Wählen Sie unter Inhalt + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Hinzufügen. Speichern Sie anschließend die Seite.',
+        'In Content, choose +, then File. Upload your file and choose Add. Save the page to keep your changes.',
     ],
     'uploadtour_save_title' => [
         'Ihre Seite speichern',
         'Save your page',
     ],
     'uploadtour_save_content' => [
-        'Dateien und Inhalte werden erst gespeichert, wenn Sie die Seite speichern. Wählen Sie Speichern und schließen, um alles einschließlich der Kompetenzen zu speichern. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.',
-        'Files and content are saved only when you save the page. Choose Save and close to save everything, including competencies. Cancel on this form discards unsaved changes.',
+        'Geben Sie Ihrer Seite einen Titel und wählen Sie Speichern. Damit speichern Sie die Seite und ihre Inhalte. Abbrechen verwirft Ihre ungespeicherten Änderungen.',
+        'Give your page a title, then choose Save and close to save the page and its content. Cancel discards unsaved changes.',
     ],
     'uploadtour_content_name' => [
         'Exaport: Dokumente unter Inhalt hinzufügen',
@@ -4115,11 +4119,23 @@ return [
         'Some page changes are missing or invalid. Your changes have not been saved.',
     ],
     'itemeditorpendinghint' => [
-        'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
-        'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.',
+        'Änderungen speichern',
+        'Saving your changes',
     ],
     'itemeditorlocked' => [
         'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.',
         'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.',
+    ],
+    'itemeditorcontentlabel' => [
+        'Hier den Hauptinhalt hinzufügen',
+        'Add the main content here',
+    ],
+    'itemeditorapplychanges' => [
+        'Änderungen übernehmen',
+        'Apply changes',
+    ],
+    'itemeditorpendinghint_help' => [
+        'Speichern Sie abschließend die Seite. Abbrechen verwirft ungespeicherte Änderungen.',
+        'Save the page when you are finished. Cancel discards unsaved changes.',
     ],
 ];

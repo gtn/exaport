@@ -183,11 +183,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             }
         }
 
-        $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,
-            array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
-                'accepted_types' => array('image', 'web_image')));
-        $mform->add_exaport_help_button('iconfile', 'forms.item.iconfile');
-
         if ($sections['content']) {
             $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
             $mform->setExpanded('itemcontent', true);
@@ -215,9 +210,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $html = \block_exaport\output\pending_item_content_blocks::render_section($state,
                     $this->_customdata['current'] ?: null, (int)$this->_customdata['course']->id,
                     !empty($this->_customdata['allowedit']));
-                $mform->addElement('static', 'editorcontent', '', $html);
-                $mform->getElement('editorcontent')->updateAttributes(['class' => 'w-100']);
-                $mform->addElement('static', 'editorpendinghint', '', get_string('itemeditorpendinghint', 'block_exaport'));
             } else {
                 $contentblocks = $this->_customdata['itemcontentblocks'];
                 $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
@@ -229,7 +221,15 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                     true,
                     false
                 );
-                $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
+                $renderer = $PAGE->get_renderer('block_exaport');
+                $html = $renderer->render_from_template('block_exaport/item_content_blocks',
+                    array_merge($contentsection->export_for_template($renderer), ['embedded' => true]));
+            }
+            $mform->addElement('static', 'editorcontent', get_string('itemeditorcontentlabel', 'block_exaport'), $html);
+            // Fill Moodle's control column without changing the form row's width.
+            $mform->getElement('editorcontent')->updateAttributes(['class' => 'flex-grow-1']);
+            if ($pendingeditor) {
+                $mform->addHelpButton('editorcontent', 'itemeditorpendinghint', 'block_exaport');
             }
         }
 
@@ -258,6 +258,12 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->add_exaport_help_button($textareafield . '_editor', 'forms.item.' . $textareafield . '_editor');
             }
         }
+
+        // A thumbnail is optional presentation metadata.
+        $mform->addElement('filemanager', 'iconfile', get_string('iconfile', 'block_exaport'), null,
+            array('subdirs' => false, 'maxfiles' => 1, 'maxbytes' => $CFG->block_exaport_max_uploadfile_size,
+                'accepted_types' => array('image', 'web_image')));
+        $mform->add_exaport_help_button('iconfile', 'iconfile');
 
         // Sharing (direct item share: users and groups/cohorts).
         if (has_capability('block/exaport:shareintern', context_system::instance())) {

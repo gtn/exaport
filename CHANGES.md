@@ -1,3 +1,8 @@
+### v5.2 (2026111800) ###
+* Clarify content-dialog actions and upload instructions in English, German, Dutch and French; show saving guidance in field help.
+* Use one upload tour for creating and editing items, with shared completion.
+* Place Thumbnail at the end of Metadata, after Results and learnings.
+
 ### v5.2 (2026111601) ###
 * Content and competency changes now remain pending until the main item Save, including when creating an item.
 * Save only applied content blocks and competency selections, preserving untouched changes from other clients. Later saves replace earlier edits to the same block.

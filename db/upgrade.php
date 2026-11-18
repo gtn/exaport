@@ -1645,5 +1645,11 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026111601, 'exaport');
     }
 
+    if ($oldversion < 2026111800) {
+        // Replace the separate create/edit guides with one guide and one native completion record per user.
+        \core\task\manager::queue_adhoc_task(new \block_exaport\task\register_user_tours(), true);
+        upgrade_block_savepoint(true, 2026111800, 'exaport');
+    }
+
     return $result;
 }

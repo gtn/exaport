@@ -110,6 +110,7 @@ $string['explainingsharefile'] = 'To allow a participant to see the file, click 
 $string['explainingsharenote'] = 'To allow a participant to see the note, click on their name and then click on Save Changes.  You can choose more than one participant.';
 $string['file'] = 'File';
 $string['iconfile'] = 'Thumbnail';
+$string['iconfile_help'] = 'Use this field for a preview image.';
 $string['firstnameshared'] = 'First Name';
 $string['go'] = 'Go!';
 $string['hidesummary'] = '(hide summary)';
@@ -211,7 +212,7 @@ $string['gradeitem'] = 'Grade the item';
 $string['submititem'] = 'Submit';
 $string['saveitem'] = 'Save and close';
 $string['saveandkeepediting'] = 'Save and keep editing';
-$string['contentaftersave'] = 'Add documents through Content: choose +, then File. Apply updates the form; save the page to save all changes together.';
+$string['contentaftersave'] = 'Save the page, then add files under Content.';
 $string['disableditemwriteapi'] = 'This legacy item write service is disabled. Use the structured content interface.';
 
 // === Notes.
@@ -1180,9 +1181,9 @@ $string['linkedbadgeexpires'] = 'Expires: {$a}';
 $string['uploadtour_create_name'] = 'Exaport: Upload a document';
 $string['uploadtour_create_description'] = 'Explains where to upload documents and how to save a portfolio page with its content.';
 $string['uploadtour_title_title'] = 'Upload a document';
-$string['uploadtour_title_content'] = 'In Content, choose +, then File. Upload your document and choose Apply to return to this form. Your document is only saved when you save the page. The icon image field is for a thumbnail.';
+$string['uploadtour_title_content'] = 'In Content, choose +, then File. Upload your file and choose Add. Save the page to keep your changes.';
 $string['uploadtour_save_title'] = 'Save your page';
-$string['uploadtour_save_content'] = 'Files and content are saved only when you save the page. Choose Save and close to save everything, including competencies. Cancel on this form discards unsaved changes.';
+$string['uploadtour_save_content'] = 'Give your page a title, then choose Save and close to save the page and its content. Cancel discards unsaved changes.';
 $string['uploadtour_content_name'] = 'Exaport: Add documents through Content';
 $string['uploadtour_content_description'] = 'Shows how to add documents and save content changes.';
 $string['uploadtour_content_title'] = 'Add content to your page';
@@ -1191,6 +1192,11 @@ $string['uploadtour_file_title'] = 'Upload a document';
 $string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.';
 
 $string['itemeditorinvalid'] = 'Some page changes are missing or invalid. Your changes have not been saved.';
-$string['itemeditorpendinghint'] = 'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.';
+$string['itemeditorpendinghint'] = 'Saving your changes';
 $string['itemeditorlocked'] = 'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.';
 $string['deletecontentblockpendingconfirm'] = 'Remove this content block? The removal takes effect when you save the page. Cancel on the page form discards the removal.';
+
+// Pending content actions and saving help.
+$string['itemeditorcontentlabel'] = 'Add the main content here';
+$string['itemeditorapplychanges'] = 'Apply changes';
+$string['itemeditorpendinghint_help'] = 'Save the page when you are finished. Cancel discards unsaved changes.';

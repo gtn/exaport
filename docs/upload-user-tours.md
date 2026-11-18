@@ -1,40 +1,36 @@
-# Document-upload User tours
+# Document-upload User tour
 
 Exaport uses Moodle's native User tours tool to explain the document-upload
-workflow. Both guides have two steps and use Moodle's native tour navigation and
-End tour controls. They do not submit forms or upload files for the user.
+workflow. One guide has two steps and uses Moodle's native tour navigation and
+End tour controls. It does not submit forms or upload files for the user.
 
-* **Upload a document** appears on the page creation form. It points to
-  **Content** and **Save and close**, explaining how to upload a document, apply
-  the dialog and save the page to keep the upload.
-* **Add documents through Content** appears in the page editor when the
-  Content add button is available. It points to Content and the **+** button,
-  explaining how to choose **File**, apply the upload dialog, then save the page.
+**Upload a document** appears on both the creation and editing forms. It points
+to the **Content** form row and **Save and close**, explaining how to upload a
+document, choose **Add** in the dialog and save the page to keep the upload.
 
-Both guides explain that **Apply** updates the form while the main **Save** saves
-the page, content and competencies together. Cancelling the main form discards
-its pending changes. The icon image field remains a thumbnail field.
+Content dialogs use **Add** for new blocks and **Apply changes** for edits.
+The main **Save** saves the page, content and competencies together. Cancelling
+the main form discards its pending changes.
 
-The guides apply across courses, including creation in Shared Categories. The
-second guide is excluded when a page cannot be edited. Assignment imports,
-read-only shared pages and other Exaport pages are outside their URL
-matches. The permanent hint on the page creation form also explains where to
-upload documents.
+The guide applies across courses, including creation in Shared Categories. Its
+item-page URL match and Content add-button filter exclude read-only pages and
+other screens without the editor. The **Content** help icon explains saving and
+cancelling. Thumbnail has its own help icon in Metadata.
 
 ## Administration and completion
 
-Manage the guides under **Site administration > Appearance > User tours**.
+Manage the guide under **Site administration > Appearance > User tours**.
 The native administration UI supports editing, disabling, reordering, exporting
 and deleting guides, and adding role, course or theme restrictions. Exaport owns
 its shipped definitions: a deliberate revision increase replaces that guide,
 including any local changes. Standard Moodle tour priority applies when another
 tour also matches the same page.
 
-Moodle records completion separately for each guide and user. Completing the
-creation guide does not complete the content guide. Users can replay a guide
+Moodle records completion per guide and user. Completing this guide while
+creating a page also completes it for editing, and vice versa. Users can replay it
 with Moodle's **Reset user tour on this page** link. Administrators can reset a
 guide for all users when they want to explain a significant change again.
-English, German and Dutch text is supplied through Exaport's language strings.
+English, German, Dutch and French text is supplied through Exaport's language strings.
 
 ## Registration and lifecycle
 
@@ -60,12 +56,14 @@ and independent revision. Exaport imports definitions through the public
 Each installed guide stores `block_exaport_tour` and
 `block_exaport_tour_version` in its existing `tool_usertours_tours.configdata`
 field. There are no per-tour entries in `config_plugins` and no custom completion
-table. Moodle owns the per-user completion and replay preferences. Both guides
-are at revision 2 because users who completed the original two-step or
-immediate-save workflow must see the new instructions again.
+table. Moodle owns the per-user completion and replay preferences. The common
+guide has identity `item-content` and revision 1. Upgrade 2026111800 retires
+`upload-create` and `upload-content` through Moodle's API, removing those old
+guides and their completion preferences. The combined guide is then offered once.
 
 Synchronisation follows Moodle's own shipped-tour pattern:
 
+* Retired Exaport guides are removed through Moodle's API; unrelated guides remain.
 * A missing guide is imported at its declared revision.
 * A guide whose installed revision is current is left untouched, including its
   ID, steps, enabled state and user completion. Newer installed revisions are
@@ -75,8 +73,9 @@ Synchronisation follows Moodle's own shipped-tour pattern:
   that guide's completion preferences, allowing users to see the revised guide.
 
 The transaction covers removals, imports and the quick-check marker. A single
-`usertourssignature` value in `config_plugins` records a hash of the declared tour
-list and revisions. It lets repeated task executions skip the synchronisation work.
+`usertourssignature` value in `config_plugins` records a hash of the active guide
+definitions and retired identities. It lets repeated task executions skip the
+synchronisation work.
 The hash changes automatically when a guide is added or its revision increases;
 there is no second version number to bump manually. Missing guides, including
 ones deleted locally, are recreated on the next catalogue synchronisation.
@@ -97,14 +96,12 @@ increase only that guide's `version`. For example:
 
 ```php
 private const TOURS = [
-    'upload-create' => ['file' => 'create_item.json', 'version' => 2],
-    'upload-content' => ['file' => 'add_file.json', 'version' => 3],
+    'item-content' => ['file' => 'item_content.json', 'version' => 2],
 ];
 ```
 
-Here only the content guide is replaced on existing installations. The creation
-guide and its completion remain unchanged. Fresh installations receive the
-current definition of both guides.
+This replaces the common guide on existing installations and offers it again.
+Fresh installations receive its current definition.
 
 For either change, bump the plugin version and add the normal upgrade savepoint
 that queues `\block_exaport\task\register_user_tours` with

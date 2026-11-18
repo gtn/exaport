@@ -392,7 +392,8 @@ if ($exacompactive && ($pendingeditor || $existing)) {
         'itemId' => (int)($existing->id ?? 0),
         'courseId' => (int)$courseid,
         'title' => get_string('opencomps', 'block_exaport'),
-        'saveLabel' => $pendingeditor ? get_string('apply') : get_string('savechanges'),
+        'saveLabel' => $pendingeditor ? get_string('itemeditorapplychanges', 'block_exaport')
+            : get_string('savechanges'),
         'pending' => $pendingeditor,
     ]]);
 }
@@ -403,9 +404,11 @@ if ($itemeditsections['content'] && $allowedit) {
         'courseId' => (int)$courseid,
         'itemId' => (int)($existing->id ?? 0),
         'title' => get_string('editcontentblock', 'block_exaport'),
+        'addTitle' => get_string('addcontentblock', 'block_exaport'),
+        'addLabel' => get_string('add', 'block_exaport'),
         'deleteTitle' => get_string('deletecontentblock', 'block_exaport'),
         'deleteLabel' => get_string('delete'),
-        'saveLabel' => get_string('apply'),
+        'saveLabel' => $pendingeditor ? get_string('itemeditorapplychanges', 'block_exaport') : get_string('save'),
         'pending' => $pendingeditor,
     ]]);
 }

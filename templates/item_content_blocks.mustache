@@ -1,7 +1,7 @@
 {{!
     Shared content section for saved items and the pending item editor.
 }}
-<section class="exaport-item-content-section mt-4 mb-4"
+<section class="exaport-item-content-section{{^embedded}} mt-4 mb-4{{/embedded}}"
     {{#showheading}}aria-labelledby="exaport-item-content-heading"{{/showheading}}
     {{^showheading}}aria-label="{{heading}}"{{/showheading}}>
     {{#showheading}}

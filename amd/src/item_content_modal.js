@@ -106,11 +106,23 @@ const open = (trigger, config) => {
         args.pendingblock = JSON.stringify(block);
         args.blockid = block.id;
     }
+    let title = config.title;
+    let saveLabel = config.saveLabel;
+    if (args.operation === 'delete') {
+        title = config.deleteTitle;
+        saveLabel = config.deleteLabel;
+    } else if (trigger.classList.contains('exaport-item-content-add')) {
+        // Unsaved blocks still have ID zero when edited; use the clicked action for the caption.
+        title = config.addTitle;
+        if (config.pending) {
+            saveLabel = config.addLabel;
+        }
+    }
     const modalForm = new ModalForm({
         formClass: 'block_exaport\\form\\item_content',
         args,
-        modalConfig: {title: trigger.dataset.operation === 'delete' ? config.deleteTitle : config.title},
-        saveButtonText: trigger.dataset.operation === 'delete' ? config.deleteLabel : config.saveLabel,
+        modalConfig: {title},
+        saveButtonText: saveLabel,
         returnFocus: trigger,
     });
 

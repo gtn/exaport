@@ -19,8 +19,10 @@ final class user_tours {
 
     /** Increase only the revision of a guide that should be replaced and shown again. */
     private const TOURS = [
-        'upload-create' => ['file' => 'create_item.json', 'version' => 1],
-        'upload-content' => ['file' => 'add_file.json', 'version' => 1],
+        // The pending editor changes both workflows. Replacements must be offered even
+        // to users who completed the original "save first" or immediate-save guides.
+        'upload-create' => ['file' => 'create_item.json', 'version' => 2],
+        'upload-content' => ['file' => 'add_file.json', 'version' => 2],
     ];
 
     /**

@@ -4,16 +4,20 @@ Exaport uses Moodle's native User tours tool to explain the document-upload
 workflow. Both guides have two steps and use Moodle's native tour navigation and
 End tour controls. They do not submit forms or upload files for the user.
 
-* **Create a page to upload a document** appears on the page creation form. It
-  points to the title and **Save and keep editing**, explaining that documents
-  are added after the page has been saved.
+* **Upload a document** appears on the page creation form. It points to
+  **Content** and **Save and close**, explaining how to upload a document, apply
+  the dialog and save the page to keep the upload.
 * **Add documents through Content** appears in the page editor when the
   Content add button is available. It points to Content and the **+** button,
-  explaining how to choose **File** and save the upload dialog.
+  explaining how to choose **File**, apply the upload dialog, then save the page.
+
+Both guides explain that **Apply** updates the form while the main **Save** saves
+the page, content and competencies together. Cancelling the main form discards
+its pending changes. The icon image field remains a thumbnail field.
 
 The guides apply across courses, including creation in Shared Categories. The
 second guide is excluded when a page cannot be edited. Assignment imports,
-read-only shared-item pages and other Exaport pages are outside their URL
+read-only shared pages and other Exaport pages are outside their URL
 matches. The permanent hint on the page creation form also explains where to
 upload documents.
 
@@ -40,9 +44,9 @@ plugin API calls to be deferred until all plugin schemas are current. The task
 imports new guides and replaces outdated guides after upgrade; the install and
 upgrade callbacks only queue it.
 
-Guides become available once cron successfully runs the queued task. Item-page
-requests do not perform registration. Deferring the import also handles a completely
-fresh Moodle installation, where blocks are installed before the User tours tool.
+Guides become available once cron successfully runs the queued task. Requests
+from the page editor do not perform registration. Deferring the import also handles
+a completely fresh Moodle installation, where blocks are installed before the User tours tool.
 A lock serialises concurrent registration attempts. If it cannot be obtained,
 the task throws Moodle's lock-timeout exception so the task runner retains it
 for a retry.
@@ -56,7 +60,9 @@ and independent revision. Exaport imports definitions through the public
 Each installed guide stores `block_exaport_tour` and
 `block_exaport_tour_version` in its existing `tool_usertours_tours.configdata`
 field. There are no per-tour entries in `config_plugins` and no custom completion
-table. Moodle owns the per-user completion and replay preferences.
+table. Moodle owns the per-user completion and replay preferences. Both guides
+are at revision 2 because users who completed the original two-step or
+immediate-save workflow must see the new instructions again.
 
 Synchronisation follows Moodle's own shipped-tour pattern:
 
@@ -91,8 +97,8 @@ increase only that guide's `version`. For example:
 
 ```php
 private const TOURS = [
-    'upload-create' => ['file' => 'create_item.json', 'version' => 1],
-    'upload-content' => ['file' => 'add_file.json', 'version' => 2],
+    'upload-create' => ['file' => 'create_item.json', 'version' => 2],
+    'upload-content' => ['file' => 'add_file.json', 'version' => 3],
 ];
 ```
 

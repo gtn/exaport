@@ -20,6 +20,7 @@ require_once(__DIR__ . '/lib/item_competence_helpers.php');
 
 use function block_exaport\common\print_error;
 use block_exaport\item_category_helper;
+use block_exaport\local\item_editor;
 
 const POSSIBLE_IFRAME_FIELDS = ['intro', 'project_description', 'project_process', 'project_result'];
 
@@ -240,12 +241,26 @@ if ($existing) {
     $itemcontentaddurl = null;
 }
 
-// Sections which manage records related to an item need its database id and are therefore edit-only.
-// Keep these decisions together so that further independently persisted sections can be added explicitly.
+$submitted = data_submitted();
+$submittedpending = $submitted && optional_param('pendingeditor', 0, PARAM_BOOL);
+$pendingeditor = ($allowedit || $submittedpending) && in_array($action, ['add', 'edit'], true);
+$editorstate = $pendingeditor ? item_editor::initial_state($existing ?: null) : null;
+if ($pendingeditor && $submittedpending) {
+    foreach (POSSIBLE_IFRAME_FIELDS as $field) {
+        // Rebuild the submitted input names after an error, even if the saved HTML mode changed.
+        if (isset($submitted->{$field . '_editor'})) {
+            $usetextareas[$field] = false;
+        } else if (isset($submitted->{$field})) {
+            $usetextareas[$field] = true;
+        }
+    }
+}
+
+// Both screens own the same pending state; only the main form creates or updates records.
 $itemeditsections = [
     'mainsettings' => true,
-    'content' => (bool)$existing,
-    'competences' => (bool)$existing && $exacompactive,
+    'content' => $pendingeditor || (bool)$existing,
+    'competences' => ($pendingeditor || (bool)$existing) && $exacompactive,
 ];
 
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type,
@@ -253,7 +268,8 @@ $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' 
         'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
         'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
         'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id),
-        'itemeditsections' => $itemeditsections));
+        'itemeditsections' => $itemeditsections, 'pendingeditor' => $pendingeditor,
+        'editorstate' => $editorstate));
 
 if ($editform->is_cancelled()) {
     redirect($returnurl);
@@ -261,7 +277,7 @@ if ($editform->is_cancelled()) {
     die("nosubmitbutton");
 } else if (($fromform = $editform->get_data()) && $allowedit) {
     require_sesskey();
-    block_exaport_require_loaded_share_users(
+    block_exaport_require_loaded_share_selection(
         (bool)optional_param('shareenabled', 0, PARAM_INT), optional_param('shareall', 0, PARAM_INT)
     );
 
@@ -269,27 +285,25 @@ if ($editform->is_cancelled()) {
     $fromform->categoryids = $categoryids;
     $keepediting = !empty($fromform->saveandkeepediting);
 
-    switch ($action) {
-        case 'add':
-            $fromform->type = $type;
-
-            block_exaport_do_add($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
-            break;
-
-        case 'edit':
-            $fromform->type = $type;
-            if (!$existing) {
-                print_error("bookmarknotfound", "block_exaport");
-            }
-
-            block_exaport_do_edit($fromform, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas);
-            break;
-
-        default:
-            print_error("unknownaction", "block_exaport");
+    $saved = false;
+    try {
+        $fromform->type = $type;
+        $fromform->id = item_editor::commit((int)$id, (int)$courseid, $fromform,
+            function(stdClass $post) use ($action, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas): int {
+                if ($action === 'add') {
+                    block_exaport_do_add($post, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas, true);
+                } else {
+                    block_exaport_do_edit($post, $editform, $returnurl, $courseid, $textfieldoptions, $usetextareas, true);
+                }
+                return (int)$post->id;
+            }, $exacompactive);
+        $saved = true;
+    } catch (moodle_exception $exception) {
+        // A save error or quota change must not replace the submitted form with fresh defaults.
+        $editform->set_editor_error($exception->getMessage());
     }
 
-    if ($keepediting) {
+    if ($saved && $keepediting) {
         $editparams = [
             'courseid' => $courseid,
             'id' => (int)$fromform->id,
@@ -306,7 +320,9 @@ if ($editform->is_cancelled()) {
         redirect(new moodle_url('/blocks/exaport/item.php', $editparams));
     }
 
-    redirect($returnurl);
+    if ($saved) {
+        redirect($returnurl);
+    }
 }
 
 $straction = "";
@@ -371,12 +387,13 @@ switch ($action) {
         print_error("unknownaction", "block_exaport");
 }
 
-if ($exacompactive && $existing) {
+if ($exacompactive && ($pendingeditor || $existing)) {
     $PAGE->requires->js_call_amd('block_exaport/item_competences', 'init', [[
-        'itemId' => (int)$existing->id,
+        'itemId' => (int)($existing->id ?? 0),
         'courseId' => (int)$courseid,
         'title' => get_string('opencomps', 'block_exaport'),
-        'saveLabel' => get_string('savechanges'),
+        'saveLabel' => $pendingeditor ? get_string('apply') : get_string('savechanges'),
+        'pending' => $pendingeditor,
     ]]);
 }
 
@@ -384,17 +401,21 @@ if ($itemeditsections['content'] && $allowedit) {
     $PAGE->requires->js_call_amd('block_exaport/item_content_modal', 'init', [[
         'contextId' => $context->id,
         'courseId' => (int)$courseid,
-        'itemId' => (int)$existing->id,
+        'itemId' => (int)($existing->id ?? 0),
         'title' => get_string('editcontentblock', 'block_exaport'),
         'deleteTitle' => get_string('deletecontentblock', 'block_exaport'),
         'deleteLabel' => get_string('delete'),
-        'saveLabel' => get_string('save'),
+        'saveLabel' => get_string('apply'),
+        'pending' => $pendingeditor,
     ]]);
 }
 
 block_exaport_print_header("bookmarks" . block_exaport_get_plural_item_type($backtype), $action);
 
 $editform->set_data($post);
+if ($submittedpending && !$allowedit) {
+    echo $OUTPUT->notification(get_string('itemeditorlocked', 'block_exaport'), 'error');
+}
 if (has_capability('block/exaport:shareintern', context_system::instance())) {
     // Translations.
     $translations = array(
@@ -424,12 +445,18 @@ echo $OUTPUT->footer($course);
 /**
  * Update item in the database
  */
-function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas) {
+function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas, $filesvalidated = false) {
     global $CFG, $USER, $DB;
 
     $existing = $DB->get_record('block_exaportitem', ['id' => $post->id, 'userid' => $USER->id], '*', MUST_EXIST);
 
     $post->timemodified = time();
+    if ($filesvalidated) {
+        // The aggregate validator already checked new uploads and retained legacy files. Avoid core
+        // silently truncating grandfathered attachments after that successful validation.
+        $textfieldoptions['maxfiles'] = -1;
+        $textfieldoptions['maxbytes'] = 0;
+    }
     foreach ($usetextareas as $fieldname => $usetextarea) {
         if (!$usetextarea) {
             $post->{$fieldname . 'format'} = FORMAT_HTML;
@@ -443,11 +470,10 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
     // Icon for item.
     // Checking userquoata.
     $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->iconfile);
-    if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
-        block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)
-    ) {
+    if ($filesvalidated || (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
+        block_exaport_get_maxfilesize_by_draftid_check($post->iconfile))) {
         file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id,
-            array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+            array('maxbytes' => $filesvalidated ? 0 : $CFG->block_exaport_max_uploadfile_size));
     };
 
     $updaterecord = block_exaport_item_parent_record($post, $existing);
@@ -477,12 +503,16 @@ function block_exaport_do_edit($post, $blogeditform, $returnurl, $courseid, $tex
 /**
  * Write a new item into database
  */
-function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas) {
+function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $textfieldoptions, $usetextareas, $filesvalidated = false) {
     global $CFG, $USER, $DB;
 
     $post->userid = $USER->id;
     $post->timemodified = time();
     $post->courseid = $courseid;
+    if ($filesvalidated) {
+        $textfieldoptions['maxfiles'] = -1;
+        $textfieldoptions['maxbytes'] = 0;
+    }
 
     $post->type = $post->type === 'mixed' ? 'note' : $post->type;
     $post->url = '';
@@ -538,11 +568,10 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
         if ($post->iconfile) {
             // Checking userquoata.
             $uploadfilesizes = block_exaport_get_filessize_by_draftid($post->iconfile);
-            if (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
-                block_exaport_get_maxfilesize_by_draftid_check($post->iconfile)
-            ) {
+            if ($filesvalidated || (block_exaport_file_userquotecheck($uploadfilesizes, $post->id) &&
+                block_exaport_get_maxfilesize_by_draftid_check($post->iconfile))) {
                 file_save_draft_area_files($post->iconfile, $context->id, 'block_exaport', 'item_iconfile', $post->id,
-                    array('maxbytes' => $CFG->block_exaport_max_uploadfile_size));
+                    array('maxbytes' => $filesvalidated ? 0 : $CFG->block_exaport_max_uploadfile_size));
             }
         }
 

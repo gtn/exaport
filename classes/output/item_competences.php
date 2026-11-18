@@ -83,12 +83,16 @@ class item_competences implements renderable, templatable {
         return $this->export_summary_from_nodes($nodes);
     }
 
-    /** Include persisted assignments outside the current tree as removable, selected nodes. */
+    /** Include permitted former assignments, including unchecked pending choices. */
     private function export_nodes_for_selection(array $tree, array $selectedids): array {
         global $DB;
 
         $nodes = $this->export_nodes($tree, $selectedids);
-        $missingids = array_diff($selectedids, block_exaport_competence_tree_descriptorids($tree));
+        // Pending forms can uncheck former assignments without removing the saved records yet.
+        // Keep those trusted candidates selectable, while only the pending selection is checked.
+        $candidateids = block_exaport_normalize_competenceids(
+            array_merge($selectedids, $this->item->availablecompids_array ?? []));
+        $missingids = array_diff($candidateids, block_exaport_competence_tree_descriptorids($tree));
         if (!$missingids || empty($this->item->id)) {
             return $nodes;
         }
@@ -110,7 +114,7 @@ class item_competences implements renderable, templatable {
                 'title' => $descriptors[$id]->title ?? get_string('unavailablecompetence', 'block_exaport'),
                 'isdescriptor' => true,
                 'isgroup' => false,
-                'checked' => true,
+                'checked' => in_array((int)$id, $selectedids, true),
                 'children' => [],
                 'haschildren' => false,
             ];

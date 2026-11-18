@@ -776,8 +776,8 @@ return [
         'Save and keep editing',
     ],
     'contentaftersave' => [
-        'Um Dokumente hochzuladen, wählen Sie "Speichern und weiter bearbeiten". Wählen Sie dann unter Inhalt zuerst + und anschließend Datei.',
-        'To upload documents, choose "Save and keep editing". Then, in Content, choose + and File.',
+        'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie die Seite, um alle Änderungen gemeinsam zu speichern.',
+        'Add documents through Content: choose +, then File. Apply updates the form; save the page to save all changes together.',
     ],
     'disableditemwriteapi' => [
         'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.',
@@ -3825,6 +3825,10 @@ return [
         null,
         'Delete this content block? Its files will also be permanently deleted.',
     ],
+    'deletecontentblockpendingconfirm' => [
+        'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern der Seite wirksam. Abbrechen im Seitenformular verwirft die Entfernung.',
+        'Remove this content block? The removal takes effect when you save the page. Cancel on the page form discards the removal.',
+    ],
     'privacy:metadata:block_exaportitemblock' => [
         'Geordnete Inhalte eines Portfolioeintrags.',
         'Ordered content stored in a portfolio item.',
@@ -3945,6 +3949,14 @@ return [
         'Die Empfängerliste ist noch nicht vollständig geladen. Bitte warten Sie oder laden Sie die Seite neu, bevor Sie speichern.',
         'The recipient list is incomplete. Please wait for it to load, or reload the page before saving.',
     ],
+    'sharing_load_groups_error' => [
+        'Die Gruppenliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.',
+        'The group list could not be loaded. Please try again.',
+    ],
+    'sharing_groups_not_ready' => [
+        'Die Gruppenauswahl ist noch nicht geladen. Bitte warten Sie oder versuchen Sie es erneut, bevor Sie speichern.',
+        'The group selection is not ready. Please wait for it to load, or retry loading it before saving.',
+    ],
 
     'exacompupdaterequired' => [
         'Exaport kann mit dem vorhandenen Exacomp nicht installiert oder aktualisiert werden. Bitte aktualisieren Sie zuerst den Exacomp-Code auf Version {$a} oder neuer und starten Sie das Moodle-Upgrade erneut. Exaport kann auch ohne Exacomp verwendet werden.',
@@ -4051,36 +4063,63 @@ return [
     'linkedbadgeexpires' => ['Gültig bis: {$a}', 'Expires: {$a}'],
     // Document-upload User tours.
     'uploadtour_create_name' => [
-        'Exaport: Eine Seite zum Hochladen eines Dokuments erstellen',
-        'Exaport: Create a page to upload a document',
+        'Exaport: Ein Dokument hochladen',
+        'Exaport: Upload a document',
     ],
     'uploadtour_create_description' => [
-        'Erklärt, warum Dokumente erst nach dem Speichern einer neuen Portfolio-Seite hinzugefügt werden.',
-        'Explains why documents are added after saving a new portfolio page.',
+        'Erklärt, wo Sie Dokumente hochladen und wie Sie eine Portfolio-Seite mit ihren Inhalten speichern.',
+        'Explains where to upload documents and how to save a portfolio page with its content.',
     ],
-    'uploadtour_title_title' => ['Mit einem Titel beginnen', 'Start with a title'],
+    'uploadtour_title_title' => [
+        'Ein Dokument hochladen',
+        'Upload a document',
+    ],
     'uploadtour_title_content' => [
-        'Geben Sie Ihrer Seite einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern der Seite hinzu.',
-        'Give your page a title and select its category. You will add your document after saving the page.',
+        'Wählen Sie unter Inhalt zuerst + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Ihr Dokument wird erst gespeichert, wenn Sie die Seite speichern. Das Symbolbild dient als Vorschaubild.',
+        'In Content, choose +, then File. Upload your document and choose Apply to return to this form. Your document is only saved when you save the page. The icon image field is for a thumbnail.',
     ],
-    'uploadtour_save_title' => ['Zuerst speichern, dann hochladen', 'Save first, then upload'],
+    'uploadtour_save_title' => [
+        'Ihre Seite speichern',
+        'Save your page',
+    ],
     'uploadtour_save_content' => [
-        'Wählen Sie "Speichern und weiter bearbeiten", um die Seite zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.',
-        'Choose "Save and keep editing" to create the page and open its Content section. The icon image field is for a thumbnail; add documents through Content.',
+        'Dateien und Inhalte werden erst gespeichert, wenn Sie die Seite speichern. Wählen Sie Speichern und schließen, um alles einschließlich der Kompetenzen zu speichern. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.',
+        'Files and content are saved only when you save the page. Choose Save and close to save everything, including competencies. Cancel on this form discards unsaved changes.',
     ],
-    'uploadtour_content_name' => ['Exaport: Dokumente unter Inhalt hinzufügen', 'Exaport: Add documents through Content'],
+    'uploadtour_content_name' => [
+        'Exaport: Dokumente unter Inhalt hinzufügen',
+        'Exaport: Add documents through Content',
+    ],
     'uploadtour_content_description' => [
-        'Zeigt, wo Dokumente auf einer gespeicherten, bearbeitbaren Portfolio-Seite hochgeladen werden.',
-        'Shows where to upload documents to a saved, editable portfolio page.',
+        'Zeigt, wie Dokumente hinzugefügt und Inhaltsänderungen gespeichert werden.',
+        'Shows how to add documents and save content changes.',
     ],
-    'uploadtour_content_title' => ['Hier werden Dokumente hinzugefügt', 'Your documents go here'],
+    'uploadtour_content_title' => [
+        'Inhalte zu Ihrer Seite hinzufügen',
+        'Add content to your page',
+    ],
     'uploadtour_content_content' => [
-        'Unter Inhalt fügen Sie dieser Seite Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten der Seite ergänzen.',
-        'Use Content to add documents, text and links to this page. You can add more content later by editing the page.',
+        'Unter Inhalt fügen Sie Dokumente, Texte und Links hinzu. Änderungen werden erst mit der Seite gespeichert. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.',
+        'Use Content for documents, text and links. Changes are saved only when you save the page. Cancel on this form discards unsaved changes.',
     ],
-    'uploadtour_file_title' => ['Datei zum Hochladen eines Dokuments wählen', 'Choose File to upload a document'],
+    'uploadtour_file_title' => [
+        'Ein Dokument hochladen',
+        'Upload a document',
+    ],
     'uploadtour_file_content' => [
-        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie die Seite fertig bearbeitet haben.',
-        'Choose +, then File. Upload your document and save the file dialog. Content is saved immediately; use "Save and close" when you have finished editing the page.',
+        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.',
+        'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.',
+    ],
+    'itemeditorinvalid' => [
+        'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.',
+        'Some page changes are missing or invalid. Your changes have not been saved.',
+    ],
+    'itemeditorpendinghint' => [
+        'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.',
+        'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.',
+    ],
+    'itemeditorlocked' => [
+        'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.',
+        'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.',
     ],
 ];

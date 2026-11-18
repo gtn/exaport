@@ -380,7 +380,7 @@ if ($editform->is_cancelled()) {
     die("nosubmitbutton");
 } else if ($formview = $editform->get_data()) {
     if ($type === 'share') {
-        block_exaport_require_loaded_share_users(
+        block_exaport_require_loaded_share_selection(
             (bool)optional_param('shareenabled', 0, PARAM_INT) && (bool)optional_param('internaccess', 0, PARAM_INT),
             optional_param('shareall', 0, PARAM_INT)
         );

@@ -14,19 +14,34 @@
 import ModalForm from 'core_form/modalform';
 import * as Templates from 'core/templates';
 import Notification from 'core/notification';
+import * as FormChangeChecker from 'core_form/changechecker';
 
-/** Synchronize custom tree checkboxes with the registered dynamic-form value. */
+/**
+ * Synchronize custom tree checkboxes with the registered dynamic-form value.
+ *
+ * @param {HTMLElement} picker Competency picker inside the modal
+ */
 export const synchronizeSelection = picker => {
     const field = picker.closest('form').querySelector('[name="competenceids"]');
     field.value = Array.from(picker.querySelectorAll('[data-region="competence-checkbox"]:checked'))
         .map(checkbox => checkbox.value).join(',');
 };
 
-/** Replace the server-rendered selected-competences summary. */
+/**
+ * Replace the server-rendered selected-competences summary.
+ *
+ * @param {HTMLElement} section Competency section
+ * @param {string} content Rendered summary HTML
+ * @returns {Array} Inserted summary nodes
+ */
 export const replaceSummary = (section, content) => Templates.replaceNode(
     section.querySelector('[data-region="competence-summary"]'), content, '');
 
-/** Register competency tree interactions and the Moodle dynamic-form launcher. */
+/**
+ * Register competency tree interactions and the Moodle dynamic-form launcher.
+ *
+ * @param {Object} config Main item form configuration
+ */
 export const init = config => {
     document.addEventListener('click', event => {
         const treeAction = event.target.closest('[data-action="expand-competences"], [data-action="collapse-competences"]');
@@ -44,19 +59,37 @@ export const init = config => {
         }
         event.preventDefault();
         const section = trigger.closest('[data-region="item-competences"]');
+        const form = trigger.closest('form');
+        const args = {courseid: config.courseId, itemid: config.itemId};
+        if (config.pending) {
+            args.pending = 1;
+            args.selectedids = form.querySelector('[name="competenceids"]').value;
+        }
         const modalForm = new ModalForm({
             formClass: 'block_exaport\\form\\item_competences',
-            args: {courseid: config.courseId, itemid: config.itemId},
+            args,
             modalConfig: {title: config.title, large: true},
             saveButtonText: config.saveLabel,
             returnFocus: trigger,
         });
         modalForm.addEventListener(modalForm.events.FORM_SUBMITTED, submitted => {
-          try {
-            replaceSummary(section, submitted.detail.content);
-          } catch (error) {
-            Notification.exception(error);
-          }
+            // A slow Apply can finish after Escape has closed and removed its modal.
+            if (config.pending && !submitted.currentTarget.isConnected) {
+                submitted.preventDefault();
+                return;
+            }
+            try {
+                if (config.pending) {
+                    // The main form owns the accepted selection; reopening must use it, not stored assignments.
+                    form.querySelector('[name="competenceids"]').value = submitted.detail.competenceids.join(',');
+                    // Opening or cancelling the picker must not overwrite assignments changed elsewhere.
+                    form.querySelector('[name="competencesmodified"]').value = '1';
+                    FormChangeChecker.markFormAsDirty(form);
+                }
+                replaceSummary(section, submitted.detail.content);
+            } catch (error) {
+                Notification.exception(error);
+            }
         });
         modalForm.show();
     });

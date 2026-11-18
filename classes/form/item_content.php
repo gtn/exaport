@@ -18,6 +18,8 @@ use context_user;
 use core_form\dynamic_form;
 use moodle_url;
 use block_exaport\local\item_linked_content;
+use block_exaport\local\item_editor;
+use block_exaport\local\item_content_edit;
 
 /**
  * Moodle dynamic form for adding an item content block.
@@ -28,6 +30,7 @@ class item_content extends dynamic_form {
 
     /** Define fields for the selected content type. */
     protected function definition(): void {
+        global $USER;
         $mform = $this->_form;
         $type = $this->get_content_type();
 
@@ -41,9 +44,14 @@ class item_content extends dynamic_form {
         $mform->setType('operation', PARAM_ALPHA);
         $mform->addElement('hidden', 'contenttype', $type);
         $mform->setType('contenttype', PARAM_ALPHA);
+        $mform->addElement('hidden', 'pending', $this->is_pending() ? 1 : 0);
+        $mform->setType('pending', PARAM_BOOL);
+        $mform->addElement('hidden', 'pendingblock', $this->optional_param('pendingblock', '', PARAM_RAW));
+        $mform->setType('pendingblock', PARAM_RAW);
 
         if ($this->get_operation() === 'delete') {
-            $mform->addElement('static', 'confirmation', '', get_string('deletecontentblockconfirm', 'block_exaport'));
+            $message = $this->is_pending() ? 'deletecontentblockpendingconfirm' : 'deletecontentblockconfirm';
+            $mform->addElement('static', 'confirmation', '', get_string($message, 'block_exaport'));
             if (!empty($this->_customdata['standalone'])) {
                 $this->add_action_buttons(true, get_string('delete'));
             }
@@ -57,18 +65,21 @@ class item_content extends dynamic_form {
             $mform->addElement('editor', 'content_editor', get_string('blockcontent', 'block_exaport'), null,
                 block_exaport_item_content_editor_options());
             $mform->setType('content_editor', PARAM_RAW);
+            if ($this->is_pending()) {
+                // maxfiles=0 hides Moodle's draft-ID input; retain imported media without enabling uploads.
+                $mform->addElement('hidden', 'content_editor[itemid]', 0);
+                $mform->setType('content_editor[itemid]', PARAM_INT);
+            }
         } else if ($type === 'link') {
             $mform->addElement('url', 'url', get_string('url', 'block_exaport'), ['size' => 60]);
             $mform->setType('url', PARAM_URL);
             $mform->addRule('url', get_string('required'), 'required', null, 'client');
         } else if (in_array($type, item_linked_content::TYPES, true)) {
-            $item = block_exaport_get_editable_content_item(
-                $this->optional_param('itemid', 0, PARAM_INT),
-                $this->optional_param('courseid', 0, PARAM_INT)
-            );
+            $item = $this->item_context();
+            $ownerid = (int)($item->userid ?? $USER->id);
             $mform->addElement('static', 'linkednotice', '', get_string('linkedcontentnotice', 'block_exaport'));
             if ($type === 'personal') {
-                $sourceurl = new moodle_url('/user/profile.php', ['id' => $item->userid]);
+                $sourceurl = new moodle_url('/user/profile.php', ['id' => $ownerid]);
                 $sourcelabel = get_string('viewprofile');
             } else if ($type === 'badge') {
                 $sourceurl = new moodle_url('/badges/mybadges.php');
@@ -82,7 +93,7 @@ class item_content extends dynamic_form {
             $mform->addElement('static', 'linkedsource', '', \html_writer::link($sourceurl, $sourcelabel,
                 ['target' => '_blank', 'rel' => 'noopener noreferrer']));
             $mform->addElement('autocomplete', 'selection', get_string('fieldstoshow', 'block_exaport'),
-                item_linked_content::options($type, (int)$item->userid), ['multiple' => true]);
+                item_linked_content::options($type, $ownerid), ['multiple' => true]);
             $mform->setType('selection', PARAM_TEXT);
             if ($type === 'cv') {
                 $mform->addElement('advcheckbox', 'withfiles', get_string('cofigureblock_cvinfo_withfiles', 'block_exaport'));
@@ -91,10 +102,7 @@ class item_content extends dynamic_form {
         } else {
             $options = block_exaport_item_content_file_options();
             if ($this->optional_param('blockid', 0, PARAM_INT)) {
-                $item = block_exaport_get_editable_content_item(
-                    $this->optional_param('itemid', 0, PARAM_INT),
-                    $this->optional_param('courseid', 0, PARAM_INT)
-                );
+                $item = $this->item_context();
                 $block = block_exaport_get_item_content_block($item, $this->optional_param('blockid', 0, PARAM_INT));
                 $options = block_exaport_item_content_file_options($item, $block);
             }
@@ -111,6 +119,28 @@ class item_content extends dynamic_form {
     /** Validate owner-specific selections and file-manager submissions. */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
+        if ($this->is_pending()) {
+            try {
+                $seed = $this->pending_state($data);
+                if (($data['operation'] ?? '') !== 'delete') {
+                    $item = item_editor::context((int)$data['itemid'], (int)$data['courseid']);
+                    $block = $seed['id'] ? block_exaport_get_item_content_block($item, $seed['id']) : null;
+                    // Quota belongs to the whole pending item; validate individual file limits here.
+                    item_content_edit::normalise(item_content_edit::from_form((object)$data, $seed['key']),
+                        $item, $block, false);
+                }
+            } catch (\moodle_exception | \block_exacomp_permission_exception $exception) {
+                $field = ['file' => 'files_filemanager', 'text' => 'content_editor', 'link' => 'url']
+                    [$data['contenttype'] ?? ''] ?? 'selection';
+                $errors[$field] = $exception instanceof \invalid_parameter_exception &&
+                        in_array($data['contenttype'] ?? '', item_linked_content::TYPES, true)
+                    ? get_string('linkedcontentselectionrequired', 'block_exaport') : $exception->getMessage();
+                if (($data['operation'] ?? '') === 'delete') {
+                    $errors['confirmation'] = $exception->getMessage();
+                }
+            }
+            return $errors;
+        }
         if (in_array($data['contenttype'] ?? '', item_linked_content::TYPES, true) &&
                 ($data['operation'] ?? '') !== 'delete') {
             $item = block_exaport_get_editable_content_item((int)$data['itemid'], (int)$data['courseid']);
@@ -142,6 +172,10 @@ class item_content extends dynamic_form {
     /** Check access before Moodle renders or processes the form. */
     protected function check_access_for_dynamic_submission(): void {
         require_capability('block/exaport:use', $this->get_context_for_dynamic_submission());
+        if ($this->is_pending()) {
+            $this->pending_state();
+            return;
+        }
         $item = block_exaport_get_editable_content_item(
             $this->optional_param('itemid', 0, PARAM_INT),
             $this->optional_param('courseid', 0, PARAM_INT)
@@ -174,6 +208,20 @@ class item_content extends dynamic_form {
             'contenttype' => $type,
             'title' => '',
         ];
+        if ($this->is_pending()) {
+            $seed = $this->pending_state();
+            $item = $this->item_context();
+            $block = $seed['id'] ? block_exaport_get_item_content_block($item, $seed['id']) : null;
+            // Each opening gets its own file drafts. A validation rerender keeps the submitted
+            // working drafts; copying the accepted version again would lose the user's edits.
+            $values = !$this->is_submitted() && $data->operation !== 'delete'
+                ? item_content_edit::prepare($seed, $item, $block) : [];
+            $this->set_data((object)array_merge($values, (array)$data, [
+                'title' => $values['title'] ?? $seed['title'],
+                'pendingblock' => $this->optional_param('pendingblock', '', PARAM_RAW),
+            ]));
+            return;
+        }
         $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
         $block = $data->blockid ? block_exaport_get_item_content_block($item, (int)$data->blockid) : null;
         if ($block) {
@@ -205,12 +253,29 @@ class item_content extends dynamic_form {
         $this->set_data($data);
     }
 
-    /** Persist a validated form submission and return the refreshed section HTML. */
+    /** Apply pending data to the main form, or save an explicit standalone submission. */
     public function process_dynamic_submission(): array {
         global $DB;
 
         require_sesskey();
         $data = $this->get_data();
+        if ($this->is_pending()) {
+            $seed = $this->pending_state((array)$data);
+            if ($data->operation === 'delete') {
+                return ['key' => $seed['key'], 'removed' => true];
+            }
+            $item = item_editor::context((int)$data->itemid, (int)$data->courseid);
+            $block = $seed['id'] ? block_exaport_get_item_content_block($item, $seed['id']) : null;
+            $state = item_content_edit::normalise(item_content_edit::from_form($data, $seed['key']),
+                $item, $block, false);
+            if ($block && $state['type'] === 'file' && $state['files_filemanager'] > 0 &&
+                    file_get_draft_area_info($state['files_filemanager'])['filecount'] === 0) {
+                return ['key' => $seed['key'], 'removed' => true];
+            }
+            // Apply returns form state and presentation only. The main item Save owns persistence.
+            return ['block' => $state, 'content' =>
+                \block_exaport\output\pending_item_content_blocks::render_row($state, $item, (int)$data->courseid)];
+        }
         if ($data->contenttype !== $this->get_content_type()) {
             throw new \invalid_parameter_exception('Content block type does not match the form');
         }
@@ -222,63 +287,61 @@ class item_content extends dynamic_form {
         if (($data->operation ?? '') === 'delete' && !$block) {
             throw new \invalid_parameter_exception('A content block is required for deletion');
         }
-        $linkedconfiguration = null;
-        if (in_array($data->contenttype, item_linked_content::TYPES, true) && ($data->operation ?? '') !== 'delete') {
-            $linkedconfiguration = item_linked_content::configuration($data->contenttype, (int)$item->userid,
-                (array)($data->selection ?? []), !empty($data->withfiles));
-        }
-        if ($data->contenttype === 'file' && ($data->operation ?? '') !== 'delete') {
-            block_exaport_check_item_content_file_submission($item, $block, (int)$data->files_filemanager);
-        }
         $transaction = $DB->start_delegated_transaction();
-        $block = $block ?: block_exaport_create_content_block(
-            (int)$data->itemid,
-            $data->contenttype,
-            $data->title,
-            $data->contenttype === 'link' ? $data->url : ''
-        );
-        if (($data->operation ?? '') === 'delete') {
-            block_exaport_delete_item_content_block($item, $block);
-            $transaction->allow_commit();
-            return ['content' => block_exaport_render_item_content_blocks((int)$data->courseid, $item)];
-        }
-        $changes = (object)[
-            'id' => $block->id,
-            'title' => $data->title,
-            'timemodified' => time(),
-        ];
-        // Editing text or files must not overwrite unrelated historical block metadata.
-        if ($data->contenttype === 'link') {
-            $changes->url = $data->url;
-        }
-        $DB->update_record('block_exaportitemblock', $changes);
-        $context = context_user::instance((int)$item->userid);
-        if ($linkedconfiguration !== null) {
-            $DB->update_record('block_exaportitemblock', (object)[
-                'id' => $block->id, 'content' => $linkedconfiguration, 'contentformat' => FORMAT_HTML,
-            ]);
-        } else if ($data->contenttype === 'text') {
-            $data = file_postupdate_standard_editor($data, 'content', block_exaport_item_content_editor_options(),
-                $context, 'block_exaport', 'item_content_text', $block->id);
-            $DB->update_record('block_exaportitemblock', (object)[
-                'id' => $block->id,
-                'content' => $data->content,
-                'contentformat' => $data->contentformat,
-                'timemodified' => time(),
-            ]);
-        } else if ($data->contenttype === 'file') {
-            $options = block_exaport_item_content_file_options($item, $block);
-            // Upload validation handles new files; retain grandfathered files on save.
-            $options['maxbytes'] = 0;
-            file_postupdate_standard_filemanager($data, 'files', $options,
-                $context, 'block_exaport', 'item_content_file', $block->id);
-            if (!block_exaport_get_item_content_files((int)$item->userid, (int)$block->id)) {
-                // Removing the final file intentionally removes its now-empty content block.
+        try {
+            // Standalone pages retain their explicit Save behavior, using the same persistence
+            // helper as the complete item form rather than maintaining a second implementation.
+            item_editor::lock_item((int)$item->id);
+            $item = block_exaport_get_editable_content_item((int)$data->itemid, (int)$data->courseid);
+            $block = !empty($data->blockid) ? block_exaport_get_item_content_block($item, (int)$data->blockid) : null;
+            item_editor::guard_files($item, $block ? [$block] : []);
+            if ($data->operation === 'delete') {
                 block_exaport_delete_item_content_block($item, $block);
+            } else {
+                $state = item_content_edit::normalise(item_content_edit::from_form($data), $item, $block, true);
+                item_content_edit::save($item, $state, $block, true);
             }
+            $transaction->allow_commit();
+        } catch (\Throwable $exception) {
+            $transaction->rollback($exception);
         }
-        $transaction->allow_commit();
         return ['content' => block_exaport_render_item_content_blocks((int)$data->courseid, $item)];
+    }
+
+    /** A pending modal belongs to a main form; ordinary standalone forms save explicitly. */
+    private function is_pending(): bool {
+        return (bool)$this->optional_param('pending', 0, PARAM_BOOL) ||
+            $this->optional_param('pendingblock', '', PARAM_RAW) !== '';
+    }
+
+    /** Resolve ownership afresh, including when validation is invoked after construction. */
+    private function item_context(): ?\stdClass {
+        $itemid = $this->optional_param('itemid', 0, PARAM_INT);
+        $courseid = $this->optional_param('courseid', 0, PARAM_INT);
+        return $this->is_pending() ? item_editor::context($itemid, $courseid)
+            : block_exaport_get_editable_content_item($itemid, $courseid);
+    }
+
+    /** Match submitted block identifiers against its current authorized parent and content type. */
+    private function pending_state(?array $data = null): array {
+        $read = function(string $name, $default, string $type) use ($data) {
+            return $data !== null && array_key_exists($name, $data)
+                ? $data[$name] : $this->optional_param($name, $default, $type);
+        };
+        $json = $read('pendingblock', '', PARAM_RAW);
+        if (!is_string($json)) {
+            throw new \moodle_exception('itemeditorinvalid', 'block_exaport');
+        }
+        $state = item_editor::pending_seed(
+            $json,
+            (int)$read('itemid', 0, PARAM_INT), (int)$read('courseid', 0, PARAM_INT)
+        );
+        if ($state['type'] !== $this->get_content_type() ||
+                $state['type'] !== $read('contenttype', '', PARAM_ALPHA) ||
+                $state['id'] !== (int)$read('blockid', 0, PARAM_INT)) {
+            throw new \invalid_parameter_exception('Content block does not match the pending editor');
+        }
+        return $state;
     }
 
     /** Return and validate the requested content type. */

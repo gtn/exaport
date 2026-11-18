@@ -177,7 +177,7 @@ $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
 $string['saveitem'] = 'Speichern und schließen';
 $string['saveandkeepediting'] = 'Speichern und weiter bearbeiten';
-$string['contentaftersave'] = 'Um Dokumente hochzuladen, wählen Sie "Speichern und weiter bearbeiten". Wählen Sie dann unter Inhalt zuerst + und anschließend Datei.';
+$string['contentaftersave'] = 'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie die Seite, um alle Änderungen gemeinsam zu speichern.';
 $string['disableditemwriteapi'] = 'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.';
 
 // === Notes.
@@ -1086,6 +1086,8 @@ $string['settings_sharing_courses_with_block_only_description'] = 'Beschränkt d
 $string['sharing_load_more_users'] = 'Weitere Nutzer/innen laden …';
 $string['sharing_load_users_error'] = 'Die Nutzerliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';
 $string['sharing_users_not_ready'] = 'Die Empfängerliste ist noch nicht vollständig geladen. Bitte warten Sie oder laden Sie die Seite neu, bevor Sie speichern.';
+$string['sharing_load_groups_error'] = 'Die Gruppenliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';
+$string['sharing_groups_not_ready'] = 'Die Gruppenauswahl ist noch nicht geladen. Bitte warten Sie oder versuchen Sie es erneut, bevor Sie speichern.';
 
 $string['settings_enable_copy_root_naming'] = 'Kursbezogene Benennung kopierter Strukturen erlauben';
 $string['settings_enable_copy_root_naming_description'] = 'Erlaubt die Kursoption, beim Kopieren oder Wiederherstellen die oberste Kategorie der kopierten Struktur nach dem Zielkurs zu benennen. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.';
@@ -1138,15 +1140,20 @@ $string['linkedbadgeissued'] = 'Verliehen: {$a}';
 $string['linkedbadgeexpires'] = 'Gültig bis: {$a}';
 
 // Document-upload User tours.
-$string['uploadtour_create_name'] = 'Exaport: Eine Seite zum Hochladen eines Dokuments erstellen';
-$string['uploadtour_create_description'] = 'Erklärt, warum Dokumente erst nach dem Speichern einer neuen Portfolio-Seite hinzugefügt werden.';
-$string['uploadtour_title_title'] = 'Mit einem Titel beginnen';
-$string['uploadtour_title_content'] = 'Geben Sie Ihrer Seite einen Titel und wählen Sie die Kategorie. Ihr Dokument fügen Sie nach dem Speichern der Seite hinzu.';
-$string['uploadtour_save_title'] = 'Zuerst speichern, dann hochladen';
-$string['uploadtour_save_content'] = 'Wählen Sie "Speichern und weiter bearbeiten", um die Seite zu erstellen und den Abschnitt Inhalt zu öffnen. Das Symbolbild dient als Vorschaubild; Dokumente fügen Sie unter Inhalt hinzu.';
+$string['uploadtour_create_name'] = 'Exaport: Ein Dokument hochladen';
+$string['uploadtour_create_description'] = 'Erklärt, wo Sie Dokumente hochladen und wie Sie eine Portfolio-Seite mit ihren Inhalten speichern.';
+$string['uploadtour_title_title'] = 'Ein Dokument hochladen';
+$string['uploadtour_title_content'] = 'Wählen Sie unter Inhalt zuerst + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Ihr Dokument wird erst gespeichert, wenn Sie die Seite speichern. Das Symbolbild dient als Vorschaubild.';
+$string['uploadtour_save_title'] = 'Ihre Seite speichern';
+$string['uploadtour_save_content'] = 'Dateien und Inhalte werden erst gespeichert, wenn Sie die Seite speichern. Wählen Sie Speichern und schließen, um alles einschließlich der Kompetenzen zu speichern. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.';
 $string['uploadtour_content_name'] = 'Exaport: Dokumente unter Inhalt hinzufügen';
-$string['uploadtour_content_description'] = 'Zeigt, wo Dokumente auf einer gespeicherten, bearbeitbaren Portfolio-Seite hochgeladen werden.';
-$string['uploadtour_content_title'] = 'Hier werden Dokumente hinzugefügt';
-$string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie dieser Seite Dokumente, Texte und Links hinzu. Weitere Inhalte können Sie später beim Bearbeiten der Seite ergänzen.';
-$string['uploadtour_file_title'] = 'Datei zum Hochladen eines Dokuments wählen';
-$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und speichern Sie den Dateidialog. Inhalte werden sofort gespeichert; wählen Sie "Speichern und schließen", wenn Sie die Seite fertig bearbeitet haben.';
+$string['uploadtour_content_description'] = 'Zeigt, wie Dokumente hinzugefügt und Inhaltsänderungen gespeichert werden.';
+$string['uploadtour_content_title'] = 'Inhalte zu Ihrer Seite hinzufügen';
+$string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie Dokumente, Texte und Links hinzu. Änderungen werden erst mit der Seite gespeichert. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.';
+$string['uploadtour_file_title'] = 'Ein Dokument hochladen';
+$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.';
+
+$string['itemeditorinvalid'] = 'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.';
+$string['itemeditorpendinghint'] = 'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
+$string['itemeditorlocked'] = 'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.';
+$string['deletecontentblockpendingconfirm'] = 'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern der Seite wirksam. Abbrechen im Seitenformular verwirft die Entfernung.';

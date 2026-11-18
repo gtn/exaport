@@ -93,7 +93,8 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
         $mform = &$this->_form;
 
-        // Main settings create the item. Other sections may opt in once their related records can be persisted.
+        $pendingeditor = !empty($this->_customdata['pendingeditor']);
+        // Assignment import keeps its own submission flow; the normal editor owns pending blocks.
         $sections = ['mainsettings' => true, 'content' => false, 'competences' => false];
         foreach ($this->_customdata['itemeditsections'] ?? [] as $section => $visible) {
             if ($section !== 'mainsettings' && array_key_exists($section, $sections)) {
@@ -134,7 +135,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->addElement('hidden', $field);
                 $mform->setType($field, $paramtype);
             }
-        } else if (empty($this->_customdata['current'])) {
+        } else if (empty($this->_customdata['current']) && !$pendingeditor) {
             $mform->addElement('static', 'contentaftersave', '', get_string('contentaftersave', 'block_exaport'));
         }
 
@@ -191,17 +192,45 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
             $mform->setExpanded('itemcontent', true);
 
-            $contentblocks = $this->_customdata['itemcontentblocks'];
-            $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
-            $contentownerid = (int)($this->_customdata['itemcontentownerid'] ?? $USER->id);
-            $contentsection = new \block_exaport\output\item_content_blocks(
-                $contentblocks,
-                $contentaddurl,
-                $contentownerid,
-                true,
-                false
-            );
-            $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
+            if ($pendingeditor) {
+                $initialstate = $this->_customdata['editorstate'];
+                $statejson = $this->optional_param('contentblocks', json_encode($initialstate), PARAM_RAW);
+                foreach (['pendingeditor' => 1, 'competencesmodified' => 0] as $name => $default) {
+                    $mform->addElement('hidden', $name, $default);
+                    $mform->setType($name, PARAM_BOOL);
+                }
+                foreach (['contentblocks' => json_encode($initialstate),
+                        'competenceids' => implode(',', $this->initial_competenceids())] as $name => $default) {
+                    $mform->addElement('hidden', $name, $default);
+                    $mform->setType($name, PARAM_RAW);
+                }
+                try {
+                    $state = \block_exaport\local\item_editor::display_state($statejson,
+                        (int)($this->_customdata['current']->id ?? 0), (int)$this->_customdata['course']->id,
+                        empty($this->_customdata['allowedit']));
+                } catch (\moodle_exception $exception) {
+                    // Keep invalid submitted values for validation, but never render untrusted block data.
+                    $state = $initialstate;
+                }
+                $html = \block_exaport\output\pending_item_content_blocks::render_section($state,
+                    $this->_customdata['current'] ?: null, (int)$this->_customdata['course']->id,
+                    !empty($this->_customdata['allowedit']));
+                $mform->addElement('static', 'editorcontent', '', $html);
+                $mform->getElement('editorcontent')->updateAttributes(['class' => 'w-100']);
+                $mform->addElement('static', 'editorpendinghint', '', get_string('itemeditorpendinghint', 'block_exaport'));
+            } else {
+                $contentblocks = $this->_customdata['itemcontentblocks'];
+                $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;
+                $contentownerid = (int)($this->_customdata['itemcontentownerid'] ?? $USER->id);
+                $contentsection = new \block_exaport\output\item_content_blocks(
+                    $contentblocks,
+                    $contentaddurl,
+                    $contentownerid,
+                    true,
+                    false
+                );
+                $mform->addElement('html', $PAGE->get_renderer('block_exaport')->render($contentsection));
+            }
         }
 
         $mform->addElement('header', 'itemmetadata', get_string('metadata', 'block_exaport'));
@@ -240,17 +269,34 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $hasusers = $itemid > 0 && $DB->record_exists('block_exaportitemshar', ['itemid' => $itemid]);
             $hasgroups = $itemid > 0 && $DB->record_exists('block_exaportitemgroupshar', ['itemid' => $itemid]);
             $shareenabled = $itemshareall > 0 || $hasusers || $hasgroups;
+            $shareconfigured = $shareenabled;
+            $submittedsharing = null;
+            // Start with saved settings. After a rejected submit, redisplay the user's
+            // submitted choices instead; this changes the form, not the stored shares.
+            $sharing = $this->submitted_sharing();
+            if ($sharing !== null) {
+                $shareenabled = $sharing['enabled'];
+                $itemshareall = $sharing['mode'];
+                $submittedsharing = json_encode([
+                    'users' => $sharing['users'], 'notify' => $sharing['notify'], 'groups' => $sharing['groups'],
+                    'courses' => $sharing['users'] === null ? null : block_exaport_get_sharing_userlist(
+                        'item', $itemid, $sharing['users'], $sharing['notify']),
+                ], JSON_THROW_ON_ERROR);
+            }
             $sharedusers = $itemid > 0 ? $DB->get_records_menu('block_exaportitemshar',
                 ['itemid' => $itemid], null, 'userid, userid AS tmp') : [];
             $mform->addElement('html', '<script>var sharedusersarr = ' . json_encode(array_values($sharedusers)) . ';</script>');
             $sharingform = new \block_exaport\output\sharing_form([
                 'componentid' => 'item-sharing',
                 'enabled' => $shareenabled,
-                'configured' => $shareenabled,
+                'configured' => $shareconfigured,
                 'showinternal' => true,
                 'showeveryone' => block_exaport_shareall_enabled(),
                 'mode' => $itemshareall,
                 'alwaysnotify' => (bool)get_config('block_exaport', 'alwaysnotifywhenshare'),
+                'submittedsharing' => $submittedsharing,
+                'submittedgroupsknown' => $sharing !== null && $sharing['groups'] !== null,
+                'submittedgroups' => $sharing['groups'] ?? [],
             ]);
             $sharinghtml = $OUTPUT->render_from_template(
                 'block_exaport/sharing_form',
@@ -291,11 +337,20 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->add_exaport_help_button('tags', 'forms.item.tags');
         }
 
-        // The picker saves independently in a Moodle modal, so competence changes are not part of this form submission.
+        // The modal edits a selection; the normal editor submits that selection with all other fields.
         if ($sections['competences']) {
             $mform->addElement('header', 'itemcompetences', get_string('competencessection', 'block_exaport'));
+            $competenceitem = $this->_customdata['current'] ? clone $this->_customdata['current'] : (object)['id' => 0];
+            if ($pendingeditor) {
+                try {
+                    $competenceitem->compids_array = block_exaport_parse_competenceids(
+                        $this->optional_param('competenceids', implode(',', $this->initial_competenceids()), PARAM_RAW));
+                } catch (\moodle_exception $exception) {
+                    $competenceitem->compids_array = $this->initial_competenceids();
+                }
+            }
             $competences = new \block_exaport\output\item_competences(
-                $this->_customdata['current'],
+                $competenceitem,
                 !empty($this->_customdata['allowedit'])
             );
             $mform->addElement(
@@ -341,6 +396,63 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $mform->addElement('html', get_string("isgraded", "block_exacomp"));
             }
         }
+    }
+
+    /** Restore only this submitted form; unloaded pickers are unknown, not empty audiences. */
+    private function submitted_sharing(): ?array {
+        $source = $this->_ajaxformdata ?: $_POST;
+        if (($source['_qf__' . $this->_formname] ?? 0) != 1 ||
+                !confirm_sesskey($source['sesskey'] ?? '')) {
+            return null;
+        }
+        $ids = static function(string $name) use ($source): array {
+            $values = \block_exaport\param::clean_array($source[$name] ?? [], PARAM_INT);
+            return array_values(array_unique(array_filter($values, static function(int $id): bool { return $id > 0; })));
+        };
+        $mode = clean_param($source['shareall'] ?? 0, PARAM_INT);
+        $users = clean_param($source['exaport_userlist_ready'] ?? 0, PARAM_INT) === 1 ? $ids('shareusers') : null;
+        return ['enabled' => (bool)clean_param($source['shareenabled'] ?? 0, PARAM_BOOL),
+            'mode' => in_array($mode, [0, 1, 2], true) ? $mode : 0, 'users' => $users,
+            'notify' => $users === null ? null : array_values(array_intersect($ids('notifyusers'), $users)),
+            'groups' => clean_param($source['exaport_grouplist_ready'] ?? 0, PARAM_INT) === 1 ? $ids('sharegroups') : null];
+    }
+
+    /** Return trusted persisted selections without creating an item for the new-item form. */
+    private function initial_competenceids(): array {
+        global $DB;
+        if (empty($this->_customdata['current']) || empty($this->_customdata['itemeditsections']['competences'])) {
+            return [];
+        }
+        return block_exaport_normalize_competenceids($DB->get_fieldset_select(BLOCK_EXACOMP_DB_COMPETENCE_ACTIVITY,
+            'compid', 'activityid = ? AND eportfolioitem = 1', [(int)$this->_customdata['current']->id]));
+    }
+
+    /** Share the modal validators, while treating the final POST as a new trust boundary. */
+    public function validation($data, $files): array {
+        $errors = parent::validation($data, $files);
+        if (empty($this->_customdata['pendingeditor'])) {
+            return $errors;
+        }
+        try {
+            // Read the actual POST: a missing collection must not fall back to an empty/default collection.
+            if (!empty($this->_customdata['itemeditsections']['competences']) &&
+                    $this->optional_param('competenceids', null, PARAM_RAW) === null) {
+                throw new \moodle_exception('itemeditorinvalid', 'block_exaport');
+            }
+            \block_exaport\local\item_editor::validate_request(
+                (int)($this->_customdata['current']->id ?? 0), (int)$this->_customdata['course']->id,
+                $this->optional_param('contentblocks', '', PARAM_RAW),
+                $this->optional_param('competenceids', '', PARAM_RAW), $data,
+                !empty($this->_customdata['itemeditsections']['competences']));
+        } catch (\moodle_exception $exception) {
+            $errors['editorcontent'] = $exception->getMessage();
+        }
+        return $errors;
+    }
+
+    /** Display a save error without losing any submitted fields. */
+    public function set_editor_error(string $message): void {
+        $this->_form->setElementError('editorcontent', $message);
     }
 
     public function category_select_setup($categorytype = '', $selectedcat = 0) {

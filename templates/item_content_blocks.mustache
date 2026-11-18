@@ -1,5 +1,5 @@
 {{!
-    Read-only ordered content blocks shown for an Exaport item.
+    Shared content section for saved items and the pending item editor.
 }}
 <section class="exaport-item-content-section mt-4 mb-4"
     {{#showheading}}aria-labelledby="exaport-item-content-heading"{{/showheading}}
@@ -7,66 +7,11 @@
     {{#showheading}}
     <h2 id="exaport-item-content-heading" class="h4 mb-3">{{heading}}</h2>
     {{/showheading}}
-    {{#hasblocks}}
-    <div class="exaport-item-content-rows border-top">
+    <div class="exaport-item-content-rows border-top" {{^hasblocks}}hidden{{/hasblocks}}>
         {{#blocks}}
-        <div class="exaport-item-content-row d-flex align-items-start py-3 border-bottom">
-            <div class="exaport-item-content-icon flex-shrink-0 me-3">
-                {{{icon}}}
-            </div>
-            <div class="flex-grow-1 text-break">
-                <div class="d-flex flex-wrap align-items-baseline gap-2">
-                    <span class="exaport-item-content-type text-muted small">{{typelabel}}</span>
-                    {{#title}}<span class="exaport-item-content-title fw-semibold">{{title}}</span>{{/title}}
-                    {{#canedit}}
-                    <span class="ms-auto exaport-item-content-actions">
-                        <a href="{{editurl}}" class="btn btn-sm btn-link exaport-item-content-edit"
-                           data-content-type="{{type}}" data-block-id="{{id}}" data-operation="save">{{editlabel}}</a>
-                        <a href="{{deleteurl}}" class="btn btn-sm btn-link text-danger exaport-item-content-delete"
-                           data-content-type="{{type}}" data-block-id="{{id}}" data-operation="delete">{{deletelabel}}</a>
-                    </span>
-                    {{/canedit}}
-                </div>
-                {{#content}}<div class="exaport-item-content-preview mt-1">{{{content}}}</div>{{/content}}
-                {{#linkurl}}
-                <div class="exaport-item-content-preview mt-1">
-                    <a href="{{linkurl}}" target="_blank" rel="noopener noreferrer">{{linkurl}}</a>
-                </div>
-                {{/linkurl}}
-                {{^linkurl}}{{#preview}}<div class="exaport-item-content-preview mt-1">{{preview}}</div>{{/preview}}{{/linkurl}}
-                {{#hasfiles}}
-                <div class="exaport-item-content-files d-flex flex-wrap gap-3 mt-2">
-                    {{#files}}
-                    {{#isvideo}}
-                    <div class="exaport-item-content-media">
-                        <video controls preload="metadata">
-                            <source src="{{url}}" type="{{mimetype}}">
-                            <a href="{{url}}">{{name}}</a>
-                        </video>
-                    </div>
-                    {{/isvideo}}
-                    {{#isaudio}}
-                    <div class="exaport-item-content-media">
-                        <audio controls preload="metadata">
-                            <source src="{{url}}" type="{{mimetype}}">
-                            <a href="{{url}}">{{name}}</a>
-                        </audio>
-                    </div>
-                    {{/isaudio}}
-                    {{^isvideo}}{{^isaudio}}
-                    <a href="{{url}}" class="exaport-item-content-file" target="_blank" rel="noopener noreferrer">
-                        {{#isimage}}<img src="{{url}}" alt="{{name}}" class="exaport-item-content-thumbnail">{{/isimage}}
-                        {{#isdownload}}{{{icon}}}<span>{{name}} ({{size}})</span>{{/isdownload}}
-                    </a>
-                    {{/isaudio}}{{/isvideo}}
-                    {{/files}}
-                </div>
-                {{/hasfiles}}
-            </div>
-        </div>
+        {{> block_exaport/item_content_row}}
         {{/blocks}}
     </div>
-    {{/hasblocks}}
     {{#showaddbutton}}
     <div class="d-flex justify-content-center align-items-center my-3 exaport-item-content-divider">
         <hr class="flex-grow-1 m-0" aria-hidden="true">

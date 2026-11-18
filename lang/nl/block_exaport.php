@@ -405,18 +405,26 @@ $string['settings_starter_view_templates_description'] = 'JSON array of starter 
 // Document-upload workflow.
 $string['saveitem'] = 'Opslaan en sluiten';
 $string['saveandkeepediting'] = 'Opslaan en verder bewerken';
-$string['contentaftersave'] = 'Om documenten te uploaden, kies je "Opslaan en verder bewerken". Kies vervolgens onder Inhoud eerst + en daarna Bestand.';
+$string['contentaftersave'] = 'Voeg documenten toe via Inhoud: kies + en daarna Bestand. Toepassen werkt het formulier bij; sla het object op om alle wijzigingen samen op te slaan.';
+
+$string['sharing_load_groups_error'] = 'De groepenlijst kon niet worden geladen. Probeer het opnieuw.';
+$string['sharing_groups_not_ready'] = 'De groepsselectie is nog niet geladen. Wacht tot deze is geladen of probeer opnieuw te laden voordat je opslaat.';
 
 // Document-upload User tours.
-$string['uploadtour_create_name'] = 'Exaport: Een object aanmaken om een document te uploaden';
-$string['uploadtour_create_description'] = 'Legt uit waarom documenten pas na het opslaan van een nieuw portfolio-object worden toegevoegd.';
-$string['uploadtour_title_title'] = 'Begin met een titel';
-$string['uploadtour_title_content'] = 'Geef je object een titel en kies de categorie. Je voegt je document toe nadat je het object hebt opgeslagen.';
-$string['uploadtour_save_title'] = 'Eerst opslaan, dan uploaden';
-$string['uploadtour_save_content'] = 'Kies "Opslaan en verder bewerken" om het object aan te maken en de sectie Inhoud te openen. Het afbeeldingsveld is bedoeld voor een miniatuur; documenten voeg je toe via Inhoud.';
+$string['uploadtour_create_name'] = 'Exaport: Een document uploaden';
+$string['uploadtour_create_description'] = 'Legt uit waar je documenten uploadt en hoe je een portfolio-object met de inhoud opslaat.';
+$string['uploadtour_title_title'] = 'Een document uploaden';
+$string['uploadtour_title_content'] = 'Kies onder Inhoud eerst + en daarna Bestand. Upload je document en kies Toepassen om terug te keren naar dit formulier. Je document wordt pas opgeslagen wanneer je het object opslaat. Het afbeeldingsveld is bedoeld voor een miniatuur.';
+$string['uploadtour_save_title'] = 'Je object opslaan';
+$string['uploadtour_save_content'] = 'Bestanden en inhoud worden pas opgeslagen wanneer je het object opslaat. Kies Opslaan en sluiten om alles op te slaan, inclusief competenties. Annuleren op dit formulier verwerpt niet-opgeslagen wijzigingen.';
 $string['uploadtour_content_name'] = 'Exaport: Documenten toevoegen via Inhoud';
-$string['uploadtour_content_description'] = 'Laat zien waar je documenten kunt uploaden in een opgeslagen portfolio-object dat je kunt bewerken.';
-$string['uploadtour_content_title'] = 'Hier voeg je je documenten toe';
-$string['uploadtour_content_content'] = 'Gebruik Inhoud om documenten, tekst en links aan dit object toe te voegen. Je kunt later meer inhoud toevoegen door het object te bewerken.';
-$string['uploadtour_file_title'] = 'Kies Bestand om een document te uploaden';
-$string['uploadtour_file_content'] = 'Kies + en vervolgens Bestand. Upload je document en sla de wijzigingen in het bestandsvenster op. De inhoud wordt direct opgeslagen; kies "Opslaan en sluiten" wanneer je klaar bent met het bewerken van het object.';
+$string['uploadtour_content_description'] = 'Laat zien hoe je documenten toevoegt en inhoudswijzigingen opslaat.';
+$string['uploadtour_content_title'] = 'Inhoud aan je object toevoegen';
+$string['uploadtour_content_content'] = 'Gebruik Inhoud voor documenten, tekst en links. Wijzigingen worden pas opgeslagen wanneer je het object opslaat. Annuleren op dit formulier verwerpt niet-opgeslagen wijzigingen.';
+$string['uploadtour_file_title'] = 'Een document uploaden';
+$string['uploadtour_file_content'] = 'Kies + en daarna Bestand. Upload je document en kies Toepassen om terug te keren naar dit formulier. Kies Opslaan en sluiten om het object en de inhoud op te slaan.';
+
+$string['itemeditorinvalid'] = 'Sommige wijzigingen aan het object ontbreken of zijn ongeldig. Je wijzigingen zijn niet opgeslagen.';
+$string['itemeditorpendinghint'] = 'Wijzigingen aan inhoud en competenties worden samen met dit object opgeslagen. Toepassen werkt het formulier bij; Opslaan slaat alles samen op. Annuleren verwerpt nog niet opgeslagen wijzigingen.';
+$string['itemeditorlocked'] = 'Dit object kan niet meer worden bewerkt. Je nog niet opgeslagen wijzigingen worden hieronder getoond, maar er is niets opgeslagen.';
+$string['deletecontentblockpendingconfirm'] = 'Dit inhoudsblok verwijderen? De verwijdering wordt pas doorgevoerd wanneer je het object opslaat. Annuleren op het objectformulier verwerpt de verwijdering.';

@@ -211,7 +211,7 @@ $string['gradeitem'] = 'Grade the item';
 $string['submititem'] = 'Submit';
 $string['saveitem'] = 'Save and close';
 $string['saveandkeepediting'] = 'Save and keep editing';
-$string['contentaftersave'] = 'To upload documents, choose "Save and keep editing". Then, in Content, choose + and File.';
+$string['contentaftersave'] = 'Add documents through Content: choose +, then File. Apply updates the form; save the page to save all changes together.';
 $string['disableditemwriteapi'] = 'This legacy item write service is disabled. Use the structured content interface.';
 
 // === Notes.
@@ -1127,6 +1127,8 @@ $string['settings_sharing_courses_with_block_only_description'] = 'Restrict the 
 $string['sharing_load_more_users'] = 'Load all users of this course …';
 $string['sharing_load_users_error'] = 'The user list could not be loaded. Please try again.';
 $string['sharing_users_not_ready'] = 'The recipient list is incomplete. Please wait for it to load, or reload the page before saving.';
+$string['sharing_load_groups_error'] = 'The group list could not be loaded. Please try again.';
+$string['sharing_groups_not_ready'] = 'The group selection is not ready. Please wait for it to load, or retry loading it before saving.';
 
 $string['settings_enable_copy_root_naming'] = 'Allow course-based naming of copied templates';
 $string['settings_enable_copy_root_naming_description'] = 'Allow courses to rename the first root of their copied category template during course copy or restore. Existing portfolio categories and the source template are never changed.';
@@ -1175,15 +1177,20 @@ $string['linkedbadgeissued'] = 'Awarded: {$a}';
 $string['linkedbadgeexpires'] = 'Expires: {$a}';
 
 // Document-upload User tours.
-$string['uploadtour_create_name'] = 'Exaport: Create a page to upload a document';
-$string['uploadtour_create_description'] = 'Explains why documents are added after saving a new portfolio page.';
-$string['uploadtour_title_title'] = 'Start with a title';
-$string['uploadtour_title_content'] = 'Give your page a title and select its category. You will add your document after saving the page.';
-$string['uploadtour_save_title'] = 'Save first, then upload';
-$string['uploadtour_save_content'] = 'Choose "Save and keep editing" to create the page and open its Content section. The icon image field is for a thumbnail; add documents through Content.';
+$string['uploadtour_create_name'] = 'Exaport: Upload a document';
+$string['uploadtour_create_description'] = 'Explains where to upload documents and how to save a portfolio page with its content.';
+$string['uploadtour_title_title'] = 'Upload a document';
+$string['uploadtour_title_content'] = 'In Content, choose +, then File. Upload your document and choose Apply to return to this form. Your document is only saved when you save the page. The icon image field is for a thumbnail.';
+$string['uploadtour_save_title'] = 'Save your page';
+$string['uploadtour_save_content'] = 'Files and content are saved only when you save the page. Choose Save and close to save everything, including competencies. Cancel on this form discards unsaved changes.';
 $string['uploadtour_content_name'] = 'Exaport: Add documents through Content';
-$string['uploadtour_content_description'] = 'Shows where to upload documents to a saved, editable portfolio page.';
-$string['uploadtour_content_title'] = 'Your documents go here';
-$string['uploadtour_content_content'] = 'Use Content to add documents, text and links to this page. You can add more content later by editing the page.';
-$string['uploadtour_file_title'] = 'Choose File to upload a document';
-$string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and save the file dialog. Content is saved immediately; use "Save and close" when you have finished editing the page.';
+$string['uploadtour_content_description'] = 'Shows how to add documents and save content changes.';
+$string['uploadtour_content_title'] = 'Add content to your page';
+$string['uploadtour_content_content'] = 'Use Content for documents, text and links. Changes are saved only when you save the page. Cancel on this form discards unsaved changes.';
+$string['uploadtour_file_title'] = 'Upload a document';
+$string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.';
+
+$string['itemeditorinvalid'] = 'Some page changes are missing or invalid. Your changes have not been saved.';
+$string['itemeditorpendinghint'] = 'Content and competency changes are saved with this page. Apply updates the form; Save saves everything together. Cancel discards pending changes.';
+$string['itemeditorlocked'] = 'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.';
+$string['deletecontentblockpendingconfirm'] = 'Remove this content block? The removal takes effect when you save the page. Cancel on the page form discards the removal.';

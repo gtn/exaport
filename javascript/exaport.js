@@ -89,6 +89,13 @@
     return true;
   };
 
+  // After an error, PHP embeds the submitted choices so the picker can restore them.
+  // Save still submits the current form inputs, including any further changes.
+  function getSubmittedSharing($root) {
+    var value = $root.attr('data-submitted-sharing');
+    return value === undefined ? null : JSON.parse(value);
+  }
+
   window.block_exaport = window.ExabisEportfolio = $E = {
     courseid: 1,
 
@@ -171,6 +178,10 @@
       var $root = $userlist.closest('[data-region="exaport-sharing"]');
       var $ready = $root.find('[name="exaport_userlist_ready"]');
       var initialLoaded = false;
+      var submitted = getSubmittedSharing($root);
+      // Null means the failed POST never loaded this audience; normal AJAX must still supply it.
+      var restoreUsers = !!submitted && Array.isArray(submitted.users) && Array.isArray(submitted.courses);
+      var initialCourses = restoreUsers ? submitted.courses : null;
 
       var alwaysNotifyBool = this.always_notify_when_share();
 
@@ -193,6 +204,10 @@
       // overwritten by a later lazy-loaded course's server state.
       var selectedUsers = {};
       var selectedNotifications = {};
+      if (restoreUsers) {
+        $.each(submitted.users, function (index, userid) { selectedUsers[String(userid)] = true; });
+        $.each(submitted.notify || [], function (index, userid) { selectedNotifications[String(userid)] = true; });
+      }
 
       // Recomputes one course's "check all" checkbox from its currently rendered rows. Needs to
       // run for every course affected by applyUserSelections(), not only the course the
@@ -349,7 +364,8 @@
             if (Object.prototype.hasOwnProperty.call(selectedUsers, uid)) {
               checked = selectedUsers[uid];
             } else {
-              checked = !!user.shared_to;
+              // A submitted empty selection is authoritative, including users first seen lazily.
+              checked = restoreUsers ? false : !!user.shared_to;
               selectedUsers[uid] = checked;
             }
 
@@ -357,7 +373,7 @@
             if (Object.prototype.hasOwnProperty.call(selectedNotifications, uid)) {
               notifyChecked = selectedNotifications[uid];
             } else {
-              notifyChecked = !!user.notify_user;
+              notifyChecked = restoreUsers ? false : !!user.notify_user;
               selectedNotifications[uid] = notifyChecked;
             }
             notifyChecked = checked && (alwaysNotifyBool || notifyChecked);
@@ -470,11 +486,14 @@
         if ((!$master.length || $master.is(':checked')) && (!$internal.length || $internal.is(':checked')) &&
             mode === '0' && !initialLoaded) {
           event.preventDefault();
+          // Keep Moodle's unsaved-change warning active when Save is blocked.
+          event.stopPropagation();
           showNotReady();
         }
       });
 
       function loadInitialUsers() {
+        initialLoaded = false;
         $ready.val('0');
         $userlist.text(M.util.get_string('loading', 'moodle')).attr('aria-busy', 'true');
         var params = {action: 'userlist', sesskey: M.cfg.sesskey};
@@ -487,22 +506,35 @@
           $('<button type="button" class="btn btn-link"></button>').text(M.util.get_string('retry', 'moodle'))
             .on('click', loadInitialUsers).appendTo($userlist);
         }
-        $.getJSON(document.location.href, params).done(function (courses) {
+        function loaded(courses) {
           if (!Array.isArray(courses)) {
             failed();
-            return;
+            return false;
           }
           try {
             renderInitialUsers(courses);
             initialLoaded = true;
             $ready.val('1');
             $root.find('.exaport-userlist-incomplete').remove();
+            return true;
           } catch (error) {
             failed();
+            return false;
           }
-        }).fail(failed).always(function () {
+        }
+        function finished() {
           $userlist.attr('aria-busy', 'false');
-        });
+        }
+        if (initialCourses !== null) {
+          // Render the submitted recipients through the same readiness checks as an AJAX response.
+          // Retain them on failure: a DB-only retry could omit newly submitted recipients.
+          if (loaded(initialCourses)) {
+            initialCourses = null;
+          }
+          finished();
+        } else {
+          $.getJSON(document.location.href, params).done(loaded).fail(failed).always(finished);
+        }
       }
 
       function renderInitialUsers(courses) {
@@ -562,18 +594,29 @@
       }
       this.grouplist_loaded = true;
 
-      $('#sharing-grouplist').html('loading grouplist...');
-
+      var $grouplist = $('#sharing-grouplist');
+      var $root = $grouplist.closest('[data-region="exaport-sharing"]');
+      var $ready = $root.find('[name="exaport_grouplist_ready"]');
+      var submitted = getSubmittedSharing($root);
+      var restoreGroups = !!submitted && Array.isArray(submitted.groups);
+      var $fallback = $root.find('[data-region="submitted-group-selection"]');
+      var selectedGroups = {};
+      if (restoreGroups) {
+        $.each(submitted.groups, function (index, groupid) { selectedGroups[String(groupid)] = true; });
+      }
       // The sesskey is always sent, because all sharing endpoints (view/category/item) require it.
       var params = {action: 'grouplist', sesskey: M.cfg.sesskey};
       if (type == 'cat_mod') {
         params.id = $('input[name="id"]').val() || 0;
       }
-      $.getJSON(document.location.href, params, function (courses) {
+      function renderGroups(courses) {
         var html = '';
 
         if (!$.empty(courses)) {
           $.each(courses, function (tmp, course) {
+            if (!course || !course.groups || typeof course.groups !== 'object') {
+              throw new Error('Missing group list');
+            }
             html += '<fieldset class="course-group"><legend class="course-group-title">';
             html += ($E.courseid == course.id ? '<b>' : '');
             html += course.name;
@@ -598,7 +641,8 @@
                 html += '<tr><td align=\"center\" width="5%">';
                 html += '<input class="sharegroups" type="checkbox" courseid="' + course.id + '" name="sharegroups[' + group.id + ']" ';
                 html += ' value="' + group.id + '"';
-                html += (group.shared_to ? ' checked="checked"' : '') + ' />';
+                var checked = restoreGroups ? !!selectedGroups[String(group.id)] : !!group.shared_to;
+                html += (checked ? ' checked="checked"' : '') + ' />';
                 html += "</td><td align=\"center\" width='45%'>" + group.name + "</td><td align=\"center\" width='45%'>" + group.member_cnt + "</td></tr>";
               });
 
@@ -657,7 +701,41 @@
         });
         // Open all shared courses.
         $('#sharing-grouplist .course-group').has('input:checked').addClass('course-group-open');
-      });
+      }
+      function failed() {
+        // Discard partially rendered controls, retaining the submitted selection outside this container.
+        $grouplist.empty();
+        $ready.val($fallback.length ? '1' : '0');
+        $('<div class="alert alert-danger" role="alert"></div>')
+          .text(M.util.get_string('sharing_load_groups_error', 'block_exaport')).appendTo($grouplist);
+        $('<button type="button" class="btn btn-link"></button>').text(M.util.get_string('retry', 'moodle'))
+          .on('click', loadGroups).appendTo($grouplist);
+      }
+      function loadGroups() {
+        // Known submitted groups remain ordinary POST inputs while their permitted roster loads.
+        $ready.val($fallback.length ? '1' : '0');
+        $grouplist.text(M.util.get_string('loading', 'moodle')).attr('aria-busy', 'true');
+        $.getJSON(document.location.href, params).done(function (courses) {
+          if (!Array.isArray(courses)) {
+            failed();
+            return;
+          }
+          try {
+            renderGroups(courses);
+            // Hand ownership to the real checkboxes only after the complete render succeeds.
+            $fallback.remove();
+            $fallback = $();
+            restoreGroups = false;
+            $ready.val('1');
+            $root.find('.exaport-grouplist-incomplete').remove();
+          } catch (error) {
+            failed();
+          }
+        }).fail(failed).always(function () {
+          $grouplist.attr('aria-busy', 'false');
+        });
+      }
+      loadGroups();
     },
 
     popup: function (config) {

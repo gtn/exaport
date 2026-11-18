@@ -1,0 +1,58 @@
+{{! A shared saved or pending content block row. }}
+<div class="exaport-item-content-row d-flex align-items-start py-3 border-bottom"
+    {{#key}}data-block-key="{{key}}"{{/key}}>
+    <div class="exaport-item-content-icon flex-shrink-0 me-3">
+        {{{icon}}}
+    </div>
+    <div class="flex-grow-1 text-break">
+        <div class="d-flex flex-wrap align-items-baseline gap-2">
+            <span class="exaport-item-content-type text-muted small">{{typelabel}}</span>
+            {{#title}}<span class="exaport-item-content-title fw-semibold">{{title}}</span>{{/title}}
+            {{#canedit}}
+            <span class="ms-auto exaport-item-content-actions">
+                <a href="{{editurl}}" class="btn btn-sm btn-link exaport-item-content-edit"
+                   data-content-type="{{type}}" data-block-id="{{id}}"
+                   {{#key}}data-block-key="{{key}}"{{/key}} data-operation="save">{{editlabel}}</a>
+                <a href="{{deleteurl}}" class="btn btn-sm btn-link text-danger exaport-item-content-delete"
+                   data-content-type="{{type}}" data-block-id="{{id}}"
+                   {{#key}}data-block-key="{{key}}"{{/key}} data-operation="delete">{{deletelabel}}</a>
+            </span>
+            {{/canedit}}
+        </div>
+        {{#content}}<div class="exaport-item-content-preview mt-1">{{{content}}}</div>{{/content}}
+        {{#linkurl}}
+        <div class="exaport-item-content-preview mt-1">
+            <a href="{{linkurl}}" target="_blank" rel="noopener noreferrer">{{linkurl}}</a>
+        </div>
+        {{/linkurl}}
+        {{^linkurl}}{{#preview}}<div class="exaport-item-content-preview mt-1">{{preview}}</div>{{/preview}}{{/linkurl}}
+        {{#hasfiles}}
+        <div class="exaport-item-content-files d-flex flex-wrap gap-3 mt-2">
+            {{#files}}
+            {{#isvideo}}
+            <div class="exaport-item-content-media">
+                <video controls preload="metadata">
+                    <source src="{{url}}" type="{{mimetype}}">
+                    <a href="{{url}}">{{name}}</a>
+                </video>
+            </div>
+            {{/isvideo}}
+            {{#isaudio}}
+            <div class="exaport-item-content-media">
+                <audio controls preload="metadata">
+                    <source src="{{url}}" type="{{mimetype}}">
+                    <a href="{{url}}">{{name}}</a>
+                </audio>
+            </div>
+            {{/isaudio}}
+            {{^isvideo}}{{^isaudio}}
+            <a href="{{url}}" class="exaport-item-content-file" target="_blank" rel="noopener noreferrer">
+                {{#isimage}}<img src="{{url}}" alt="{{name}}" class="exaport-item-content-thumbnail">{{/isimage}}
+                {{#isdownload}}{{{icon}}}<span>{{name}} ({{size}})</span>{{/isdownload}}
+            </a>
+            {{/isaudio}}{{/isvideo}}
+            {{/files}}
+        </div>
+        {{/hasfiles}}
+    </div>
+</div>

@@ -279,7 +279,7 @@ if ($mform->is_cancelled()) {
     redirect('view_items.php?courseid=' . $courseid . '&categoryid=' . ($same == 'same' ? $id : $pid));
 } else if ($newentry = $mform->get_data()) {
     require_sesskey();
-    block_exaport_require_loaded_share_users(
+    block_exaport_require_loaded_share_selection(
         (bool)optional_param('shareenabled', 0, PARAM_INT) && (bool)optional_param('internshare', 0, PARAM_INT),
         optional_param('shareall', 0, PARAM_INT)
     );

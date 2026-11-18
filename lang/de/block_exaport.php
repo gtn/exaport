@@ -1160,6 +1160,7 @@ $string['itemeditorlocked'] = 'Diese Seite kann nicht mehr bearbeitet werden. Ih
 $string['deletecontentblockpendingconfirm'] = 'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern der Seite wirksam. Abbrechen im Seitenformular verwirft die Entfernung.';
 
 // Pending content actions and saving help.
+$string['itemeditorcontentlabel'] = 'Hier den Hauptinhalt hinzufügen';
 $string['editcontentblock'] = 'Inhalt bearbeiten';
 $string['itemeditorapplychanges'] = 'Änderungen übernehmen';
 $string['itemeditorpendinghint_help'] = 'Speichern Sie abschließend die Seite. Abbrechen verwirft ungespeicherte Änderungen.';

@@ -1197,5 +1197,6 @@ $string['itemeditorlocked'] = 'This page can no longer be edited. Your pending c
 $string['deletecontentblockpendingconfirm'] = 'Remove this content block? The removal takes effect when you save the page. Cancel on the page form discards the removal.';
 
 // Pending content actions and saving help.
+$string['itemeditorcontentlabel'] = 'Add the main content here';
 $string['itemeditorapplychanges'] = 'Apply changes';
 $string['itemeditorpendinghint_help'] = 'Save the page when you are finished. Cancel discards unsaved changes.';

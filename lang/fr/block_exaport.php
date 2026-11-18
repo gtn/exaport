@@ -601,6 +601,7 @@ $string['uploadtour_save_title'] = 'Sauvegarder votre artefact';
 $string['uploadtour_save_content'] = 'Renseignez le champ Titre, puis cliquez sur Sauvegarder pour enregistrer l\'artefact et son contenu. Cliquez sur Annuler pour quitter ce formulaire sans enregistrer vos modifications.';
 
 // Pending content actions and saving help.
+$string['itemeditorcontentlabel'] = 'Ajoutez ici le contenu principal';
 $string['addcontentblock'] = 'Ajouter du contenu';
 $string['editcontentblock'] = 'Modifier le contenu';
 $string['contentaftersave'] = 'Sauvegardez l’artefact, puis ajoutez des fichiers dans Contenu.';

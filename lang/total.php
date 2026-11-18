@@ -4126,6 +4126,10 @@ return [
         'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.',
         'This page can no longer be edited. Your pending changes are shown below, but nothing has been saved.',
     ],
+    'itemeditorcontentlabel' => [
+        'Hier den Hauptinhalt hinzufügen',
+        'Add the main content here',
+    ],
     'itemeditorapplychanges' => [
         'Änderungen übernehmen',
         'Apply changes',

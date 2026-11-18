@@ -432,6 +432,7 @@ $string['itemeditorlocked'] = 'Dit object kan niet meer worden bewerkt. Je nog n
 $string['deletecontentblockpendingconfirm'] = 'Dit inhoudsblok verwijderen? De verwijdering wordt pas doorgevoerd wanneer je het object opslaat. Annuleren op het objectformulier verwerpt de verwijdering.';
 
 // Pending content actions and saving help.
+$string['itemeditorcontentlabel'] = 'Voeg hier de hoofdinhoud toe';
 $string['add'] = 'Toevoegen';
 $string['addcontentblock'] = 'Inhoud toevoegen';
 $string['editcontentblock'] = 'Inhoud bewerken';

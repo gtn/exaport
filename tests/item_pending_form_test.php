@@ -342,7 +342,7 @@ final class item_pending_form_test extends \advanced_testcase {
         $controls = $dom->query('./div[contains(@class, "felement")]', $row)->item(0);
         $this->assertNotNull($label);
         $this->assertNotNull($controls);
-        $this->assertStringContainsString(get_string('viewcontent', 'block_exaport'), $label->textContent);
+        $this->assertStringContainsString(get_string('itemeditorcontentlabel', 'block_exaport'), $label->textContent);
         $icons = $dom->query('.//a[@data-toggle="popover" or @data-bs-toggle="popover"]', $label);
         $this->assertSame(1, $icons->length);
         $this->assertSame(1, $dom->query('.//section[contains(@class, "exaport-item-content-section")]', $controls)->length);

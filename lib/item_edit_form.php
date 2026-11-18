@@ -225,7 +225,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                 $html = $renderer->render_from_template('block_exaport/item_content_blocks',
                     array_merge($contentsection->export_for_template($renderer), ['embedded' => true]));
             }
-            $mform->addElement('static', 'editorcontent', get_string('viewcontent', 'block_exaport'), $html);
+            $mform->addElement('static', 'editorcontent', get_string('itemeditorcontentlabel', 'block_exaport'), $html);
             // Fill Moodle's control column without changing the form row's width.
             $mform->getElement('editorcontent')->updateAttributes(['class' => 'flex-grow-1']);
             if ($pendingeditor) {

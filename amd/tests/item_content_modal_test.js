@@ -88,6 +88,89 @@ define(['jquery', 'block_exaport/item_content_modal', 'core_form/modalform'], fu
         assert.strictEqual(focus, this.section.querySelector('.exaport-item-content-add-button'));
     });
 
+    QUnit.test('pending captions distinguish adding from editing an unsaved or saved block and deleting', function(assert) {
+        var Modal = ModalForm.default || ModalForm;
+        var originalShow = Modal.prototype.show;
+        var originalListener = document.addEventListener;
+        var form = this.form;
+        var modals = [];
+        var state = {blocks: [
+            {key: 'new-accepted', id: 0, type: 'text', title: 'Pending', modified: true},
+            {key: 'block-42', id: 42, type: 'text', title: 'Saved', modified: false}
+        ], removed: []};
+        form.querySelector('[name="contentblocks"]').value = JSON.stringify(state);
+        this.section.insertAdjacentHTML('beforeend',
+            '<a href="#" class="exaport-item-content-add" data-content-type="file">Add file</a>' +
+            '<a href="#" class="exaport-item-content-edit" data-content-type="text"' +
+                ' data-block-key="new-accepted">Edit pending</a>' +
+            '<a href="#" class="exaport-item-content-edit" data-content-type="text" data-block-key="block-42">Edit saved</a>' +
+            '<a href="#" class="exaport-item-content-delete" data-content-type="text" data-block-key="new-accepted"' +
+                ' data-operation="delete">Delete pending</a>' +
+            '<a href="#" class="exaport-item-content-delete" data-content-type="text" data-block-key="block-42"' +
+                ' data-operation="delete">Delete saved</a>');
+        Modal.prototype.show = function() {
+            modals.push(this);
+        };
+        try {
+            document.addEventListener = function(type, listener, options) {
+                form.addEventListener(type, listener, options);
+            };
+            Content.init({pending: true, itemId: 5, courseId: 1, title: 'Edit content', addTitle: 'Add content',
+                saveLabel: 'Apply changes', addLabel: 'Add', deleteTitle: 'Delete content', deleteLabel: 'Delete'});
+            document.addEventListener = originalListener;
+            var cases = [
+                ['.exaport-item-content-add', 'Add content', 'Add', 0, 'save'],
+                ['[data-block-key="new-accepted"].exaport-item-content-edit', 'Edit content', 'Apply changes', 0, 'save'],
+                ['[data-block-key="block-42"].exaport-item-content-edit', 'Edit content', 'Apply changes', 42, 'save'],
+                ['[data-block-key="new-accepted"].exaport-item-content-delete', 'Delete content', 'Delete', 0, 'delete'],
+                ['[data-block-key="block-42"].exaport-item-content-delete', 'Delete content', 'Delete', 42, 'delete']
+            ];
+            cases.forEach(function(testcase, index) {
+                form.querySelector(testcase[0]).click();
+                var config = modals[index].config;
+                assert.strictEqual(config.modalConfig.title, testcase[1], 'title matches the clicked action');
+                assert.strictEqual(config.saveButtonText, testcase[2], 'button matches the clicked action');
+                assert.strictEqual(config.args.pending, 1, 'the action still edits the main form working copy');
+                assert.strictEqual(config.args.blockid, testcase[3], 'caption changes retain the database identity');
+                assert.strictEqual(config.args.operation, testcase[4], 'caption changes retain the operation');
+            });
+            assert.strictEqual(JSON.parse(modals[1].config.args.pendingblock).key, 'new-accepted',
+                'editing an unsaved block reuses its accepted identity');
+            assert.deepEqual(Content.readPendingState(form), state, 'opening any action leaves accepted state unchanged');
+        } finally {
+            document.addEventListener = originalListener;
+            Modal.prototype.show = originalShow;
+        }
+    });
+
+    QUnit.test('an immediate new-content modal retains its Save button', function(assert) {
+        var Modal = ModalForm.default || ModalForm;
+        var originalShow = Modal.prototype.show;
+        var originalListener = document.addEventListener;
+        var form = this.form;
+        var config;
+        this.section.insertAdjacentHTML('beforeend',
+            '<a href="#" class="exaport-item-content-add" data-content-type="file">Add file</a>');
+        Modal.prototype.show = function() {
+            config = this.config;
+        };
+        try {
+            document.addEventListener = function(type, listener, options) {
+                form.addEventListener(type, listener, options);
+            };
+            Content.init({pending: false, itemId: 5, courseId: 1, title: 'Edit content',
+                addTitle: 'Add content', saveLabel: 'Save', addLabel: 'Add'});
+            document.addEventListener = originalListener;
+            form.querySelector('.exaport-item-content-add').click();
+            assert.strictEqual(config.modalConfig.title, 'Add content');
+            assert.strictEqual(config.saveButtonText, 'Save', 'an immediate submission still saves independently');
+            assert.notOk(config.args.pending, 'the caption change does not enable pending submission');
+        } finally {
+            document.addEventListener = originalListener;
+            Modal.prototype.show = originalShow;
+        }
+    });
+
     QUnit.test('a closed modal cannot apply its late response over the accepted content', function(assert) {
         var Modal = ModalForm.default || ModalForm;
         var originalShow = Modal.prototype.show;

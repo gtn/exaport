@@ -177,7 +177,7 @@ $string['gradeitem'] = 'Abgabe beurteilen';
 $string['submititem'] = 'Abgeben';
 $string['saveitem'] = 'Speichern';
 $string['saveandkeepediting'] = 'Speichern und weiter bearbeiten';
-$string['contentaftersave'] = 'Fügen Sie Dokumente unter Inhalt hinzu: Wählen Sie + und anschließend Datei. Übernehmen aktualisiert das Formular; speichern Sie die Seite, um alle Änderungen gemeinsam zu speichern.';
+$string['contentaftersave'] = 'Speichern Sie die Seite. Anschließend können Sie unter Inhalt Dateien hinzufügen.';
 $string['disableditemwriteapi'] = 'Dieser alte Schreibdienst für Einträge ist deaktiviert. Verwenden Sie die strukturierte Inhaltsoberfläche.';
 
 // === Notes.
@@ -1143,7 +1143,7 @@ $string['linkedbadgeexpires'] = 'Gültig bis: {$a}';
 $string['uploadtour_create_name'] = 'Exaport: Ein Dokument hochladen';
 $string['uploadtour_create_description'] = 'Erklärt, wo Sie Dokumente hochladen und wie Sie eine Portfolio-Seite mit ihren Inhalten speichern.';
 $string['uploadtour_title_title'] = 'Ein Dokument hochladen';
-$string['uploadtour_title_content'] = 'Wählen Sie unter Inhalt + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Übernehmen, um zum Formular zurückzukehren. Die Datei wird erst gespeichert, wenn Sie die Seite speichern. Das Feld Miniaturansicht dient nur für ein Vorschaubild der Seite.';
+$string['uploadtour_title_content'] = 'Wählen Sie unter Inhalt + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Hinzufügen. Speichern Sie anschließend die Seite. Das Feld Miniaturansicht dient nur für ein Vorschaubild.';
 $string['uploadtour_save_title'] = 'Ihre Seite speichern';
 $string['uploadtour_save_content'] = 'Geben Sie Ihrer Seite einen Titel und wählen Sie Speichern. Damit speichern Sie die Seite und ihre Inhalte. Abbrechen verwirft Ihre ungespeicherten Änderungen.';
 $string['uploadtour_content_name'] = 'Exaport: Dokumente unter Inhalt hinzufügen';
@@ -1151,9 +1151,14 @@ $string['uploadtour_content_description'] = 'Zeigt, wie Dokumente hinzugefügt u
 $string['uploadtour_content_title'] = 'Inhalte zu Ihrer Seite hinzufügen';
 $string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie Dokumente, Texte und Links hinzu. Änderungen werden erst mit der Seite gespeichert. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.';
 $string['uploadtour_file_title'] = 'Ein Dokument hochladen';
-$string['uploadtour_file_content'] = 'Wählen Sie + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Übernehmen, um zum Formular zurückzukehren. Wählen Sie anschließend Speichern, um die Seite und ihre Inhalte zu speichern.';
+$string['uploadtour_file_content'] = 'Wählen Sie + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Hinzufügen. Wählen Sie anschließend Speichern, um die Seite und ihre Inhalte zu speichern.';
 
 $string['itemeditorinvalid'] = 'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.';
-$string['itemeditorpendinghint'] = 'Änderungen an Inhalt und Kompetenzen werden mit dieser Seite gespeichert. Übernehmen aktualisiert das Formular; Speichern speichert alles gemeinsam. Abbrechen verwirft noch nicht gespeicherte Änderungen.';
+$string['itemeditorpendinghint'] = 'Änderungen speichern';
 $string['itemeditorlocked'] = 'Diese Seite kann nicht mehr bearbeitet werden. Ihre noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.';
 $string['deletecontentblockpendingconfirm'] = 'Diesen Inhaltsblock entfernen? Die Entfernung wird erst beim Speichern der Seite wirksam. Abbrechen im Seitenformular verwirft die Entfernung.';
+
+// Pending content actions and saving help.
+$string['editcontentblock'] = 'Inhalt bearbeiten';
+$string['itemeditorapplychanges'] = 'Änderungen übernehmen';
+$string['itemeditorpendinghint_help'] = 'Speichern Sie abschließend die Seite. Abbrechen verwirft ungespeicherte Änderungen.';

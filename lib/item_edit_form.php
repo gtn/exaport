@@ -193,6 +193,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->setExpanded('itemcontent', true);
 
             if ($pendingeditor) {
+                $mform->addHelpButton('itemcontent', 'itemeditorpendinghint', 'block_exaport');
                 $initialstate = $this->_customdata['editorstate'];
                 $statejson = $this->optional_param('contentblocks', json_encode($initialstate), PARAM_RAW);
                 foreach (['pendingeditor' => 1, 'competencesmodified' => 0] as $name => $default) {
@@ -217,7 +218,6 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
                     !empty($this->_customdata['allowedit']));
                 $mform->addElement('static', 'editorcontent', '', $html);
                 $mform->getElement('editorcontent')->updateAttributes(['class' => 'w-100']);
-                $mform->addElement('static', 'editorpendinghint', '', get_string('itemeditorpendinghint', 'block_exaport'));
             } else {
                 $contentblocks = $this->_customdata['itemcontentblocks'];
                 $contentaddurl = $this->_customdata['itemcontentaddurl'] ?? null;

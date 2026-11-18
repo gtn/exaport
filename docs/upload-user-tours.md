@@ -5,21 +5,21 @@ workflow. Both guides have two steps and use Moodle's native tour navigation and
 End tour controls. They do not submit forms or upload files for the user.
 
 * **Upload a document** appears on the page creation form. It points to
-  **Content** and **Save and close**, explaining how to upload a document, apply
-  the dialog and save the page to keep the upload.
+  **Content** and **Save and close**, explaining how to upload a document, choose
+  **Add** in the dialog and save the page to keep the upload.
 * **Add documents through Content** appears in the page editor when the
   Content add button is available. It points to Content and the **+** button,
-  explaining how to choose **File**, apply the upload dialog, then save the page.
+  explaining how to choose **File**, add the document, then save the page.
 
-Both guides explain that **Apply** updates the form while the main **Save** saves
-the page, content and competencies together. Cancelling the main form discards
-its pending changes. The icon image field remains a thumbnail field.
+Content dialogs use **Add** for new blocks and **Apply changes** for edits.
+The main **Save** saves the page, content and competencies together. Cancelling
+the main form discards its pending changes. The thumbnail field is for a preview image.
 
 The guides apply across courses, including creation in Shared Categories. The
 second guide is excluded when a page cannot be edited. Assignment imports,
 read-only shared pages and other Exaport pages are outside their URL
-matches. The permanent hint on the page creation form also explains where to
-upload documents.
+matches. A standard Moodle help icon beside **Content** explains saving and
+cancelling without adding an inline paragraph to the form.
 
 ## Administration and completion
 

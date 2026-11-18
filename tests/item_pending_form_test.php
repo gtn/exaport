@@ -333,6 +333,24 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertSame(0, $dom->query('//*[@data-region="submitted-group-selection"]')->length);
     }
 
+    public function test_pending_save_guidance_is_native_help_beside_the_content_heading(): void {
+        $form = $this->form($this->customdata());
+        $dom = $this->dom($form->render());
+        $icons = $dom->query('//*[@id="id_itemcontent"]/div[.//h3]/a'
+            . '[@data-toggle="popover" or @data-bs-toggle="popover"]');
+        $this->assertSame(1, $icons->length);
+
+        // Moodle 4.5 and 5.2 use different Bootstrap attribute names for the same native help icon.
+        $icon = $icons->item(0);
+        $content = $icon->getAttribute('data-bs-content') ?: $icon->getAttribute('data-content');
+        $help = get_formatted_help_string('itemeditorpendinghint', 'block_exaport', false);
+        $this->assertSame(trim($help->text . ' ' . ($help->completedoclink ?? '')), trim($content));
+        $this->assertSame(0, $dom->query('//*[@id="fitem_id_editorpendinghint"]'
+            . ' | //*[@id="id_editorpendinghint"] | //*[@name="editorpendinghint"]')->length);
+        $container = $dom->query('//*[@id="id_itemcontentcontainer"]')->item(0);
+        $this->assertStringNotContainsString(trim(strip_tags($help->text)), $container->textContent);
+    }
+
     public function test_creation_offers_content_and_competencies_before_an_item_exists(): void {
         global $DB;
         set_config('block_exaport_enable_interaction_competences', 1);

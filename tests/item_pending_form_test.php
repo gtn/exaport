@@ -333,7 +333,7 @@ final class item_pending_form_test extends \advanced_testcase {
         $this->assertSame(0, $dom->query('//*[@data-region="submitted-group-selection"]')->length);
     }
 
-    public function test_content_uses_a_normal_labelled_form_row_with_native_help(): void {
+    public function test_content_has_its_own_expanded_section_and_normal_form_row_with_native_help(): void {
         $form = $this->form($this->customdata());
         $dom = $this->dom($form->render());
         $row = $dom->query('//*[@id="fitem_id_editorcontent"]')->item(0);
@@ -346,8 +346,11 @@ final class item_pending_form_test extends \advanced_testcase {
         $icons = $dom->query('.//a[@data-toggle="popover" or @data-bs-toggle="popover"]', $label);
         $this->assertSame(1, $icons->length);
         $this->assertSame(1, $dom->query('.//section[contains(@class, "exaport-item-content-section")]', $controls)->length);
-        $this->assertSame(1, $dom->query('ancestor::fieldset[@id="id_mainsettings"]', $row)->length);
-        $this->assertSame(0, $dom->query('//*[@id="id_itemcontent" or @id="id_itemcontentcontainer"]')->length);
+        $section = $dom->query('ancestor::fieldset[@id="id_itemcontent"]', $row)->item(0);
+        $this->assertNotNull($section);
+        $this->assertStringNotContainsString('collapsed', $section->getAttribute('class'));
+        $this->assertSame(0, $dom->query('ancestor::fieldset[@id="id_mainsettings"]', $row)->length);
+        $this->assertSame(0, $dom->query('.//*[@id="fitem_id_iconfile"]', $section)->length);
         $this->assertSame(0, $dom->query('.//h2 | .//h3', $row)->length);
 
         // Moodle 4.5 and 5.2 use different Bootstrap attribute names for the same native help icon.

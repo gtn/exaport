@@ -1,6 +1,6 @@
 ### v5.2 (2026111800) ###
 * Use one upload tour for creating and editing pages, replacing the two previous tours on upgrade.
-* Align Content and its help in a standard Moodle form row; move thumbnail guidance into its field help in English, German, Dutch and French.
+* Keep Content in its own expanded section with standard Moodle form columns; move thumbnail guidance into its field help in English, German, Dutch and French.
 
 ### v5.2 (2026111601) ###
 * Clarify content-dialog actions, move saving guidance into standard Moodle help, and improve localized upload tours.

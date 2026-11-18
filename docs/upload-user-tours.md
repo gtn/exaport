@@ -17,6 +17,7 @@ The guide applies across courses, including creation in Shared Categories. Its
 item-page URL match and Content add-button filter exclude read-only pages and
 other screens without the editor. A standard Moodle help icon in the **Content**
 label column explains saving and cancelling without an inline paragraph.
+Content remains a separate form section, expanded by default.
 
 ## Administration and completion
 

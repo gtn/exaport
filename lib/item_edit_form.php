@@ -189,6 +189,10 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform->add_exaport_help_button('iconfile', 'iconfile');
 
         if ($sections['content']) {
+            // Keep Content in its own fieldset while using normal form columns inside it.
+            $mform->addElement('header', 'itemcontent', get_string('viewcontent', 'block_exaport'));
+            $mform->setExpanded('itemcontent', true);
+
             if ($pendingeditor) {
                 $initialstate = $this->_customdata['editorstate'];
                 $statejson = $this->optional_param('contentblocks', json_encode($initialstate), PARAM_RAW);

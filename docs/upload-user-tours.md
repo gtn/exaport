@@ -10,14 +10,12 @@ document, choose **Add** in the dialog and save the page to keep the upload.
 
 Content dialogs use **Add** for new blocks and **Apply changes** for edits.
 The main **Save** saves the page, content and competencies together. Cancelling
-the main form discards its pending changes. Thumbnail is at the end of Metadata,
-with guidance in its own help icon, so the tour does not refer to an optional field.
+the main form discards its pending changes.
 
 The guide applies across courses, including creation in Shared Categories. Its
 item-page URL match and Content add-button filter exclude read-only pages and
-other screens without the editor. A standard Moodle help icon in the **Content**
-label column explains saving and cancelling without an inline paragraph.
-Content remains a separate form section, expanded by default.
+other screens without the editor. The **Content** help icon explains saving and
+cancelling. Thumbnail has its own help icon in Metadata.
 
 ## Administration and completion
 
@@ -76,7 +74,8 @@ Synchronisation follows Moodle's own shipped-tour pattern:
 
 The transaction covers removals, imports and the quick-check marker. A single
 `usertourssignature` value in `config_plugins` records a hash of the active guide
-definitions and retired identities. It lets repeated task executions skip the synchronisation work.
+definitions and retired identities. It lets repeated task executions skip the
+synchronisation work.
 The hash changes automatically when a guide is added or its revision increases;
 there is no second version number to bump manually. Missing guides, including
 ones deleted locally, are recreated on the next catalogue synchronisation.

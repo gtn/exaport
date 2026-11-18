@@ -1,10 +1,9 @@
 ### v5.2 (2026111800) ###
-* Use one upload tour for creating and editing pages, replacing the two previous tours on upgrade.
-* Keep Content in its own expanded section with standard Moodle form columns; move thumbnail guidance into its field help in English, German, Dutch and French.
-* Place the optional item Thumbnail at the end of Metadata, after Results and learnings.
+* Clarify content-dialog actions and upload instructions in English, German, Dutch and French; show saving guidance in field help.
+* Use one upload tour for creating and editing items, with shared completion.
+* Place Thumbnail at the end of Metadata, after Results and learnings.
 
 ### v5.2 (2026111601) ###
-* Clarify content-dialog actions, move saving guidance into standard Moodle help, and improve localized upload tours.
 * Content and competency changes now remain pending until the main item Save, including when creating an item.
 * Save only applied content blocks and competency selections, preserving untouched changes from other clients. Later saves replace earlier edits to the same block.
 * Keep submitted sharing choices through validation errors and loading retries; wait for an unknown active selection before saving.

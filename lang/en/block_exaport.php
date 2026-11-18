@@ -1189,7 +1189,7 @@ $string['uploadtour_content_description'] = 'Shows how to add documents and save
 $string['uploadtour_content_title'] = 'Add content to your page';
 $string['uploadtour_content_content'] = 'Use Content for documents, text and links. Changes are saved only when you save the page. Cancel on this form discards unsaved changes.';
 $string['uploadtour_file_title'] = 'Upload a document';
-$string['uploadtour_file_content'] = 'Choose +, then File. Upload your file and choose Add. Choose Save and close to save the page and its content.';
+$string['uploadtour_file_content'] = 'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.';
 
 $string['itemeditorinvalid'] = 'Some page changes are missing or invalid. Your changes have not been saved.';
 $string['itemeditorpendinghint'] = 'Saving your changes';

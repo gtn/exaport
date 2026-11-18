@@ -599,12 +599,6 @@ $string['uploadtour_title_title'] = 'Ajouter un document';
 $string['uploadtour_title_content'] = 'Dans Contenu, cliquez sur +, puis sur Fichier. Ajoutez votre document et cliquez sur Ajouter. Sauvegardez ensuite l’artefact.';
 $string['uploadtour_save_title'] = 'Sauvegarder votre artefact';
 $string['uploadtour_save_content'] = 'Renseignez le champ Titre, puis cliquez sur Sauvegarder pour enregistrer l\'artefact et son contenu. Cliquez sur Annuler pour quitter ce formulaire sans enregistrer vos modifications.';
-$string['uploadtour_content_name'] = 'Exaport : Ajouter des documents dans Contenu';
-$string['uploadtour_content_description'] = 'Explique comment ajouter des documents et enregistrer les modifications du contenu.';
-$string['uploadtour_content_title'] = 'Ajouter du contenu à votre artefact';
-$string['uploadtour_content_content'] = 'Utilisez Contenu pour ajouter des documents, du texte et des liens. Vos modifications ne sont enregistrées que lorsque vous sauvegardez l\'artefact. Cliquez sur Annuler pour quitter ce formulaire sans enregistrer vos modifications.';
-$string['uploadtour_file_title'] = 'Ajouter un document';
-$string['uploadtour_file_content'] = 'Cliquez sur +, puis sur Fichier. Ajoutez votre document et cliquez sur Ajouter. Cliquez ensuite sur Sauvegarder pour enregistrer l’artefact et son contenu.';
 
 // Pending content actions and saving help.
 $string['addcontentblock'] = 'Ajouter du contenu';

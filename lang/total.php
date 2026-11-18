@@ -4111,8 +4111,8 @@ return [
         'Upload a document',
     ],
     'uploadtour_file_content' => [
-        'Wählen Sie + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Hinzufügen. Wählen Sie anschließend Speichern, um die Seite und ihre Inhalte zu speichern.',
-        'Choose +, then File. Upload your file and choose Add. Choose Save and close to save the page and its content.',
+        'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.',
+        'Choose +, then File. Upload your document and choose Apply to return to this form. Choose Save and close to save the page and its content.',
     ],
     'itemeditorinvalid' => [
         'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.',

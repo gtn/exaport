@@ -422,9 +422,9 @@ $string['uploadtour_save_content'] = 'Vul het veld Opschrift in en kies Opslaan 
 $string['uploadtour_content_name'] = 'Exaport: Documenten toevoegen via Inhoud';
 $string['uploadtour_content_description'] = 'Laat zien hoe je documenten toevoegt en inhoudswijzigingen opslaat.';
 $string['uploadtour_content_title'] = 'Inhoud aan je object toevoegen';
-$string['uploadtour_content_content'] = 'Gebruik Inhoud voor documenten, tekst en links. Je wijzigingen worden pas opgeslagen wanneer je het object opslaat. Met Annuleren sluit je dit formulier zonder je wijzigingen op te slaan.';
+$string['uploadtour_content_content'] = 'Gebruik Inhoud voor documenten, tekst en links. Wijzigingen worden pas opgeslagen wanneer je het object opslaat. Annuleren op dit formulier verwerpt niet-opgeslagen wijzigingen.';
 $string['uploadtour_file_title'] = 'Een document uploaden';
-$string['uploadtour_file_content'] = 'Kies + en daarna Bestand. Upload je bestand en kies Toevoegen. Kies daarna Opslaan en sluiten om het object en de inhoud op te slaan.';
+$string['uploadtour_file_content'] = 'Kies + en daarna Bestand. Upload je document en kies Toepassen om terug te keren naar dit formulier. Kies Opslaan en sluiten om het object en de inhoud op te slaan.';
 
 $string['itemeditorinvalid'] = 'Sommige wijzigingen aan het object ontbreken of zijn ongeldig. Je wijzigingen zijn niet opgeslagen.';
 $string['itemeditorpendinghint'] = 'Wijzigingen opslaan';

@@ -1152,7 +1152,7 @@ $string['uploadtour_content_description'] = 'Zeigt, wie Dokumente hinzugefügt u
 $string['uploadtour_content_title'] = 'Inhalte zu Ihrer Seite hinzufügen';
 $string['uploadtour_content_content'] = 'Unter Inhalt fügen Sie Dokumente, Texte und Links hinzu. Änderungen werden erst mit der Seite gespeichert. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.';
 $string['uploadtour_file_title'] = 'Ein Dokument hochladen';
-$string['uploadtour_file_content'] = 'Wählen Sie + und dann Datei. Laden Sie Ihre Datei hoch und wählen Sie Hinzufügen. Wählen Sie anschließend Speichern, um die Seite und ihre Inhalte zu speichern.';
+$string['uploadtour_file_content'] = 'Wählen Sie + und anschließend Datei. Laden Sie Ihr Dokument hoch und wählen Sie Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.';
 
 $string['itemeditorinvalid'] = 'Einige Änderungen an der Seite fehlen oder sind ungültig. Ihre Änderungen wurden nicht gespeichert.';
 $string['itemeditorpendinghint'] = 'Änderungen speichern';

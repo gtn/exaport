@@ -238,7 +238,7 @@ return [
         'Shows additional bounded identifiers and informational counts. Sensitive values remain hidden.',
     ],
     'exaport:viewartifactsfromstudents' => [
-        'Portfolioseiten der eigenen Teilnehmer/innen einsehen',
+        'Portfolioseiten der eigenen Teilnehmer/innen sehen',
         'Can see portfolio pages of own students',
     ],
     'new' => [
@@ -342,12 +342,12 @@ return [
         'The Portfolio can be used to store web addresses, files, and notes, allowing users to jot down insights or brief comments',
     ],
     'explainingmoredata' => [
-        '<strong>Hier können Sie Belege für Ihren Lernweg sammeln.</strong>
+        '<strong>Dies ist Ihr Bereich, um Belege für Ihren Lernweg zu sammeln.</strong>
 			<ul>
 				<li><strong>Fügen Sie Ihre besten Arbeiten hinzu:</strong> Laden Sie Dateien, Weblinks oder Beschreibungen von Projekten, Präsentationen und mehr hoch.</li>
-				<li><strong>Reflektieren Sie Ihre Erfahrungen:</strong> Beschreiben Sie für jeden Eintrag, was Sie gelernt haben, welche Herausforderungen Sie bewältigt haben und was Ihnen gelungen ist.</li>
+				<li><strong>Reflektieren Sie über Ihre Erfahrungen:</strong> Erklären Sie für jeden Eintrag, was Sie gelernt haben, welche Herausforderungen Sie bewältigt haben und welche Erfolge Sie erzielt haben.</li>
 			</ul>
-			<strong>Betrachten Sie jeden Eintrag als eine Geschichte, die Ihre Fähigkeiten und Ihr Wissen zeigt.</strong>',
+			<strong>Betrachten Sie jeden Eintrag als eine Art Geschichte, die Ihre Fähigkeiten und Ihr Wissen beschreibt.</strong>',
         '<strong>This is your space to gather evidence of your learning journey.</strong>
             <ul>
                 <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
@@ -356,31 +356,31 @@ return [
             <strong>Think of each item as a story highlighting your skills and knowledge.</strong>',
     ],
     'explaininglink' => [
-        '<span class=\'block_eportfolio_bold\'>Externe Links:</span> Kursteilnehmer/innen können diese Links untereinander austauschen.',
+        '<span class=\'block_eportfolio_bold\'>Externe Links:</span> Diese Links können mit anderen Kursteilnehmer/innen ausgetauscht werden.',
         'Links.  These links may be shared with all authorized course members.',
     ],
     'explainingfile' => [
-        '<span class=\'block_eportfolio_bold\'>Dateien:</span> Kursteilnehmer/innen können diese Dateien untereinander austauschen.',
+        '<span class=\'block_eportfolio_bold\'>Dateien:</span> Diese Dateien können mit anderen Kursteilnehmer/innen ausgetauscht werden.',
         'Files. These files may be shared with all authorized course members.',
     ],
     'explainingnote' => [
-        '<span class=\'block_eportfolio_bold\'>Notizen:</span> Kursteilnehmer/innen können diese Notizen untereinander austauschen.',
+        '<span class=\'block_eportfolio_bold\'>Notizen:</span> Diese Notizen können mit anderen Kursteilnehmer/innen ausgetauscht werden.',
         'Notes. These notes may be shared with all authorized course members.',
     ],
     'explainingshare' => [
-        'Um den Link mit anderen Teilnehmer/innen zu teilen, klicken Sie auf die jeweiligen Namen und speichern Sie die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
+        'Um den Link für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
         'To allow a participant to see the link, click on their name and then click on Save Changes. You can choose more than one participant.',
     ],
     'explainingshared' => [
-        'Folgende Teilnehmer/innen haben Links, Dateien oder Notizen geteilt.',
+        'Folgende Teilnehmer/innen haben veröffentlichte Links, Dateien bzw. Notizen.',
         'These participants have shared some of their external links, files or notes.',
     ],
     'explainingsharefile' => [
-        'Um die Datei mit anderen Teilnehmer/innen zu teilen, klicken Sie auf die jeweiligen Namen und speichern Sie die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
+        'Um die Datei für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
         'To allow a participant to see the file, click on their name and then click on Save Changes.  You can choose more than one participant.',
     ],
     'explainingsharenote' => [
-        'Um die Notiz mit anderen Teilnehmer/innen zu teilen, klicken Sie auf die jeweiligen Namen und speichern Sie die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
+        'Um die Notiz für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
         'To allow a participant to see the note, click on their name and then click on Save Changes.  You can choose more than one participant.',
     ],
     'file' => [
@@ -492,7 +492,7 @@ return [
         'Share',
     ],
     'strunshare' => [
-        'Freigabe aufheben',
+        'Ver&ouml;ffentlichung zurücknehmen',
         'Unshare',
     ],
     'summary' => [
@@ -532,7 +532,7 @@ return [
         'Access only for the following users',
     ],
     'internalaccessgroups' => [
-        'Zugriff nur für die folgenden Gruppen',
+        'Zugriff für folgende Gruppen',
         'Access only for the following groups',
     ],
     'externaccess' => [
@@ -544,7 +544,7 @@ return [
         'Share by Email',
     ],
     'emailaccessdescription' => [
-        'Geben Sie pro Zeile eine E-Mail-Adresse ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Wenn Sie eine Adresse löschen, erlischt der Zugriff auf die Sammelmappe über diesen Link.',
+        'Geben Sie eine E-Mail-Adresse pro Zeile ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Das Löschen der Adresse löscht den Zugriff auf diese Sammelmappe.',
         'Input an email address per line<br />Each email will receive a unique link with access to this collection. Deleting the email will remove access to this collection.',
     ],
     'emailaccessmessagesubject' => [
@@ -552,11 +552,11 @@ return [
         'New shared collection for you',
     ],
     'emailaccessmessage' => [
-        'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt. Sie können sie hier abrufen: {$a->url}',
+        'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt. Sie kann hier abgerufen werden: {$a->url}',
         'Hello! {$a->sendername} has shared the collection "{$a->viewname}" for you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML' => [
-        'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt.<br />Sie können sie <a href="{$a->url}">hier</a> abrufen.',
+        'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden',
         'Hello!<br />{$a->sendername} has shared the collection "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
@@ -569,11 +569,11 @@ return [
         '{$a->sendername} made changes to a collection shared with you.',
     ],
     'emailaccessmessage_updatedview' => [
-        'Hallo! {$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert. Sie können sie hier abrufen: {$a->url}',
+        'Hallo! {$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert. Sie kann hier abgerufen werden: {$a->url}',
         'Hello! {$a->sendername} has updated the collection "{$a->viewname}" they shared with you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML_updatedview' => [
-        'Hallo!<br />{$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert.<br />Sie können sie <a href="{$a->url}">hier</a> abrufen.',
+        'Hallo!<br />{$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden',
         'Hello!<br />{$a->sendername} has updated the collection "{$a->viewname}" they shared with you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
@@ -668,7 +668,7 @@ return [
         'Create XAPI-File',
     ],
     'clicktodownloadscorm' => [
-        'Klicken Sie auf die Schaltfläche, um die SCORM-Datei herunterzuladen:',
+        'Drücken Sie den folgenden Button, um die SCORM-Datei herunterzuladen:',
         'Press button to download the SCORM file:',
     ],
     'add_directory_structure' => [
@@ -819,7 +819,7 @@ return [
         'Filetype of $a->filename ($a->title) could not be detected. File not imported!',
     ],
     'linkedfilenotfound' => [
-        'Die Datei $a->filename in $a->url ($a->title) wurde nicht gefunden und konnte nicht importiert werden.',
+        'Datei $a->filename in $a->url ($a->title) wurde nicht gefunden. Datei wurde nicht importiert!',
         'File $a->filename in $a->url ($a->title) was not found. File not imported!',
     ],
     'couldntinsert' => [
@@ -863,15 +863,15 @@ return [
         'Upload failed.',
     ],
     'couldntupdatedesc' => [
-        'Ihre Beschreibung konnte nicht aktualisiert werden!',
+        'Beschreibung konnte nicht aktualisiert werden!',
         'Could not update your description!',
     ],
     'couldntinsertdesc' => [
-        'Die Beschreibung konnte nicht eingefügt werden!',
+        'Beschreibung konnte nicht eingefügt werden!',
         'Could not insert the description!',
     ],
     'exportcomment' => [
-        'Dies ist eine exportierte Datei von Exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst beim Import fehlen.',
+        'Dies ist eine exportierte Datei von Exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden können!',
         'This is an exported file from Exabis ePortfolio. Please do not remove the comments, they are needed for the import!',
     ],
     'comment' => [
@@ -879,7 +879,7 @@ return [
         'Comment',
     ],
     'commentshouldnotbeempty' => [
-        'Sie müssen einen Kommentar eingeben.',
+        'Der Kommentar darf nicht leer sein.',
         'You have to enter a comment.',
     ],
     'title' => [
@@ -911,7 +911,7 @@ return [
         'Results and learnings',
     ],
     'intronotempty' => [
-        'Geben Sie einen Inhalt ein.',
+        'Der Inhalt darf nicht leer sein.',
         'You have to enter a content.',
     ],
     'link' => [
@@ -927,11 +927,11 @@ return [
         'Add new page',
     ],
     'categorynotempty' => [
-        'Sie müssen eine Kategorie auswählen.',
+        'Es muss eine Kategorie ausgew&auml;hlt sein.',
         'You have to choose a category.',
     ],
     'urlnotempty' => [
-        'Sie müssen eine URL eingeben.',
+        'Die URL darf nicht leer sein.',
         'You have to enter an URL.',
     ],
     'selectall' => [
@@ -1093,7 +1093,7 @@ return [
         'Create EPX-File',
     ],
     'exportviewselect' => [
-        'Wählen Sie die Sammelmappe aus, deren Einträge Sie exportieren möchten.',
+        'Um alle Einträge einer bestimmten Sammelmappe zu exportieren, wählen Sie diese bitte hier aus.',
         'To export all items of a specific collection, please select it here',
     ],
     'export_directory' => [
@@ -1115,7 +1115,7 @@ return [
         'Share',
     ],
     'explainingall' => [
-        'Alle Einträge in Ihrem Portfolio',
+        'Alle Einträge im Portfolio',
         'All Items in your portfolio',
     ],
     'share_to_other_users' => [
@@ -1163,7 +1163,7 @@ return [
         'Please create a new Collection',
     ],
     'viewnotfound' => [
-        'Die Sammelmappe wurde nicht gefunden oder Sie haben keine Zugriffsberechtigung.',
+        'Die Sammelmappe ist für die Person nicht einsehbar / Keine Zugriffsberechtigung.',
         'Collection not found',
     ],
     'newview' => [
@@ -1255,7 +1255,7 @@ return [
         'Automatically add all available pages to this collection',
     ],
     'sharetoteacher' => [
-        'Sofort für alle Kurstrainer/innen freigeben',
+        'Sofort mit allen Kurs-Trainer/innen teilen',
         'Share to all teachers in this course',
     ],
     'createpage' => [
@@ -1543,11 +1543,11 @@ return [
         'Show items from subcategories',
     ],
     'show_items_from_other_users' => [
-        'Einträge anderer Nutzer/innen in Ihren geteilten Kategorien anzeigen',
+        'Einträge von anderen Nutzer/innen in Ihren geteilten Kategorien anzeigen',
         'Show items from other users in your shared categories',
     ],
     'show_items_from_other_users_help' => [
-        'Wenn Sie eine oder mehrere Kategorien freigegeben haben, können andere Nutzer/innen dort Einträge hinzufügen. Mit diesem Kontrollkästchen legen Sie fest, ob diese Einträge angezeigt werden.',
+        'Falls Sie eine oder mehrere Ihrer Kategorien geteilt haben, können andere Nutzer/innen Einträge zu Ihren Kategorien hinzufügen. Mit diesem Kontrollkästchen können Sie entscheiden, ob Sie die Einträge sehen möchten.',
         'In case you shared one or more of your categories, other users are able to add items into your categories. With this checkbox you can decide if you want to see them, or not.',
     ],
     'layout_mode_folder' => [
@@ -1587,11 +1587,11 @@ return [
         'Shared with',
     ],
     'sharedwithotherusers' => [
-        'Intern für andere Nutzer/innen freigegeben',
+        'Intern mit anderen Nutzer/innen geteilt',
         'Shared internally with other users',
     ],
     'sharedwith_user_cnt' => [
-        'Für {$a} Nutzer/innen freigegeben',
+        'Mit {$a} Nutzer/innen geteilt',
         'Shared with {$a} users',
     ],
     'sharedwith_onlyme' => [
@@ -1599,7 +1599,7 @@ return [
         'Shared only with me',
     ],
     'sharedwith_shareall' => [
-        'Für alle Nutzer/innen freigegeben',
+        'Mit allen Nutzer/innen geteilt',
         'Shared with all users',
     ],
     'sharedwith_shareexternal' => [
@@ -1619,7 +1619,7 @@ return [
         'Shared with {$a} groups',
     ],
     'share_tooltip_users' => [
-        'Intern für folgende Nutzer/innen freigegeben: {$a}',
+        'Intern mit den folgenden Nutzer/innen geteilt: {$a}',
         'Shared internally with the following users: {$a}',
     ],
     'share_tooltip_groups' => [
@@ -1627,7 +1627,7 @@ return [
         'Shared internally with the following groups: {$a}',
     ],
     'share_tooltip_all' => [
-        'Intern für alle Nutzer/innen freigegeben.',
+        'Intern mit allen Nutzer/innen geteilt.',
         'Shared internally with all users.',
     ],
     'share_tooltip_external' => [
@@ -1851,7 +1851,7 @@ return [
         'Choose your competences',
     ],
     'selectcomps' => [
-        'Wählen Sie die Kompetenzen aus, die zu Ihrer hochgeladenen Datei passen.',
+        'Wählen Sie hier die Kompetenzen, die zu Ihrem Upload passen!',
         'Choose competences associated with your upload!',
     ],
     'competences_old_version' => [
@@ -1871,7 +1871,7 @@ return [
         'Here you can self-assess whether you have acquired the competency with your page.',
     ],
     'teachercomps' => [
-        'Hier können Sie beurteilen, ob die Teilnehmer/innen die folgenden Kompetenzen durch ihre Seiten erreicht haben.',
+        'Hier können Sie beurteilen, ob die Teilnehmer/innen folgende Kompetenzen durch Seiten erreicht haben.',
         'Here you can assess whether your students have acquired the competency with this page.',
     ],
     'competences' => [
@@ -1963,7 +1963,7 @@ return [
         'User quota for Exabis ePortfolio',
     ],
     'block_exaport_userquota_body' => [
-        'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio hochladen kann.<br>Wert für die gesamte Website: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
+        'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio hochladen kann. <br> Wert für diese Website ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
         'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
     ],
     'block_exaport_multiplefilesinitem' => [
@@ -1983,11 +1983,11 @@ return [
         'User will be able to copy pages from a shared category into their own collection',
     ],
     'block_exaport_app_alloweditdelete_head' => [
-        'Teilnehmer/innen können Inhalte nach einer Rückmeldung von Trainer/innen bearbeiten und/oder löschen.',
+        'Teilnehmer/innen können Inhalte nach einem Feedback von Trainer/innen bearbeiten und/oder löschen.',
         'Students are allowed to edit and delete items after teacher reviews',
     ],
     'block_exaport_app_alloweditdelete_head_alternative' => [
-        'Teilnehmer/innen können Inhalte nach einer Rückmeldung von Trainer/innen bearbeiten und/oder löschen.',
+        'Teilnehmer/innen können Inhalte nach einem Feedback von Trainer/innen bearbeiten und/oder löschen.',
         'Students are allowed to edit and delete items after teacher reviews',
     ],
     'block_exaport_app_alloweditdelete_body' => [
@@ -1999,11 +1999,11 @@ return [
         'Remove all existing "Everyone with an account" shares from items, categories and collections? They will not be restored when sharing with everyone is re-enabled. Other sharing methods remain unchanged.',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head' => [
-        'Trainer/innen können alle Seiten der eigenen Teilnehmer/innen einsehen',
+        'Trainer/innen können ALLE Seiten der eigenen Teilnehmer/innen einsehen',
         'Teacher can see ALL pages of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
-        'Trainer/innen können alle Seiten der eigenen Teilnehmer/innen einsehen',
+        'Trainer/innen können ALLE Seiten der eigenen Teilnehmer/innen einsehen',
         'Teacher can see ALL pages of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_body' => [
@@ -2420,7 +2420,7 @@ return [
         'Tiles',
     ],
     'category_up' => [
-        'Zurück zur übergeordneten Kategorie',
+        'übergeordnete Kategorie',
         'back to Parent Category',
     ],
     'supported' => [
@@ -2440,7 +2440,7 @@ return [
         'My students',
     ],
     'show_sharedbyuser' => [
-        'Durch Teilnehmer/innen geteilt',
+        'Von Nutzer/innen geteilt',
         'Shared by users',
     ],
     'enrolled_courses' => [
@@ -2465,7 +2465,7 @@ return [
     ],
 
     'messageprovider:viewupdated' => [
-        'Nachricht bei Aktualisierung einer mit mir geteilten Sammelmappe',
+        'Nachricht, wenn ein/e Nutzer/in eine mit mir geteilte Sammelmappe aktualisiert',
         'Updated collection notifications',
     ],
 
@@ -2503,9 +2503,9 @@ return [
         'Pdf settings',
     ],
     'pdf_settings_description' => [
-        'Wenn Sie spezielle oder ungewöhnliche Schriftzeichen verwenden, kann es bei der PDF-Erstellung zu Problemen kommen. Probieren Sie in diesem Fall andere Schriftarteinstellungen aus.<br>
-			Ihre PDF-Einstellungen werden für diese Sammelmappe gespeichert.<br>Wenn Sie Ihre Sammelmappe für andere Nutzer/innen freigeben, sehen diese das PDF mit Ihren Einstellungen.<br>
-			Bei nicht standardisierten Schriftarten können Formatierungen wie Fett- und Kursivschrift fehlen.',
+        'Wenn Sie spezielle oder ungewöhnliche Schriftzeichen verwenden, kann es zu Problemen mit dem generierten PDF kommen. Sie können daher versuchen, unterschiedliche Schriftarteinstellungen zu verwenden.<br>
+			Ihre PDF-Einstellungen werden für diese Sammelmappe gespeichert.<br>Wenn Ihre Sammelmappe mit anderen Nutzer/innen geteilt wird, sehen diese das PDF mit Ihren Einstellungen.<br>
+			Nicht-standardisierte Schriftarten können einige Optionen wie Fett, Kursiv usw. verlieren.',
         'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
             Your PDF settings will be saved for this collection.<br>So, if your collection is shared with other users - they will see the pdf with your settings.<br>
             Non-standard fonts can have some lost options like bold, italic, e.t.c.',
@@ -2523,7 +2523,7 @@ return [
         'Add collection meta data',
     ],
     'pdf_settings_showusername' => [
-        'Vollständiger Name',
+        'Name',
         'user name',
     ],
     'pdf_settings_showuserpicture' => [
@@ -2723,7 +2723,7 @@ return [
 				<li>Was haben Sie erreicht?</li>
 				<li>Welche Fähigkeiten und Kompetenzen haben Sie durch diese Arbeit entwickelt oder gestärkt?</li>
 				<li>Was haben Sie über sich und Ihre Fähigkeiten gelernt?</li>
-				<li>Was würden Sie beim nächsten Mal anders machen?</li>
+				<li>Was würden Sie das nächste Mal anders machen?</li>
 			</ul>',
         '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul>
@@ -2743,7 +2743,7 @@ return [
 				<li>Was haben Sie erreicht?</li>
 				<li>Welche Fähigkeiten und Kompetenzen haben Sie durch diese Arbeit entwickelt oder gestärkt?</li>
 				<li>Was haben Sie über sich und Ihre Fähigkeiten gelernt?</li>
-				<li>Was würden Sie beim nächsten Mal anders machen?</li>
+				<li>Was würden Sie das nächste Mal anders machen?</li>
 			</ul>',
         '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul>
@@ -2857,7 +2857,7 @@ return [
     ],
 
     'privacy:metadata:block_exaportcate' => [
-        'Kategorien eines Nutzerkontos',
+        'Kategorien der Person',
         'user\'s categories',
     ],
     'privacy:metadata:block_exaportcate:pid' => [
@@ -2938,7 +2938,7 @@ return [
     ],
 
     'privacy:metadata:block_exaportitem' => [
-        'Seite eines Nutzerkontos',
+        'Seite der Person',
         'user\'s page',
     ],
     'privacy:metadata:block_exaportitem:userid' => [
@@ -3027,7 +3027,7 @@ return [
         'id of page',
     ],
     'privacy:metadata:block_exaportitemcomm:userid' => [
-        'Verfasser/in des Kommentars',
+        'Autor/in des Kommentars',
         'author of comment',
     ],
     'privacy:metadata:block_exaportitemcomm:entry' => [
@@ -3184,7 +3184,7 @@ return [
 ',
     ],
     'cofigureblock_cvinfo_help' => [
-        'Hier sehen Sie den aktuellen Stand der ausgewählten Elemente in Ihrem Lebenslauf. Der Blockinhalt wird aktualisiert, wenn Sie diese Elemente später ändern.',
+        'Sie sehen den aktuellen Status der ausgewählten Elemente in Ihrem Lebenslauf. Der Blockinhalt wird aktualisiert, wenn Sie später Änderungen an Elementen in Ihrem Lebenslauf vornehmen.',
         'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.',
     ],
     'cofigureblock_cvinfo_cover' => [
@@ -3196,16 +3196,16 @@ return [
         'add actual CV "About me" content',
     ],
     'create_view_content_help_title' => [
-        'Erzählen Sie Ihre Geschichte: Erstellen Sie Ihr Portfolio',
+        'Gestalten Sie Ihre einzigartige Geschichte: Erstellen Sie Ihr Portfolio',
         'Craft Your Unique Story: Build Your Portfolio',
     ],
     'create_view_content_help_text' => [
         '<ul>
-				<li><strong>Planen Sie Ihr Layout:</strong> Ziehen Sie die Bausteine an die gewünschte Stelle und ordnen Sie sie so an, dass sie Ihre Geschichte erzählen. Verwenden Sie die Spalten im Abschnitt "Layout", um Ihr Portfolio zu gestalten.</li>
-				<li><strong>Strukturieren Sie Ihre Inhalte:</strong> Verwenden Sie Überschriften, Links und Notizen, um Ihre Inhalte übersichtlich zu gliedern.</li>
-				<li><strong>Geben Sie Ihrem Portfolio einen eigenen Stil:</strong> Wählen Sie Schriftarten und Farben aus den verfügbaren Optionen aus.</li>
+				<li><strong>Planen Sie Ihr Layout:</strong> Ziehen Sie Bausteine an die gewünschte Stelle und arrangieren Sie sie, um Ihre Geschichte zu erzählen. Verwenden Sie Spalten (verfügbar im Abschnitt "Layout"), um Ihr Portfolio zu planen.</li>
+				<li><strong>Sorgen Sie für Übersichtlichkeit:</strong> Verwenden Sie Überschriften, Links und Notizen, um Ihre Inhalte effektiv zu strukturieren.</li>
+				<li><strong>Personalisieren Sie Ihren Stil:</strong> Wählen Sie Schriftarten und Farben innerhalb der verfügbaren Optionen, um Ihrem Portfolio eine persönliche Note zu geben.</li>
 			</ul>
-			<strong>Denken Sie daran: Ihr ePortfolio zeigt, wer Sie sind und was Sie können. Gestalten Sie es klar, prägnant und ansprechend.</strong>',
+			<strong>Denken Sie daran: Ihr e-Portfolio erzählt der Welt von Ihnen und Ihren Fähigkeiten. Machen Sie es klar, prägnant und ansprechend!</strong>',
         '<ul>
                 <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
                 <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
@@ -3320,7 +3320,7 @@ return [
         'Show course navigation bar',
     ],
     'settings_show_course_navbar_body' => [
-        'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer/innen, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren Sie diese Einstellung für eine übersichtlichere Ansicht ohne Kurs-Tabs.',
+        'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer/innen, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren für eine übersichtlichere Ansicht ohne Kurs-Tabs.',
         'When enabled, the Moodle course navigation bar (Course, Participants, Grades, etc.) is shown on ePortfolio pages. Disable to show a cleaner interface without course tabs.',
     ],
     'settings_items_display_defaults_heading' => [
@@ -3522,7 +3522,7 @@ return [
         'Load Template',
     ],
     'starter_template_load_confirm' => [
-        'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Für Teilnehmer/innen ändert sich erst etwas, wenn Sie die Vorlage verteilen. Möchten Sie fortfahren?',
+        'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Dies wirkt sich erst auf Teilnehmer/innen aus, wenn Sie verteilen. Fortfahren?',
         'Loading this template will replace the current course template. This does not affect student categories until you distribute. Continue?',
     ],
     'starter_template_loaded' => [
@@ -3562,7 +3562,7 @@ return [
         'Remove from Template',
     ],
     'remove_from_template_confirm' => [
-        'Diese Kategorie aus der Vorlage entfernen? Bestehende Kategorien von Teilnehmer/innen bleiben erhalten.',
+        'Diese Kategorie aus der Vorlage entfernen? Löscht keine Kategorien von Teilnehmer/innen.',
         'Remove this category from the template? This does not delete student categories.',
     ],
     'distribute_now' => [
@@ -3594,7 +3594,7 @@ return [
         'Categories skipped (already exist): {$a}',
     ],
     'students_processed' => [
-        'Bearbeitete Teilnehmer/innen: {$a}',
+        'Teilnehmer/innen bearbeitet: {$a}',
         'Students processed: {$a}',
     ],
     'no_students_enrolled' => [
@@ -3666,7 +3666,7 @@ return [
         'Confirm Distribution',
     ],
     'confirm_distribute_categories_body' => [
-        'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dabei werden Kategorien für Teilnehmer/innen erstellt, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden.',
+        'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dies erstellt Kategorien für Teilnehmer/innen, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.',
         'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.',
     ],
     'confirm_distribute_views_title' => [
@@ -3674,7 +3674,7 @@ return [
         'Confirm Distribution',
     ],
     'confirm_distribute_views_body' => [
-        'Sind Sie sicher, dass Sie die Sammelmappenvorlagen an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dabei werden Sammelmappen für Teilnehmer/innen erstellt, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden.',
+        'Sind Sie sicher, dass Sie die Sammelmappenvorlagen an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dies erstellt Sammelmappen für Teilnehmer/innen, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Sammelmappen erstellt.',
         'Are you sure you want to distribute the collection templates to all enrolled students? This will create collections for students who do not already have them. This action cannot be undone. Once distributed, the collections are created.',
     ],
     'distribute' => [
@@ -3695,7 +3695,7 @@ return [
         'Collection Distribution',
     ],
     'view_distribution_description' => [
-        'Verteilen Sie Sammelmappenvorlagen an Teilnehmer/innen. In den Sammelmappen können die Teilnehmer/innen ihre Arbeit präsentieren.',
+        'Verteilen Sie Sammelmappen-Vorlagen an Teilnehmer/innen. Sammelmappen helfen Teilnehmer/innen, ihre Arbeit zu präsentieren.',
         'Manage and distribute collection templates to students. Collections help students showcase their work.',
     ],
     'starter_view_template_select' => [
@@ -3723,7 +3723,7 @@ return [
         'Remove Collection',
     ],
     'remove_view_confirm' => [
-        'Sind Sie sicher, dass Sie diese Sammelmappe aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Sammelmappen der Teilnehmer/innen.',
+        'Sind Sie sicher, dass Sie diese Sammelmappe aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Sammelmappen von Teilnehmer/innen.',
         'Are you sure you want to remove this collection from the template? This will not delete existing student collections.',
     ],
     'view_name_required' => [

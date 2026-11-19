@@ -35,7 +35,7 @@ $string['exaport:shareintern'] = 'Internes Teilen von Sammelmappen';
 $string['exaport:shareextern'] = 'Externes Teilen von Sammelmappen';
 $string['exaport:allowposts'] = 'Kommentare erlauben';
 $string['exaport:competences'] = 'Kompetenzen erlauben';
-$string['exaport:viewartifactsfromstudents'] = 'Portfolioseiten der eigenen Teilnehmer/innen einsehen';
+$string['exaport:viewartifactsfromstudents'] = 'Portfolioseiten der eigenen Teilnehmer/innen sehen';
 $string['new'] = 'Neu';
 $string['addbookmark'] = 'Lesezeichen hinzufügen';
 $string['addcategory'] = 'Kategorie hinzufügen';
@@ -61,19 +61,19 @@ $string['dontincludeurl'] = 'Diese Option auswählen, um die Verknüpfung zwisch
 $string['duplicatedurl'] = 'Diese URL ist bereits bei den Lesezeichen vorhanden.';
 $string['editcategories'] = 'Kategorien bearbeiten';
 $string['explaining'] = 'Das ePortfolio-System kann verwendet werden um Webadressen, Dateien, Notizen und Kommentare zu verwalten.';
-$string['explainingmoredata'] = '<strong>Hier können Sie Belege für Ihren Lernweg sammeln.</strong>
+$string['explainingmoredata'] = '<strong>Dies ist Ihr Bereich, um Belege für Ihren Lernweg zu sammeln.</strong>
 			<ul>
 				<li><strong>Fügen Sie Ihre besten Arbeiten hinzu:</strong> Laden Sie Dateien, Weblinks oder Beschreibungen von Projekten, Präsentationen und mehr hoch.</li>
-				<li><strong>Reflektieren Sie Ihre Erfahrungen:</strong> Beschreiben Sie für jeden Eintrag, was Sie gelernt haben, welche Herausforderungen Sie bewältigt haben und was Ihnen gelungen ist.</li>
+				<li><strong>Reflektieren Sie über Ihre Erfahrungen:</strong> Erklären Sie für jeden Eintrag, was Sie gelernt haben, welche Herausforderungen Sie bewältigt haben und welche Erfolge Sie erzielt haben.</li>
 			</ul>
-			<strong>Betrachten Sie jeden Eintrag als eine Geschichte, die Ihre Fähigkeiten und Ihr Wissen zeigt.</strong>';
-$string['explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> Kursteilnehmer/innen können diese Links untereinander austauschen.';
-$string['explainingfile'] = '<span class=\'block_eportfolio_bold\'>Dateien:</span> Kursteilnehmer/innen können diese Dateien untereinander austauschen.';
-$string['explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:</span> Kursteilnehmer/innen können diese Notizen untereinander austauschen.';
-$string['explainingshare'] = 'Um den Link mit anderen Teilnehmer/innen zu teilen, klicken Sie auf die jeweiligen Namen und speichern Sie die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.';
-$string['explainingshared'] = 'Folgende Teilnehmer/innen haben Links, Dateien oder Notizen geteilt.';
-$string['explainingsharefile'] = 'Um die Datei mit anderen Teilnehmer/innen zu teilen, klicken Sie auf die jeweiligen Namen und speichern Sie die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.';
-$string['explainingsharenote'] = 'Um die Notiz mit anderen Teilnehmer/innen zu teilen, klicken Sie auf die jeweiligen Namen und speichern Sie die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.';
+			<strong>Betrachten Sie jeden Eintrag als eine Art Geschichte, die Ihre Fähigkeiten und Ihr Wissen beschreibt.</strong>';
+$string['explaininglink'] = '<span class=\'block_eportfolio_bold\'>Externe Links:</span> Diese Links können mit anderen Kursteilnehmer/innen ausgetauscht werden.';
+$string['explainingfile'] = '<span class=\'block_eportfolio_bold\'>Dateien:</span> Diese Dateien können mit anderen Kursteilnehmer/innen ausgetauscht werden.';
+$string['explainingnote'] = '<span class=\'block_eportfolio_bold\'>Notizen:</span> Diese Notizen können mit anderen Kursteilnehmer/innen ausgetauscht werden.';
+$string['explainingshare'] = 'Um den Link für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.';
+$string['explainingshared'] = 'Folgende Teilnehmer/innen haben veröffentlichte Links, Dateien bzw. Notizen.';
+$string['explainingsharefile'] = 'Um die Datei für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.';
+$string['explainingsharenote'] = 'Um die Notiz für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.';
 $string['file'] = 'Datei';
 $string['iconfile'] = 'Miniaturansicht';
 $string['iconfile_help'] = 'Dieses Feld dient nur für ein Vorschaubild.';
@@ -101,7 +101,7 @@ $string['showall'] = 'auch andere Kurse anzeigen';
 $string['showcourse'] = 'nur diesen Kurs anzeigen';
 $string['showsummary'] = '(Gesamtaufstellung einblenden)';
 $string['strshare'] = 'Teilen';
-$string['strunshare'] = 'Freigabe aufheben';
+$string['strunshare'] = 'Ver&ouml;ffentlichung zurücknehmen';
 $string['summary'] = 'Gesamtaufstellung (optional)';
 $string['url'] = 'URL';
 $string['maincategory'] = 'Hauptkategorie';
@@ -111,21 +111,21 @@ $string['shareallexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bo
 $string['sharenoneexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>niemanden</span> außer für folgende Nutzer/innen';
 $string['internalaccessall'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span>';
 $string['internalaccessusers'] = 'Zugriff nur für folgende Nutzer/innen';
-$string['internalaccessgroups'] = 'Zugriff nur für die folgenden Gruppen';
+$string['internalaccessgroups'] = 'Zugriff für folgende Gruppen';
 $string['externaccess'] = 'externer ePortfolio-Link';
 $string['emailaccess'] = 'Per E-Mail teilen';
-$string['emailaccessdescription'] = 'Geben Sie pro Zeile eine E-Mail-Adresse ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Wenn Sie eine Adresse löschen, erlischt der Zugriff auf die Sammelmappe über diesen Link.';
+$string['emailaccessdescription'] = 'Geben Sie eine E-Mail-Adresse pro Zeile ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Das Löschen der Adresse löscht den Zugriff auf diese Sammelmappe.';
 $string['emailaccessmessagesubject'] = 'Eine Sammelmappe wurde mit Ihnen geteilt';
-$string['emailaccessmessage'] = 'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt. Sie können sie hier abrufen: {$a->url}';
-$string['emailaccessmessageHTML'] = 'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt.<br />Sie können sie <a href="{$a->url}">hier</a> abrufen.';
+$string['emailaccessmessage'] = 'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt. Sie kann hier abgerufen werden: {$a->url}';
+$string['emailaccessmessageHTML'] = 'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden';
 
 // 'emailaccessmessagesubject_updatedview' => [
 //     'Ich habe ein Eportfolio aktualisiert, welches ich mit Ihnen geteilt habe',
 //     'I updated an eportfolio view I shared with you',
 // ],
 $string['emailaccessmessagesubject_updatedview'] = '{$a->sendername} hat Änderungen an einer Sammelmappe vorgenommen, die mit Ihnen geteilt ist.';
-$string['emailaccessmessage_updatedview'] = 'Hallo! {$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert. Sie können sie hier abrufen: {$a->url}';
-$string['emailaccessmessageHTML_updatedview'] = 'Hallo!<br />{$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert.<br />Sie können sie <a href="{$a->url}">hier</a> abrufen.';
+$string['emailaccessmessage_updatedview'] = 'Hallo! {$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert. Sie kann hier abgerufen werden: {$a->url}';
+$string['emailaccessmessageHTML_updatedview'] = 'Hallo!<br />{$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden';
 $string['showallusers'] = 'Nutzer/innen aus allen meinen Kursen anzeigen';
 $string['showcourseusers'] = 'Nur Nutzer/innen des aktuellen Kurses anzeigen';
 $string['sharedpersons'] = 'Personen mit ver&ouml;ffentlichten Portfolios';
@@ -150,7 +150,7 @@ $string['import_short'] = 'Import';
 $string['explainexport'] = '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export:</span> Hier können Sie Ihr ePortfolio exportieren</span>';
 $string['createexport'] = 'SCORM-Datei erstellen';
 $string['createexportxapi'] = 'XAPI-Datei erstellen';
-$string['clicktodownloadscorm'] = 'Klicken Sie auf die Schaltfläche, um die SCORM-Datei herunterzuladen:';
+$string['clicktodownloadscorm'] = 'Drücken Sie den folgenden Button, um die SCORM-Datei herunterzuladen:';
 $string['add_directory_structure'] = 'Mit Unterverzeichnissen exportieren';
 $string['download'] = 'Herunterladen';
 $string['endedit'] = 'Bearbeiten beenden';
@@ -191,7 +191,7 @@ $string['couldninsertcomment'] = 'Kommentar konnte nicht eingefügt werden!';
 $string['importedcommentsstart'] = 'Importierte Kommentare:<br /><br />';
 $string['importedcommentsend'] = 'Ende importierte Kommentare';
 $string['filetypenotdetected'] = 'Filetyp von $a->filename ($a->title) konnte nicht ermittelt werden. Datei wurde nicht importiert!';
-$string['linkedfilenotfound'] = 'Die Datei $a->filename in $a->url ($a->title) wurde nicht gefunden und konnte nicht importiert werden.';
+$string['linkedfilenotfound'] = 'Datei $a->filename in $a->url ($a->title) wurde nicht gefunden. Datei wurde nicht importiert!';
 $string['couldntinsert'] = '$a konnte nicht in die Datenbank eingefügt werden';
 $string['couldntcreatedirectory'] = 'Verzeichnis konnte nicht erstellt werden';
 $string['couldntcopyfile'] = 'Konnte Datei $a nicht kopieren! Datei wurde nicht importiert!';
@@ -202,11 +202,11 @@ $string['couldntextractscormfile'] = 'SCORM-Datei konnte nicht extrahiert werden
 $string['couldntcreatetempdir'] = 'Temporäres Verzeichnis konnte nicht erstellt werden!';
 $string['scormhastobezip'] = 'SCORM-Datei muss im ZIP-Format vorliegen!';
 $string['uploadfailed'] = 'Upload nicht erfolgreich!';
-$string['couldntupdatedesc'] = 'Ihre Beschreibung konnte nicht aktualisiert werden!';
-$string['couldntinsertdesc'] = 'Die Beschreibung konnte nicht eingefügt werden!';
-$string['exportcomment'] = 'Dies ist eine exportierte Datei von Exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst beim Import fehlen.';
+$string['couldntupdatedesc'] = 'Beschreibung konnte nicht aktualisiert werden!';
+$string['couldntinsertdesc'] = 'Beschreibung konnte nicht eingefügt werden!';
+$string['exportcomment'] = 'Dies ist eine exportierte Datei von Exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden können!';
 $string['comment'] = 'Kommentar';
-$string['commentshouldnotbeempty'] = 'Sie müssen einen Kommentar eingeben.';
+$string['commentshouldnotbeempty'] = 'Der Kommentar darf nicht leer sein.';
 $string['title'] = 'Titel';
 $string['titlenotemtpy'] = 'Der Titel darf nicht leer sein.';
 $string['intro'] = 'Inhalt';
@@ -214,12 +214,12 @@ $string['shortdescription'] = 'Kurzbeschreibung';
 $string['project_description'] = 'Der Grund hinter diesem Projekt';
 $string['project_process'] = 'Umsetzung des Projekts';
 $string['project_result'] = 'Ergebnisse und Erkenntnisse';
-$string['intronotempty'] = 'Geben Sie einen Inhalt ein.';
+$string['intronotempty'] = 'Der Inhalt darf nicht leer sein.';
 $string['link'] = 'Link';
 $string['mixed'] = 'Seiten';
 $string['add_mixed'] = 'Neue Seiten';
-$string['categorynotempty'] = 'Sie müssen eine Kategorie auswählen.';
-$string['urlnotempty'] = 'Sie müssen eine URL eingeben.';
+$string['categorynotempty'] = 'Es muss eine Kategorie ausgew&auml;hlt sein.';
+$string['urlnotempty'] = 'Die URL darf nicht leer sein.';
 $string['selectall'] = 'Alle markieren';
 $string['deselectall'] = 'Alle Markierungen l&ouml;schen';
 $string['internalaccess'] = 'Interner Zugriff';
@@ -264,14 +264,14 @@ $string['export'] = 'Export SCORM-Datei';
 $string['export_short'] = 'Export';
 $string['exportepx'] = 'Export EPX-Datei';
 $string['createepxexport'] = 'EPX-Datei erstellen';
-$string['exportviewselect'] = 'Wählen Sie die Sammelmappe aus, deren Einträge Sie exportieren möchten.';
+$string['exportviewselect'] = 'Um alle Einträge einer bestimmten Sammelmappe zu exportieren, wählen Sie diese bitte hier aus.';
 $string['export_directory'] = 'Ordnerstruktur exportieren';
 $string['createexport_directory'] = 'Ordnerstruktur erstellen';
 
 // === Stuff.
 $string['type'] = 'Typ';
 $string['share'] = 'Teilen';
-$string['explainingall'] = 'Alle Einträge in Ihrem Portfolio';
+$string['explainingall'] = 'Alle Einträge im Portfolio';
 $string['share_to_other_users'] = 'Nutzer/innen suchen';
 $string['other_users_course'] = 'Nutzer/innen, die nicht in meinen Kursen sind';
 $string['other_groups_course'] = 'Andere Kurse';
@@ -286,7 +286,7 @@ $string['view'] = 'Sammelmappe';
 $string['views'] = 'Meine Sammelmappen';
 $string['explainingviews'] = 'Sammelmappen verwalten';
 $string['noviews'] = 'Legen Sie bitte eine Sammelmappe an';
-$string['viewnotfound'] = 'Die Sammelmappe wurde nicht gefunden oder Sie haben keine Zugriffsberechtigung.';
+$string['viewnotfound'] = 'Die Sammelmappe ist für die Person nicht einsehbar / Keine Zugriffsberechtigung.';
 $string['newview'] = 'Neue Sammelmappe erstellen';
 $string['viewinformation'] = 'Informationen zur Sammelmappe';
 $string['viewdescription'] = 'Beschreibung';
@@ -309,7 +309,7 @@ $string['show'] = 'Anzeigen';
 $string['thiscourse'] = 'Aktueller Kurs';
 $string['othercourses'] = 'Andere Kurse';
 $string['autofillview'] = 'Alle bestehenden Seiten in diese Sammelmappe einfügen';
-$string['sharetoteacher'] = 'Sofort für alle Kurstrainer/innen freigeben';
+$string['sharetoteacher'] = 'Sofort mit allen Kurs-Trainer/innen teilen';
 $string['createpage'] = 'Ziehen Sie die Elemente in das Feld darunter, um Ihren Inhalt zu erstellen.';
 $string['chooselayout'] = 'Wählen Sie ein Layout für Ihre Sammelmappe.';
 $string['viewtitle'] = 'Titel und Beschreibung';
@@ -381,8 +381,8 @@ $string['tagarea_block_exaportitem'] = 'Meine Seiten';
 $string['searchByTitle'] = 'Suchen';
 $string['clearAllFilers'] = 'Alle Filter zurücksetzen';
 $string['show_items_from_subcategories'] = 'Einträge aus Unterkategorien anzeigen';
-$string['show_items_from_other_users'] = 'Einträge anderer Nutzer/innen in Ihren geteilten Kategorien anzeigen';
-$string['show_items_from_other_users_help'] = 'Wenn Sie eine oder mehrere Kategorien freigegeben haben, können andere Nutzer/innen dort Einträge hinzufügen. Mit diesem Kontrollkästchen legen Sie fest, ob diese Einträge angezeigt werden.';
+$string['show_items_from_other_users'] = 'Einträge von anderen Nutzer/innen in Ihren geteilten Kategorien anzeigen';
+$string['show_items_from_other_users_help'] = 'Falls Sie eine oder mehrere Ihrer Kategorien geteilt haben, können andere Nutzer/innen Einträge zu Ihren Kategorien hinzufügen. Mit diesem Kontrollkästchen können Sie entscheiden, ob Sie die Einträge sehen möchten.';
 $string['layout_mode_folder'] = 'Hierarchisch';
 $string['layout_mode_flat'] = 'Flach';
 $string['searchcategory'] = 'Kategorie suchen...';
@@ -392,17 +392,17 @@ $string['filter_entry_type_all'] = 'Alle (Seiten &amp; Sammelmappen)';
 $string['filter_entry_type_items'] = 'Nur Seiten';
 $string['filter_entry_type_views'] = 'Nur Sammelmappen';
 $string['sharedwith'] = 'Geteilt mit';
-$string['sharedwithotherusers'] = 'Intern für andere Nutzer/innen freigegeben';
-$string['sharedwith_user_cnt'] = 'Für {$a} Nutzer/innen freigegeben';
+$string['sharedwithotherusers'] = 'Intern mit anderen Nutzer/innen geteilt';
+$string['sharedwith_user_cnt'] = 'Mit {$a} Nutzer/innen geteilt';
 $string['sharedwith_onlyme'] = 'Nur mit mir geteilt';
-$string['sharedwith_shareall'] = 'Für alle Nutzer/innen freigegeben';
+$string['sharedwith_shareall'] = 'Mit allen Nutzer/innen geteilt';
 $string['sharedwith_shareexternal'] = 'Externer Link';
 $string['sharedexternalcategory'] = 'Extern geteilt';
 $string['sharedwith_group'] = 'Mit ausgewählten Gruppen geteilt';
 $string['sharedwith_group_cnt'] = 'Mit {$a} Gruppe geteilt';
-$string['share_tooltip_users'] = 'Intern für folgende Nutzer/innen freigegeben: {$a}';
+$string['share_tooltip_users'] = 'Intern mit den folgenden Nutzer/innen geteilt: {$a}';
 $string['share_tooltip_groups'] = 'Intern mit den folgenden Gruppen geteilt: {$a}';
-$string['share_tooltip_all'] = 'Intern für alle Nutzer/innen freigegeben.';
+$string['share_tooltip_all'] = 'Intern mit allen Nutzer/innen geteilt.';
 $string['share_tooltip_external'] = 'Extern via URL geteilt.';
 $string['share_tooltip_emails'] = 'Über individuelle E-Mail-Links geteilt.';
 $string['share_summary_none'] = 'Nicht geteilt';
@@ -479,12 +479,12 @@ $string['desp_categories'] = '
 $string['config_feature_copy_to_course'] = 'Teilnehmer/innen dürfen Dateien in den Kurs kopieren';
 $string['competenceinteraction'] = 'Interaktion mit Block Exabis Competence Grid, falls dieser installiert ist, zulassen.';
 $string['opencomps'] = 'Kompetenzen auswählen';
-$string['selectcomps'] = 'Wählen Sie die Kompetenzen aus, die zu Ihrer hochgeladenen Datei passen.';
+$string['selectcomps'] = 'Wählen Sie hier die Kompetenzen, die zu Ihrem Upload passen!';
 $string['competences_old_version'] = 'Auf diesem Moodle ist eine alte Version von Exabis Competences installiert. Diese wird von Exabis Eportfolio nicht mehr unterstützt.';
 $string['expandcomps'] = 'Alle &ouml;ffnen';
 $string['contactcomps'] = 'Alle schlie&szlig;en';
 $string['studentcomps'] = 'Hier können Sie einschätzen, ob folgende Kompetenzen durch Ihre Seite erreicht wurden.';
-$string['teachercomps'] = 'Hier können Sie beurteilen, ob die Teilnehmer/innen die folgenden Kompetenzen durch ihre Seiten erreicht haben.';
+$string['teachercomps'] = 'Hier können Sie beurteilen, ob die Teilnehmer/innen folgende Kompetenzen durch Seiten erreicht haben.';
 $string['competences'] = 'Kompetenzen';
 $string['desp_einleitung'] = 'Hier ist nun meine Sammelmappe, mein Dossier. Hier kann ich anderen zeigen, was ich alles gemacht habe. Ich kann genau sehen, wie viel ich schon gelernt habe.';
 $string['settings_interaktion_exacomp_head'] = 'Verknüpfung von Exabis ePortfolio und Exabis Kompetenzraster aktivieren';
@@ -513,17 +513,17 @@ $string['settings_disable_external_comments_body'] = 'Blendet Kommentare beim Zu
 $string['block_exaport_maxbytes'] = 'Maximale Upload-Dateigröße in Exabis ePortfolio';
 $string['block_exaport_maxbytes_body'] = 'Maximale Dateigröße, die Dateien haben können, die im Exabis ePortfolio hochgeladen werden. <br> Wert für diese Seite ist: {$a->sitemaxbytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_userquota'] = 'Dateikontingent Exabis ePortfolio pro Nutzer/in';
-$string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio hochladen kann.<br>Wert für die gesamte Website: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
+$string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio hochladen kann. <br> Wert für diese Website ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_multiplefilesinitem'] = 'Mehrere Dateien in Datei-Seite hochladen';
 $string['block_exaport_multiplefilesinitem_body'] = 'Limit: 10 Dateien';
 $string['block_exaport_copytomyportfolio'] = '„In mein Portfolio kopieren“ aktivieren';
 $string['block_exaport_copytomyportfolio_body'] = 'Nutzer/innen können Seiten aus einer geteilten Kategorie in ihre eigene Sammelmappe kopieren.';
-$string['block_exaport_app_alloweditdelete_head'] = 'Teilnehmer/innen können Inhalte nach einer Rückmeldung von Trainer/innen bearbeiten und/oder löschen.';
-$string['block_exaport_app_alloweditdelete_head_alternative'] = 'Teilnehmer/innen können Inhalte nach einer Rückmeldung von Trainer/innen bearbeiten und/oder löschen.';
+$string['block_exaport_app_alloweditdelete_head'] = 'Teilnehmer/innen können Inhalte nach einem Feedback von Trainer/innen bearbeiten und/oder löschen.';
+$string['block_exaport_app_alloweditdelete_head_alternative'] = 'Teilnehmer/innen können Inhalte nach einem Feedback von Trainer/innen bearbeiten und/oder löschen.';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
 $string['delete_all_shareall'] = 'Alle vorhandenen Freigaben an „Alle mit einem Nutzerkonto“ für Einträge, Kategorien und Sammelmappen entfernen? Sie werden nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';
-$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer/innen können alle Seiten der eigenen Teilnehmer/innen einsehen';
-$string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Trainer/innen können alle Seiten der eigenen Teilnehmer/innen einsehen';
+$string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer/innen können ALLE Seiten der eigenen Teilnehmer/innen einsehen';
+$string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Trainer/innen können ALLE Seiten der eigenen Teilnehmer/innen einsehen';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer/innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.';
 $string['block_exaport_teachercanseeartifactsofstudents_configurationlink'] = 'Erforderliches Profilfeld für vertrauenswürdige Trainer/innen erstellen';
 $string['block_exaport_confirm_profilefield_create'] = 'Möchten Sie wirklich das Profilfeld für vertrauenswürdige Trainer/innen erstellen?';
@@ -637,12 +637,12 @@ $string['current_category'] = 'Aktuelle Kategorie';
 $string['change_layout'] = 'Darstellung wechseln';
 $string['details'] = 'Details';
 $string['tiles'] = 'Kacheln';
-$string['category_up'] = 'Zurück zur übergeordneten Kategorie';
+$string['category_up'] = 'übergeordnete Kategorie';
 $string['supported'] = 'Projekt wurde unterstützt von';
 $string['developed'] = 'entwickelt von';
 $string['myfilearea'] = 'Mein Dateibereich';
 $string['show_mystudents'] = 'Meine Teilnehmer/innen';
-$string['show_sharedbyuser'] = 'Durch Teilnehmer/innen geteilt';
+$string['show_sharedbyuser'] = 'Von Nutzer/innen geteilt';
 $string['enrolled_courses'] = 'mit folgenden Kursen verknüpft';
 $string['browseportfolio'] = 'Inhalt anzeigen';
 
@@ -650,7 +650,7 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 
 // === Message.
 $string['messageprovider:sharing'] = 'Nachricht, wenn ein/e Nutzer/in etwas mit mir teilt';
-$string['messageprovider:viewupdated'] = 'Nachricht bei Aktualisierung einer mit mir geteilten Sammelmappe';
+$string['messageprovider:viewupdated'] = 'Nachricht, wenn ein/e Nutzer/in eine mit mir geteilte Sammelmappe aktualisiert';
 
 // === Not Used Anymore.
 // 'i_shared' => [
@@ -664,13 +664,13 @@ $string['addstdcat'] = 'Standardkategorien importieren';
 $string['incompatible_video'] = 'Um dieses Video anzusehen, bitte den direkten Link benutzen: {$a->link}';
 $string['download_pdf'] = 'Download as Pdf';
 $string['pdf_settings'] = 'PDF-Einstellungen';
-$string['pdf_settings_description'] = 'Wenn Sie spezielle oder ungewöhnliche Schriftzeichen verwenden, kann es bei der PDF-Erstellung zu Problemen kommen. Probieren Sie in diesem Fall andere Schriftarteinstellungen aus.<br>
-			Ihre PDF-Einstellungen werden für diese Sammelmappe gespeichert.<br>Wenn Sie Ihre Sammelmappe für andere Nutzer/innen freigeben, sehen diese das PDF mit Ihren Einstellungen.<br>
-			Bei nicht standardisierten Schriftarten können Formatierungen wie Fett- und Kursivschrift fehlen.';
+$string['pdf_settings_description'] = 'Wenn Sie spezielle oder ungewöhnliche Schriftzeichen verwenden, kann es zu Problemen mit dem generierten PDF kommen. Sie können daher versuchen, unterschiedliche Schriftarteinstellungen zu verwenden.<br>
+			Ihre PDF-Einstellungen werden für diese Sammelmappe gespeichert.<br>Wenn Ihre Sammelmappe mit anderen Nutzer/innen geteilt wird, sehen diese das PDF mit Ihren Einstellungen.<br>
+			Nicht-standardisierte Schriftarten können einige Optionen wie Fett, Kursiv usw. verlieren.';
 $string['pdf_settings_fontfamily'] = 'Schriftfamilie';
 $string['pdf_settings_fontsize'] = 'Grundlegende Schriftgröße';
 $string['pdf_settings_showmetadata'] = 'Metadaten zur Sammelmappe hinzufügen';
-$string['pdf_settings_showusername'] = 'Vollständiger Name';
+$string['pdf_settings_showusername'] = 'Name';
 $string['pdf_settings_showuserpicture'] = 'Profilbild';
 $string['pdf_settings_showuseremail'] = 'E-Mail-Adresse';
 $string['pdf_settings_showuserphone'] = 'Telefonnummer';
@@ -734,7 +734,7 @@ $string['forms.item.project_result_help'] = '<strong>Fassen Sie die Ergebnisse I
 				<li>Was haben Sie erreicht?</li>
 				<li>Welche Fähigkeiten und Kompetenzen haben Sie durch diese Arbeit entwickelt oder gestärkt?</li>
 				<li>Was haben Sie über sich und Ihre Fähigkeiten gelernt?</li>
-				<li>Was würden Sie beim nächsten Mal anders machen?</li>
+				<li>Was würden Sie das nächste Mal anders machen?</li>
 			</ul>';
 $string['forms.item.project_result_editor'] = 'Ergebnisse und Erkenntnisse';
 $string['forms.item.project_result_editor_help'] = '<strong>Fassen Sie die Ergebnisse Ihres Projekts kurz zusammen:</strong>
@@ -742,7 +742,7 @@ $string['forms.item.project_result_editor_help'] = '<strong>Fassen Sie die Ergeb
 				<li>Was haben Sie erreicht?</li>
 				<li>Welche Fähigkeiten und Kompetenzen haben Sie durch diese Arbeit entwickelt oder gestärkt?</li>
 				<li>Was haben Sie über sich und Ihre Fähigkeiten gelernt?</li>
-				<li>Was würden Sie beim nächsten Mal anders machen?</li>
+				<li>Was würden Sie das nächste Mal anders machen?</li>
 			</ul>';
 $string['item.project_information'] = 'Projekt Information';
 $string['view_saved'] = 'Sammelmappe gespeichert';
@@ -786,7 +786,7 @@ $string['privacy:metadata:block_exaportuser'] = 'Nutzerdaten von Exabis ePortfol
 $string['privacy:metadata:block_exaportuser:user_id'] = 'Nutzer-ID';
 $string['privacy:metadata:block_exaportuser:description'] = 'Beschreibung';
 $string['privacy:metadata:block_exaportuser:view_items_layout'] = 'Anzeigelayout für Seiten';
-$string['privacy:metadata:block_exaportcate'] = 'Kategorien eines Nutzerkontos';
+$string['privacy:metadata:block_exaportcate'] = 'Kategorien der Person';
 $string['privacy:metadata:block_exaportcate:pid'] = 'Hauptkategorie ID';
 $string['privacy:metadata:block_exaportcate:userid'] = 'Nutzer-ID';
 $string['privacy:metadata:block_exaportcate:name'] = 'Titel';
@@ -806,7 +806,7 @@ $string['privacy:metadata:block_exaportcate:shareall'] = 'Freigegeben für alle?
 $string['privacy:metadata:block_exaportcate:internshare'] = 'intern geteilt?';
 $string['privacy:metadata:block_exaportcate:structure_shareall'] = 'Als Struktur freigegeben? 0 - nicht freigegeben; 1 - für alle freigegeben; 2 - für Gruppen freigegeben';
 $string['privacy:metadata:block_exaportcate:structure_share'] = 'Als Struktur freigegeben? Siehe auch \'structure_shareall\'';
-$string['privacy:metadata:block_exaportitem'] = 'Seite eines Nutzerkontos';
+$string['privacy:metadata:block_exaportitem'] = 'Seite der Person';
 $string['privacy:metadata:block_exaportitem:userid'] = 'Eigentümer/in der Seite';
 $string['privacy:metadata:block_exaportitem:type'] = 'Typ der Seite';
 $string['privacy:metadata:block_exaportitem:categoryid'] = 'Kategorie-ID';
@@ -828,7 +828,7 @@ $string['privacy:metadata:block_exaportitem:example_url'] = 'Material-URL';
 $string['privacy:metadata:block_exaportitem:parentid'] = 'Übergeordnete ID';
 $string['privacy:metadata:block_exaportitemcomm'] = 'Kommentare zu Seiten';
 $string['privacy:metadata:block_exaportitemcomm:itemid'] = 'Id zu Seiten';
-$string['privacy:metadata:block_exaportitemcomm:userid'] = 'Verfasser/in des Kommentars';
+$string['privacy:metadata:block_exaportitemcomm:userid'] = 'Autor/in des Kommentars';
 $string['privacy:metadata:block_exaportitemcomm:entry'] = 'Kommentar';
 $string['privacy:metadata:block_exaportitemcomm:timemodified'] = 'zuletzt geändert';
 $string['privacy:metadata:block_exaportview'] = 'Kommentar zu Seiten';
@@ -876,16 +876,16 @@ $string['whyEportfolio_description'] = '<h4>Machen Sie Arbeit sichtbar: Ihr digi
                 <li><strong>Gestalten:</strong> Bauen Sie ein Portfolio Schritt für Schritt auf und entwickeln Sie es laufend weiter.</li>
             </ol>
             <p>Mit Exabis ePortfolio geht das unkompliziert, flexibel und effizient. Sie haben jederzeit die Kontrolle darüber, wie Sie sich und Ihr Können präsentieren und machen sichtbar, was Sie einzigartig macht.</p>';
-$string['cofigureblock_cvinfo_help'] = 'Hier sehen Sie den aktuellen Stand der ausgewählten Elemente in Ihrem Lebenslauf. Der Blockinhalt wird aktualisiert, wenn Sie diese Elemente später ändern.';
+$string['cofigureblock_cvinfo_help'] = 'Sie sehen den aktuellen Status der ausgewählten Elemente in Ihrem Lebenslauf. Der Blockinhalt wird aktualisiert, wenn Sie später Änderungen an Elementen in Ihrem Lebenslauf vornehmen.';
 $string['cofigureblock_cvinfo_cover'] = 'Über mich';
 $string['cofigureblock_cvinfo_cover_actual'] = 'Aktuellen Lebenslauf "Über mich" Inhalt hinzufügen';
-$string['create_view_content_help_title'] = 'Erzählen Sie Ihre Geschichte: Erstellen Sie Ihr Portfolio';
+$string['create_view_content_help_title'] = 'Gestalten Sie Ihre einzigartige Geschichte: Erstellen Sie Ihr Portfolio';
 $string['create_view_content_help_text'] = '<ul>
-				<li><strong>Planen Sie Ihr Layout:</strong> Ziehen Sie die Bausteine an die gewünschte Stelle und ordnen Sie sie so an, dass sie Ihre Geschichte erzählen. Verwenden Sie die Spalten im Abschnitt "Layout", um Ihr Portfolio zu gestalten.</li>
-				<li><strong>Strukturieren Sie Ihre Inhalte:</strong> Verwenden Sie Überschriften, Links und Notizen, um Ihre Inhalte übersichtlich zu gliedern.</li>
-				<li><strong>Geben Sie Ihrem Portfolio einen eigenen Stil:</strong> Wählen Sie Schriftarten und Farben aus den verfügbaren Optionen aus.</li>
+				<li><strong>Planen Sie Ihr Layout:</strong> Ziehen Sie Bausteine an die gewünschte Stelle und arrangieren Sie sie, um Ihre Geschichte zu erzählen. Verwenden Sie Spalten (verfügbar im Abschnitt "Layout"), um Ihr Portfolio zu planen.</li>
+				<li><strong>Sorgen Sie für Übersichtlichkeit:</strong> Verwenden Sie Überschriften, Links und Notizen, um Ihre Inhalte effektiv zu strukturieren.</li>
+				<li><strong>Personalisieren Sie Ihren Stil:</strong> Wählen Sie Schriftarten und Farben innerhalb der verfügbaren Optionen, um Ihrem Portfolio eine persönliche Note zu geben.</li>
 			</ul>
-			<strong>Denken Sie daran: Ihr ePortfolio zeigt, wer Sie sind und was Sie können. Gestalten Sie es klar, prägnant und ansprechend.</strong>';
+			<strong>Denken Sie daran: Ihr e-Portfolio erzählt der Welt von Ihnen und Ihren Fähigkeiten. Machen Sie es klar, prägnant und ansprechend!</strong>';
 $string['moreinfolink'] = 'Mehr Informationen anzeigen ...';
 $string['badges_help'] = 'Der Block mit Ihnen verliehenen Badges<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Ihre Badges anzeigen</a>';
 $string['view_preview_help_title'] = 'Vorschau';
@@ -913,7 +913,7 @@ $string['settings_enable_importexport_body'] = 'Den Navigationsbereich "Import/E
 $string['settings_enable_category_distribution_head'] = 'Bereich "Struktur vorgeben" anzeigen';
 $string['settings_enable_category_distribution_body'] = 'Den Navigationsbereich "Struktur vorgeben" ein-/ausblenden.';
 $string['settings_show_course_navbar_head'] = 'Kurs-Navigationsleiste anzeigen';
-$string['settings_show_course_navbar_body'] = 'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer/innen, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren Sie diese Einstellung für eine übersichtlichere Ansicht ohne Kurs-Tabs.';
+$string['settings_show_course_navbar_body'] = 'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer/innen, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren für eine übersichtlichere Ansicht ohne Kurs-Tabs.';
 $string['settings_items_display_defaults_heading'] = 'Standarddarstellung der Eintragsliste';
 $string['settings_items_display_defaults_description'] = 'Diese Standardwerte gelten nur für Personen, die noch kein Layout gewählt haben. Die Darstellung kann jederzeit geändert werden; die eigene gespeicherte Auswahl hat immer Vorrang.';
 $string['settings_default_folderlayout'] = 'Standarddarstellung in Ordnern';
@@ -965,7 +965,7 @@ $string['category_distribution_title'] = 'Struktur vorgeben';
 $string['category_distribution_description'] = 'Kategorien- und Sammelmappenstrukturen an Teilnehmer/innen verteilen';
 $string['starter_template_select'] = 'Starter-Vorlage auswählen';
 $string['starter_template_load'] = 'Vorlage laden';
-$string['starter_template_load_confirm'] = 'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Für Teilnehmer/innen ändert sich erst etwas, wenn Sie die Vorlage verteilen. Möchten Sie fortfahren?';
+$string['starter_template_load_confirm'] = 'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Dies wirkt sich erst auf Teilnehmer/innen aus, wenn Sie verteilen. Fortfahren?';
 $string['starter_template_loaded'] = 'Starter-Vorlage erfolgreich geladen';
 $string['current_template'] = 'Aktuelle Kursvorlage';
 $string['template_empty'] = 'Keine Vorlage definiert. Laden Sie eine Starter-Vorlage oder erstellen Sie Kategorien manuell.';
@@ -975,7 +975,7 @@ $string['add_subcategory'] = 'Unterkategorie hinzufügen';
 $string['rename_category'] = 'Umbenennen';
 $string['move_category'] = 'Verschieben';
 $string['remove_from_template'] = 'Aus Vorlage entfernen';
-$string['remove_from_template_confirm'] = 'Diese Kategorie aus der Vorlage entfernen? Bestehende Kategorien von Teilnehmer/innen bleiben erhalten.';
+$string['remove_from_template_confirm'] = 'Diese Kategorie aus der Vorlage entfernen? Löscht keine Kategorien von Teilnehmer/innen.';
 $string['distribute_now'] = 'Jetzt verteilen';
 $string['auto_distribute_on_enrolment'] = 'Automatisch verteilen bei neuen Einschreibungen';
 $string['distribution_in_progress'] = 'Verteilung läuft...';
@@ -983,7 +983,7 @@ $string['distribution_complete'] = 'Verteilung abgeschlossen';
 $string['distribution_summary'] = 'Verteilungs-Zusammenfassung';
 $string['categories_created'] = 'Kategorien erstellt: {$a}';
 $string['categories_skipped'] = 'Kategorien übersprungen (existieren bereits): {$a}';
-$string['students_processed'] = 'Bearbeitete Teilnehmer/innen: {$a}';
+$string['students_processed'] = 'Teilnehmer/innen bearbeitet: {$a}';
 $string['no_students_enrolled'] = 'Keine Teilnehmer/innen in diesem Kurs eingeschrieben';
 $string['no_template_to_distribute'] = 'Keine Vorlage zu verteilen. Bitte erstellen oder laden Sie zuerst eine Vorlage.';
 $string['distribution_error'] = 'Verteilungsfehler: {$a}';
@@ -1001,22 +1001,22 @@ $string['invalid_template_json'] = 'Ungültiges Vorlagen-JSON-Format';
 $string['share_to_teachers'] = 'Umschalten: Geteilte Kategorie';
 $string['share_to_teachers_help'] = 'Zukünftige Erstellungen dieser Kategorie werden diese Kategorien mit den Kurslehrenden dieses Kurses teilen';
 $string['confirm_distribute_categories_title'] = 'Verteilung bestätigen';
-$string['confirm_distribute_categories_body'] = 'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dabei werden Kategorien für Teilnehmer/innen erstellt, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden.';
+$string['confirm_distribute_categories_body'] = 'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dies erstellt Kategorien für Teilnehmer/innen, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.';
 $string['confirm_distribute_views_title'] = 'Verteilung bestätigen';
-$string['confirm_distribute_views_body'] = 'Sind Sie sicher, dass Sie die Sammelmappenvorlagen an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dabei werden Sammelmappen für Teilnehmer/innen erstellt, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden.';
+$string['confirm_distribute_views_body'] = 'Sind Sie sicher, dass Sie die Sammelmappenvorlagen an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dies erstellt Sammelmappen für Teilnehmer/innen, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Sammelmappen erstellt.';
 $string['distribute'] = 'Verteilen';
 $string['distribute_categories'] = 'Kategorien verteilen';
 $string['distribute_categories_now'] = 'Kategorien jetzt verteilen';
 // View distribution strings.
 $string['view_distribution'] = 'Sammelmappen-Verteilung';
-$string['view_distribution_description'] = 'Verteilen Sie Sammelmappenvorlagen an Teilnehmer/innen. In den Sammelmappen können die Teilnehmer/innen ihre Arbeit präsentieren.';
+$string['view_distribution_description'] = 'Verteilen Sie Sammelmappen-Vorlagen an Teilnehmer/innen. Sammelmappen helfen Teilnehmer/innen, ihre Arbeit zu präsentieren.';
 $string['starter_view_template_select'] = 'Starter-Sammelmappenvorlage auswählen';
 $string['current_view_template'] = 'Aktuelle Sammelmappenvorlage';
 $string['view_template_empty'] = 'Keine Sammelmappen in der Vorlage. Fügen Sie eine Sammelmappe hinzu, um zu beginnen.';
 $string['add_view'] = 'Sammelmappe hinzufügen';
 $string['rename_view'] = 'Sammelmappe umbenennen';
 $string['remove_view'] = 'Sammelmappe entfernen';
-$string['remove_view_confirm'] = 'Sind Sie sicher, dass Sie diese Sammelmappe aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Sammelmappen der Teilnehmer/innen.';
+$string['remove_view_confirm'] = 'Sind Sie sicher, dass Sie diese Sammelmappe aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Sammelmappen von Teilnehmer/innen.';
 $string['view_name_required'] = 'Sammelmappenname ist erforderlich';
 $string['view_added'] = 'Sammelmappe zur Vorlage hinzugefügt';
 $string['view_renamed'] = 'Sammelmappe erfolgreich umbenannt';

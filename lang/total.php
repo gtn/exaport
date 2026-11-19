@@ -4000,7 +4000,7 @@ return [
         'Allow course-based naming of copied templates',
     ],
     'settings_enable_copy_root_naming_description' => [
-        'Erlaubt die Kursoption, beim Kopieren oder Wiederherstellen die oberste Kategorie der kopierten Struktur nach dem Zielkurs zu benennen. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.',
+        'Aktiviert eine Kursoption, mit der beim Kopieren oder Wiederherstellen eines Kurses die erste Kategorie auf oberster Ebene der kopierten Vorlage nach dem Zielkurs benannt werden kann. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.',
         'Allow courses to rename the first root of their copied category template during course copy or restore. Existing portfolio categories and the source template are never changed.',
     ],
     'settings_copied_template_root_name' => [
@@ -4012,7 +4012,7 @@ return [
         'Use {coursefullname} for the destination course’s full name. An empty pattern uses Ausbildungsdokumente {coursefullname}. Names are shortened to the existing limit of 255 characters.',
     ],
     'rename_root_on_copy' => [
-        'Bei Kurskopie die oberste Template-Kategorie nach dem Zielkurs benennen',
+        'Bei Kurskopie die erste Kategorie auf oberster Ebene der Vorlage nach dem Zielkurs benennen',
         'Name the first template root after the destination course when copying',
     ],
     'rename_root_on_copy_help' => [

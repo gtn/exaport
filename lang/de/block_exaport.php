@@ -616,7 +616,7 @@ $string['resume_exportto_europass_intro'] = '<p>Das Tool hilft den Nutzer/innen 
         <li>Alle Datumsangaben sollten überprüft werden</li>
         <li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
         <li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
-        <li>Vorgaben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+        <li>Dateianhänge werden beim Export für Europass nicht in die XML-Datei aufgenommen.</li>
     </ul>';
 $string['resume_exportto_europass_getXML'] = 'XML herunterladen';
 $string['resume_expand'] = 'Alles öffnen';

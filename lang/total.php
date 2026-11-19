@@ -2330,7 +2330,7 @@ return [
         <li>Alle Datumsangaben sollten überprüft werden</li>
         <li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
         <li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
-        <li>Vorgaben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+        <li>Dateianhänge werden beim Export für Europass nicht in die XML-Datei aufgenommen.</li>
     </ul>',
         '<p>The Europass profile can help people to plan their learning and career development. The profile can be used by organisations – employers, volunteer organisations, recruiters, guidance practitioners, youth organisations, education and training institutions and more – as part of the support and services they offer to people.</p>
         <p>We provide a way for using your CV from Exabis eProtfolio in Europass profile<br>

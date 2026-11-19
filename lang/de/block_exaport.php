@@ -81,10 +81,10 @@ $string['firstnameshared'] = 'Familienname';
 $string['go'] = 'Go!';
 $string['hidesummary'] = '(Gesamtaufstellung ausblenden)';
 $string['managecategories'] = 'Kategorien verwalten';
-$string['mandatoryfields'] = 'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte fülle beides aus.';
-$string['mandatoryfieldsforcat'] = 'Eine Feldbezeichnung ist erforderlich. Bitte fülle diese aus.';
+$string['mandatoryfields'] = 'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte füllen Sie beides aus.';
+$string['mandatoryfieldsforcat'] = 'Eine Feldbezeichnung ist erforderlich. Bitte füllen Sie diese aus.';
 $string['myportfolio'] = 'Mein Portfolio';
-$string['myportfoliotitle'] = 'ePortfolio-Modul: Füge hier Links und Dateien hinzu.';
+$string['myportfoliotitle'] = 'ePortfolio-Modul: Fügen Sie hier Links und Dateien hinzu.';
 $string['newlink'] = 'Neuen externen Link hinzufügen';
 $string['newfile'] = 'Neue Datei hinzufügen';
 $string['newnote'] = 'Neue Notiz hinzufügen';
@@ -110,7 +110,7 @@ $string['accessoptions'] = 'Wer hat Zugriff?';
 $string['shareallexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern';
 $string['sharenoneexceptthose'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer';
 $string['internalaccessall'] = 'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span>';
-$string['internalaccessusers'] = 'Zugriff nur für folgende Benutzer';
+$string['internalaccessusers'] = 'Zugriff nur für folgende Nutzer/innen';
 $string['internalaccessgroups'] = 'Zugriff für folgende Gruppen';
 $string['externaccess'] = 'externer ePortfolio-Link';
 $string['emailaccess'] = 'Per Email teilen';
@@ -134,7 +134,7 @@ $string['nomoodleimportyet'] = 'Im Moment sind noch keine Abgaben vorhanden!';
 $string['deletecategoryconfirm'] = 'Willst du die Kategorie "{$a->name}" wirklich l&ouml;schen? Es werden alle Eintr&auml;ge in dieser Kategorie und alle Unterkategorien mitgel&ouml;scht!';
 $string['name'] = 'Name';
 $string['role'] = 'Rolle';
-$string['nousersfound'] = 'Keine Benutzer gefunden';
+$string['nousersfound'] = 'Keine Nutzer/innen gefunden';
 $string['delete'] = 'L&ouml;schen';
 $string['add'] = 'Hinzufügen';
 $string['edit'] = 'Editieren';
@@ -142,7 +142,7 @@ $string['checkall'] = 'Alle auswählen';
 $string['grouptitle'] = 'Gruppentitel';
 $string['membercount'] = 'Anzahl von Mitgliedern';
 $string['nogroupsfound'] = 'Keine Gruppen gefunden';
-$string['make_it_yours'] = 'Mach\' es zu deinem Eigenen';
+$string['make_it_yours'] = 'Machen Sie es zu Ihrem Eigenen';
 
 // === Export/import.
 $string['import'] = 'Import SCORM-Datei';
@@ -167,7 +167,7 @@ $string['bookmarksall'] = 'Alle Eintr&auml;ge';
 $string['bookmarkslinks'] = 'Links';
 $string['bookmarksfiles'] = 'Dateien';
 $string['bookmarksnotes'] = 'Notizen';
-$string['noguestpost'] = 'G&auml;ste haben hier keinen Zugriff!';
+$string['noguestpost'] = 'Gäste haben hier keinen Zugriff!';
 $string['comments'] = 'Kommentare';
 $string['addcomment'] = 'Kommentar hinzufügen';
 $string['editcomment'] = 'Kommentar bearbeiten';
@@ -224,7 +224,7 @@ $string['selectall'] = 'Alle markieren';
 $string['deselectall'] = 'Alle Markierungen l&ouml;schen';
 $string['internalaccess'] = 'Interner Zugriff';
 $string['externalaccess'] = 'Externer Zugriff';
-$string['loginasmode'] = 'Du hast als Administrator keine Zugriff auf fremde Portfolios';
+$string['loginasmode'] = 'Sie haben als Administrator keine Zugriff auf fremde Portfolios';
 $string['badsessionkey'] = 'Session nicht mehr gültig';
 $string['invalidinstance'] = 'Ungültige Instanz';
 $string['invalidcourseid'] = 'Ungültige Kursnummer';
@@ -252,12 +252,12 @@ $string['comment_delete_confirmation'] = 'Willst du wirklich diesen Kommentar l�
 // Shared portfolios.
 $string['nocoursetogether'] = 'Kein Kurs';
 $string['nothingshared'] = 'Kein freigegebenen ePortfolios gefunden';
-$string['nothingsharedwithme'] = 'Es wurde nichts mit dir geteilt';
-$string['nothingsharedbyme'] = 'Du hast nichts geteilt';
+$string['nothingsharedwithme'] = 'Es wurde nichts mit Ihnen geteilt';
+$string['nothingsharedbyme'] = 'Sie haben nichts geteilt';
 
 // === Errors.
-$string['nouserforid'] = 'Kein Benutzer zu dieser Id!';
-$string['nouserforaccess'] = 'Benutzer nicht gefunden (Zugriffscode unbekannt)';
+$string['nouserforid'] = 'Kein/e Nutzer/in zu dieser ID';
+$string['nouserforaccess'] = 'Nutzer/in nicht gefunden (Zugriffscode unbekannt)';
 
 // === Export.
 $string['export'] = 'Export SCORM-Datei';
@@ -273,7 +273,7 @@ $string['type'] = 'Typ';
 $string['share'] = 'Share';
 $string['explainingall'] = 'Alle Eintr&auml;ge im Portfolio';
 $string['share_to_other_users'] = 'Benutzer suchen';
-$string['other_users_course'] = 'Benutzer, die nicht in meinen Kursen sind';
+$string['other_users_course'] = 'Nutzer/innen, die nicht in meinen Kursen sind';
 $string['other_groups_course'] = 'Andere Kurse';
 
 // === Item sorting.
@@ -285,7 +285,7 @@ $string['movebottom'] = 'An letzte Stelle';
 $string['view'] = 'Sammelmappe';
 $string['views'] = 'Meine Sammelmappen';
 $string['explainingviews'] = 'Sammelmappen verwalten';
-$string['noviews'] = 'Bitte eine Sammelmappe anlegen';
+$string['noviews'] = 'Legen Sie bitte eine Sammelmappe an';
 $string['viewnotfound'] = 'Die Sammelmappe ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.';
 $string['newview'] = 'Neue Sammelmappe erstellen';
 $string['viewinformation'] = 'Informationen zur Sammelmappe';
@@ -349,7 +349,7 @@ $string['items_help'] = 'Der Block mit deinen Seiten<br><a href=\'{$a}\' target=
 $string['media'] = 'Medieneintrag';
 $string['media_help'] = 'Der Block mit eingebetteten Mediendaten von Quellen wie: YouTube, Vimeo, SlideShare usw.';
 $string['fieldstoshow'] = 'Anzuzeigende Felder';
-$string['listofartefacts'] = 'W&aumlhle eine Seite aus';
+$string['listofartefacts'] = 'Liste von Seiten';
 $string['listofbadges'] = 'Liste von Badges';
 $string['addButton'] = 'Hinzufügen';
 $string['saveButton'] = 'Speichern';
@@ -365,8 +365,8 @@ $string['profilepicture'] = 'Profilbild';
 $string['nopicture'] = 'kein Bild';
 $string['noprofilepicture'] = 'kein Bild verfügbar';
 $string['mailadress'] = 'E-Mail-Adresse';
-$string['nomail'] = 'keine Mail-Adresse';
-$string['noemails'] = 'keine Mail-Adresse vorhanden';
+$string['nomail'] = 'keine E-Mail-Adresse';
+$string['noemails'] = 'keine E-Mail-Adresse vorhanden';
 $string['aboutme'] = 'Über mich';
 $string['aboutme_description'] = 'Vordefiniert durch Lebenslaufinformationen, kann jedoch für jeden Block bearbeitet werden.';
 $string['notify'] = 'Benachrichtigen';
@@ -510,16 +510,16 @@ $string['settings_disable_external_comments_body'] = 'Blendet Kommentare beim Zu
 // ],
 $string['block_exaport_maxbytes'] = 'Maximale Upload-Dateigröße in Exabis ePortfolio';
 $string['block_exaport_maxbytes_body'] = 'Maximale Dateigröße, die Dateien haben können, die im Exabis ePortfolio hochgeladen werden. <br> Wert für diese Seite ist: {$a->sitemaxbytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
-$string['block_exaport_userquota'] = 'Benutzer-Dateikontingent Exabis ePortfolio';
-$string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
+$string['block_exaport_userquota'] = 'Dateikontingent Exabis ePortfolio pro Benutzer/in';
+$string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_multiplefilesinitem'] = 'Mehrere Dateien in Datei-Seite hochladen';
 $string['block_exaport_multiplefilesinitem_body'] = 'Limit: 10 Dateien';
 $string['block_exaport_copytomyportfolio'] = 'Aktiviere "In mein Portfolio kopieren"';
-$string['block_exaport_copytomyportfolio_body'] = 'Benutzer können Seiten aus einer geteilten Kategorie in ihre eigene Sammelmappe kopieren.';
+$string['block_exaport_copytomyportfolio_body'] = 'Nutzer/innen können Seiten aus einer geteilten Kategorie in ihre eigene Sammelmappe kopieren.';
 $string['block_exaport_app_alloweditdelete_head'] = 'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.';
 $string['block_exaport_app_alloweditdelete_head_alternative'] = 'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.';
 $string['block_exaport_app_alloweditdelete_body'] = 'Nur in Kombination mit Exabis Competence Grid und Dakora sinnvoll';
-$string['delete_all_shareall'] = 'Alle vorhandenen Freigaben an „Alle mit einem Benutzerkonto“ für Einträge, Kategorien und Sammelmappen entfernen? Sie werden nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';
+$string['delete_all_shareall'] = 'Alle vorhandenen Freigaben an „Alle mit einem Nutzerkonto“ für Einträge, Kategorien und Sammelmappen entfernen? Sie werden nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.';
 $string['block_exaport_teachercanseeartifactsofstudents_head'] = 'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen';
 $string['block_exaport_teachercanseeartifactsofstudents_head_alternative'] = 'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen';
 $string['block_exaport_teachercanseeartifactsofstudents_body'] = 'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.';
@@ -647,8 +647,8 @@ $string['browseportfolio'] = 'Inhalt anzeigen';
 // === Language categories.
 
 // === Message.
-$string['messageprovider:sharing'] = 'Nachricht, wenn ein Benutzer/in etwas mit mir teilt';
-$string['messageprovider:viewupdated'] = 'Nachricht, wenn ein Benutzer seine geteilte Sammelmappe aktualisiert';
+$string['messageprovider:sharing'] = 'Nachricht, wenn ein/e Nutzer/in etwas mit mir teilt';
+$string['messageprovider:viewupdated'] = 'Nachricht, wenn ein/e Nutzer/in ihre geteilte Sammelmappe aktualisiert';
 
 // === Not Used Anymore.
 // 'i_shared' => [
@@ -682,9 +682,9 @@ $string['pdf_customfont_help'] = 'Du kannst deine eigene .ttf-Datei hochladen. W
 $string['pdf_settings_fontfamily_fixedgroup'] = 'Vordefinierte Schriften';
 $string['pdf_settings_fontfamily_customgroup'] = 'Benutzerdefinierte hochgeladene Schriftarten';
 $string['settings_layout_settings_heading'] = 'Layout-Einstellungen';
-$string['block_exaport_allowcustomlayout_head'] = 'Benutzerdefinierte Optionen für das Layout der Sammelmappen für Sammelmappen-Eigentümer';
-$string['block_exaport_allowcustomlayout_body'] = 'Ermöglicht die Verwendung benutzerdefinierter Layout-Einstellungen für Sammelmappen (ähnlich den unten aufgeführten Optionen) für reguläre Besitzer der Sammelmappen.';
-$string['settings_layout_settings_description'] = 'Hier kannst du einige Layout-Optionen der Sammelmappe ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach deinen Wünschen zu gestalten.<br>Diese Einstellungen werden als Standardeinstellungen <strong>für alle Sammelmappen</strong> verwendet.';
+$string['block_exaport_allowcustomlayout_head'] = 'Nutzerdefinierte Optionen für das Layout der Sammelmappen für Sammelmappen-Eigentümer/innen';
+$string['block_exaport_allowcustomlayout_body'] = 'Ermöglicht die Verwendung nutzerdefinierter Layout-Einstellungen für Sammelmappen (ähnlich den unten aufgeführten Optionen) für reguläre Eigentümer/innen der Sammelmappen.';
+$string['settings_layout_settings_description'] = 'Hier können Sie einige Layout-Optionen der Sammelmappe ändern oder eigene nutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach Ihren Wünschen zu gestalten.';
 $string['layout_settings'] = 'Layout-Einstellungen';
 $string['layout_settings_description'] = 'Hier kannst du einige Layout-Optionen der Sammelmappe ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach deinen Wünschen zu gestalten.';
 $string['layout_settings_font_size'] = 'Schriftgröße';
@@ -693,8 +693,8 @@ $string['layout_settings_font_weight'] = 'Fett';
 $string['layout_settings_border_width_only_bottom'] = 'Nur unterer Rand';
 $string['layout_settings_view_headers'] = 'Überschriften der Sammelmappen-Blöcke';
 $string['layout_settings_view_content'] = 'Inhalt der Sammelmappen-Blöcke';
-$string['layout_settings_custom_css'] = 'benutzerdefinierte CSS-Regeln';
-$string['layout_settings_custom_css_description'] = 'Hier kannst du eigene benutzerdefinierte CSS-Regeln verwenden.';
+$string['layout_settings_custom_css'] = 'Nutzerdefinierte CSS-Regeln';
+$string['layout_settings_custom_css_description'] = 'Hier können Sie eigene nutzerdefinierte CSS-Regeln verwenden.';
 $string['selected_competencies'] = 'Erreichte Kompetenz';
 $string['forms.item.title'] = 'Titel';
 $string['forms.item.title_help'] = '';
@@ -948,7 +948,7 @@ $string['wp_exported_view'] = 'Exportierte Sammelmapp';
 $string['wp_exported_view_hidden_in_wp'] = 'Exportiert, aber in Wordpress ausgeblendet';
 $string['wp_exported_view_newer_than_wp'] = 'WordPress-Sammelmappe ist älter als die Moodle-Sammelmappe';
 $string['alwaysnotifywhenshare'] = 'Immer benachrichtigen, wenn geteilt wird';
-$string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.';
+$string['alwaysnotifywhenshare_description'] = 'Wenn aktiviert, wird das Kontrollkästchen "Nutzer/innen benachrichtigen" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.';
 
 // Category distribution.
 $string['exaport:distributecategories'] = 'Kategorie-Verteilung verwalten';
@@ -982,7 +982,7 @@ $string['distribution_summary'] = 'Verteilungs-Zusammenfassung';
 $string['categories_created'] = 'Kategorien erstellt: {$a}';
 $string['categories_skipped'] = 'Kategorien übersprungen (existieren bereits): {$a}';
 $string['students_processed'] = 'Lernende bearbeitet: {$a}';
-$string['no_students_enrolled'] = 'Keine Lernende in diesem Kurs eingeschrieben';
+$string['no_students_enrolled'] = 'Keine Teilnehmer/innen in diesem Kurs eingeschrieben';
 $string['no_template_to_distribute'] = 'Keine Vorlage zu verteilen. Bitte erstellen oder laden Sie zuerst eine Vorlage.';
 $string['distribution_error'] = 'Verteilungsfehler: {$a}';
 $string['category_name_required'] = 'Kategoriename ist erforderlich';

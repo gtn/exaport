@@ -2007,7 +2007,7 @@ return [
         'Teacher can see ALL pages of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_body' => [
-        'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer/innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.',
+        'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Vertrauenswürdige Trainer/innen können die Seiten von Teilnehmer/innen in den Kursen einsehen, in denen ihnen eine Trainerrolle zugewiesen ist.<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.',
         'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
     ],
     'block_exaport_teachercanseeartifactsofstudents_configurationlink' => [

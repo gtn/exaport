@@ -24,61 +24,82 @@
         hasrows           - Boolean: at least one share row
         rows              - List of rows:
                                typeicon (pre-rendered HTML), typelabel, title, titlenamelower, entitytype, timemodified,
-                              url, ownername, coursename, sharemodetext, sharetooltip, hastooltip,
-                              commentcount, hascomments
+                              url, ownerid, ownername, coursename, categorycourseid, ownercourseids, updateddate,
+                              sharemodetext, sharetooltip, hastooltip, commentcount, hascomments
         nothingtext       - Localised text shown when nothing is shared with the user
-        headertitle       - Localised column header "Title"
-        headertype        - Localised column header "Type"
-        headeruser        - Localised column header "Shared by"
-        headercourse      - Localised column header "Course"
-        headersharedwith  - Localised column header "Shared with"
-        headercomments    - Localised column header "Comments"
+        columns           - Localised column labels and their sort fields, in display order
         searchcontrols    - Pre-rendered HTML for the filter controls
+        groupbysender     - Saved display preference for grouping rows by sender
+        hassenders, senders, hascourseoptions, courseoptions - Available discovery options
 }}
 <div class="block_exaport_shared_with_me">
     {{> block_exaport/share_filter_controls }}
+    {{#hassenders}}
+        <div class="mb-2">
+            <label class="mb-0 d-inline-flex align-items-center gap-2">
+                <input type="checkbox" id="exaport-group-by-sender"{{#groupbysender}} checked{{/groupbysender}}>
+                {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
+            </label>
+        </div>
+    {{/hassenders}}
     {{^hasrows}}
         <p>{{nothingtext}}</p>
     {{/hasrows}}
     {{#hasrows}}
-        <table class="generaltable table table-striped table-hover exaport-share-overview-table" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>{{headertitle}}</th>
-                    <th>{{headertype}}</th>
-                    <th>{{headeruser}}</th>
-                    <th>{{headercourse}}</th>
-                    <th>{{headersharedwith}}</th>
-                    <th>{{headercomments}}</th>
-                </tr>
-            </thead>
-            <tbody class="exaport-view-section" data-exaport-view="1">
-                {{#rows}}
-                    <tr class="exaport-flat-item"
-                        data-item-name="{{titlenamelower}}"
-                        data-item-date="{{timemodified}}"
-                        data-entry-type="{{entitytype}}">
-                        <td><a href="{{url}}">{{title}}</a></td>
-                        <td>{{{typeicon}}}&nbsp;{{typelabel}}</td>
-                        <td>{{ownername}}</td>
-                        <td>{{coursename}}</td>
-                        <td>
-                            {{#hastooltip}}
-                            <span data-bs-toggle="tooltip"
-                                  data-bs-html="true"
-                                  data-bs-title="{{sharetooltip}}"
-                                  data-toggle="tooltip"
-                                  data-html="true"
-                                  data-title="{{sharetooltip}}">
-                                {{sharemodetext}}
-                            </span>
-                            {{/hastooltip}}
-                            {{^hastooltip}}{{sharemodetext}}{{/hastooltip}}
-                        </td>
-                        <td>{{#hascomments}}{{commentcount}}{{/hascomments}}</td>
+        <div class="table-responsive">
+            <table class="generaltable table table-striped table-hover exaport-share-overview-table"
+                   style="width: 100%;" data-region="incoming-shares-table"
+                   data-other-courses="{{#str}} othercourses, block_exaport {{/str}}">
+                <thead>
+                    <tr>
+                        {{#columns}}
+                            <th scope="col">
+                                <button type="button"
+                                        class="exaport-sort-heading btn btn-link p-0 align-baseline font-weight-bold fw-bold"
+                                        data-sort-field="{{sortfield}}">
+                                    {{label}} <span class="exaport-sort-arrow" aria-hidden="true"></span>
+                                </button>
+                            </th>
+                        {{/columns}}
                     </tr>
-                {{/rows}}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {{#rows}}
+                        <tr class="exaport-flat-item"
+                            data-item-name="{{titlenamelower}}"
+                            data-item-date="{{timemodified}}"
+                            data-item-type="{{typelabel}}"
+                            data-entry-type="{{entitytype}}"
+                            data-owner-id="{{ownerid}}"
+                            data-owner-name="{{ownername}}"
+                            data-course-name="{{coursename}}"
+                            data-category-course-id="{{categorycourseid}}"
+                            data-owner-course-ids="{{ownercourseids}}"
+                            data-shared-with="{{sharemodetext}}"
+                            data-comment-count="{{commentcount}}">
+                            <td><a href="{{url}}">{{title}}</a></td>
+                            <td>{{{typeicon}}}&nbsp;{{typelabel}}</td>
+                            <td>{{ownername}}</td>
+                            <td>{{coursename}}</td>
+                            <td>{{updateddate}}</td>
+                            <td>
+                                {{#hastooltip}}
+                                <span data-bs-toggle="tooltip"
+                                      data-bs-html="true"
+                                      data-bs-title="{{sharetooltip}}"
+                                      data-toggle="tooltip"
+                                      data-html="true"
+                                      data-title="{{sharetooltip}}">
+                                    {{sharemodetext}}
+                                </span>
+                                {{/hastooltip}}
+                                {{^hastooltip}}{{sharemodetext}}{{/hastooltip}}
+                            </td>
+                            <td>{{#hascomments}}{{commentcount}}{{/hascomments}}</td>
+                        </tr>
+                    {{/rows}}
+                </tbody>
+            </table>
+        </div>
     {{/hasrows}}
 </div>

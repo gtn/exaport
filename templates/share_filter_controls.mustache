@@ -1,17 +1,58 @@
 {{!
     @template block_exaport/share_filter_controls
 
-    Search, sort and type filters for the sharing overviews.
+    Shared search, sort and type controls, with discovery options for incoming shares.
 }}
 {{#hasrows}}
 {{#searchcontrols}}
     <div data-region="exaport-share-filters" class="mb-3">
         <div class="d-flex flex-wrap gap-2 align-items-center">
             {{{searchcontrols}}}
-            <button type="button" class="btn btn-secondary" data-action="clear-filters" hidden>
-                {{#str}} clearAllFilers, block_exaport {{/str}}
-            </button>
+            {{#hassenders}}
+                <div style="min-width: 160px; max-width: 250px;">
+                    <label class="sr-only" for="exaport-share-sender">{{#str}} share_filter_shared_by, block_exaport {{/str}}</label>
+                    <select class="form-control custom-select" id="exaport-share-sender" data-share-filter="userid">
+                        <option value="">{{#str}} share_filter_search_user, block_exaport {{/str}}</option>
+                        {{#senders}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/senders}}
+                    </select>
+                </div>
+            {{/hassenders}}
+            {{^hassenders}}
+                <button type="button" class="btn btn-secondary" data-action="clear-filters" hidden>
+                    {{#str}} clearAllFilers, block_exaport {{/str}}
+                </button>
+            {{/hassenders}}
         </div>
+        {{#hassenders}}
+            {{#hascourseoptions}}
+                <div class="mt-2" data-region="share-course-filter" hidden>
+                    <label for="exaport-share-course" class="mb-1">
+                        <span data-course-label="category" hidden>
+                            {{#str}} share_filter_category_course, block_exaport {{/str}}
+                        </span>
+                        <span data-course-label="view" hidden>
+                            {{#str}} share_filter_collection_course, block_exaport {{/str}}
+                        </span>
+                    </label>
+                    <select class="form-control custom-select w-auto mw-100" id="exaport-share-course" data-share-filter="filtercourseid">
+                        <option value="">{{#str}} share_filter_no_course_priority, block_exaport {{/str}}</option>
+                        {{#courseoptions}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/courseoptions}}
+                    </select>
+                </div>
+            {{/hascourseoptions}}
+            <div class="d-flex flex-wrap align-items-center gap-1">
+                <div class="d-flex flex-wrap gap-1" data-region="sender-filter-chips"
+                     data-remove-label="{{#str}} remove {{/str}}"></div>
+                <button type="button" class="badge bg-primary text-light border-0 m-1 exaport-clear-filters-chip"
+                        data-action="clear-senders" hidden>
+                    {{#str}} share_filter_clear_users, block_exaport {{/str}}
+                </button>
+            </div>
+        {{/hassenders}}
         <div role="status">
             <p class="mt-3 mb-0" data-region="no-matching-shares" hidden>
                 {{#str}} share_filter_no_matches, block_exaport {{/str}}

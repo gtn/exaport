@@ -1538,6 +1538,10 @@ return [
         'Alle Filter zurücksetzen',
         'Clear all filters',
     ],
+    'clear_category_filter' => [
+        'Kategoriefilter zurücksetzen',
+        'Clear category filter',
+    ],
     'show_items_from_subcategories' => [
         'Einträge aus Unterkategorien anzeigen',
         'Show items from subcategories',
@@ -1597,6 +1601,38 @@ return [
     'share_filter_no_matches' => [
         'Keine passenden Ergebnisse',
         'No matching results',
+    ],
+    'share_filter_search_titles' => [
+        'Titel suchen',
+        'Search titles',
+    ],
+    'share_filter_shared_by' => [
+        'Geteilt von',
+        'Shared by',
+    ],
+    'share_filter_search_user' => [
+        'Benutzer suchen...',
+        'Search User...',
+    ],
+    'share_filter_clear_users' => [
+        'Benutzerfilter zurücksetzen',
+        'Clear user filter',
+    ],
+    'share_filter_group_by_sender' => [
+        'Nach Person gruppieren',
+        'Group by sender',
+    ],
+    'share_filter_category_course' => [
+        'Kurs zuerst anzeigen',
+        'Show course first',
+    ],
+    'share_filter_collection_course' => [
+        'Personen aus diesem Kurs zuerst anzeigen',
+        'Show senders from this course first',
+    ],
+    'share_filter_no_course_priority' => [
+        'Keine Kurspriorität',
+        'No course priority',
     ],
     'sharedwith' => [
         'Geteilt mit',

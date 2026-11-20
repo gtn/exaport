@@ -444,6 +444,71 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertSame([], share_overview::get_my_shares($this->owner->id));
     }
 
+    /** Categories use their saved course and collections use the sender's course role. */
+    public function test_shared_with_me_discovery_keeps_the_two_course_scopes_distinct(): void {
+        global $DB;
+
+        $generator = $this->getDataGenerator();
+        $recipient = $generator->create_user();
+        $sendercourse = $generator->create_course(['fullname' => 'Sender course']);
+        $categorycourse = $generator->create_course(['fullname' => 'Category course']);
+        $othercourse = $generator->create_course(['fullname' => 'Unlisted course']);
+        $generator->enrol_user($recipient->id, $sendercourse->id);
+        $generator->enrol_user($recipient->id, $categorycourse->id);
+
+        // The legacy collection list recognises a direct course role even without an enrolment.
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'student'], MUST_EXIST);
+        role_assign($roleid, $this->owner->id, \context_course::instance($sendercourse->id)->id);
+        role_assign($roleid, $this->owner->id, \context_course::instance($othercourse->id)->id);
+
+        $updated = 1700000000;
+        $viewid = $this->create_view($this->owner);
+        $DB->set_field('block_exaportview', 'timemodified', $updated, ['id' => $viewid]);
+        $this->share_view_with_user($viewid, $recipient->id);
+        $categoryid = $this->create_category($this->owner, internshare: 1);
+        $DB->set_field('block_exaportcate', 'courseid', $categorycourse->id, ['id' => $categoryid]);
+        $DB->set_field('block_exaportcate', 'timemodified', 0, ['id' => $categoryid]);
+        $this->share_category_with_user($categoryid, $recipient->id);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $data = $page->export_for_template($this->createMock(\renderer_base::class));
+        $rows = array_column($data['rows'], null, 'entitytype');
+
+        $this->assertSame([['id' => (int)$this->owner->id, 'name' => fullname($this->owner)]], $data['senders']);
+        $this->assertSame([(int)$categorycourse->id, (int)$sendercourse->id], array_column($data['courseoptions'], 'id'));
+        $this->assertSame((int)$this->owner->id, $rows['view']['ownerid']);
+        $this->assertSame((string)$sendercourse->id, $rows['view']['ownercourseids']);
+        $this->assertSame(0, $rows['view']['categorycourseid']);
+        $this->assertSame((int)$categorycourse->id, $rows['category']['categorycourseid']);
+        $this->assertSame('', $rows['category']['ownercourseids']);
+        $this->assertSame(userdate($updated, get_string('strftimedate', 'langconfig')), $rows['view']['updateddate']);
+        $this->assertSame('', $rows['category']['updateddate']);
+    }
+
+    /** Sender grouping defaults off and follows the current recipient's saved preference. */
+    public function test_shared_with_me_sender_grouping_preference_is_per_user(): void {
+        $recipient = $this->getDataGenerator()->create_user();
+        $otherrecipient = $this->getDataGenerator()->create_user();
+        $itemid = $this->create_item($this->owner);
+        $this->share_item_with_user($itemid, $recipient->id);
+        $this->share_item_with_user($itemid, $otherrecipient->id);
+        $output = $this->createMock(\renderer_base::class);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $this->assertFalse($page->export_for_template($output)['groupbysender']);
+        set_user_preference('block_exaport_group_by_sender', 1);
+
+        $this->setUser($otherrecipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($otherrecipient->id), SITEID);
+        $this->assertFalse($page->export_for_template($output)['groupbysender']);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $this->assertTrue($page->export_for_template($output)['groupbysender']);
+    }
+
     // -------------------------------------------------------------------------
     // Tests: tooltip integration
     // -------------------------------------------------------------------------

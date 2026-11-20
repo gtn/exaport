@@ -1086,7 +1086,7 @@ $string['settings_sharing_courses_with_block_only'] = 'Beim Teilen nur Kurse mit
 $string['other_shared_users_course'] = 'Andere Nutzer/innen';
 $string['settings_sharing_courses_with_block_only_description'] = 'Beschränkt die Kursliste zur Empfängerauswahl auf eingeschriebene Kurse, in denen ein Exabis-ePortfolio-Block direkt hinzugefügt wurde (auch ausgeblendete Blöcke). Bestehende Empfänger/innen außerhalb dieser Kurse bleiben unter "Andere Nutzer/innen" bearbeitbar. Die globale Nutzersuche, bestehende Zugriffsrechte und "Alle mit einem Nutzerkonto" bleiben unverändert.';
 
-$string['sharing_load_more_users'] = 'Weitere Nutzer/innen laden …';
+$string['sharing_load_more_users'] = 'Alle Nutzer/innen dieses Kurses laden …';
 $string['sharing_load_users_error'] = 'Die Nutzerliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';
 $string['sharing_users_not_ready'] = 'Die Empfängerliste ist noch nicht vollständig geladen. Bitte warten Sie oder laden Sie die Seite neu, bevor Sie speichern.';
 $string['sharing_load_groups_error'] = 'Die Gruppenliste konnte nicht geladen werden. Bitte versuchen Sie es erneut.';

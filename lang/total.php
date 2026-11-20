@@ -3942,7 +3942,7 @@ return [
         'Everyone with an account',
     ],
     'sharing_load_more_users' => [
-        'Weitere Nutzer/innen laden …',
+        'Alle Nutzer/innen dieses Kurses laden …',
         'Load all users of this course …',
     ],
     'sharing_load_users_error' => [

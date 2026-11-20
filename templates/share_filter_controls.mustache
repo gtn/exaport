@@ -11,9 +11,8 @@
             {{#hassenders}}
                 <div style="min-width: 160px; max-width: 250px;">
                     <label class="sr-only" for="exaport-share-sender">{{#str}} share_filter_shared_by, block_exaport {{/str}}</label>
-                    <select class="form-control custom-select" id="exaport-share-sender" data-share-filter="userid"
-                            data-search-placeholder="{{#str}} share_filter_search_user, block_exaport {{/str}}">
-                        <option value="">{{#str}} share_filter_any_sender, block_exaport {{/str}}</option>
+                    <select class="form-control custom-select" id="exaport-share-sender" data-share-filter="userid">
+                        <option value="">{{#str}} share_filter_search_user, block_exaport {{/str}}</option>
                         {{#senders}}
                             <option value="{{id}}">{{name}}</option>
                         {{/senders}}
@@ -38,7 +37,7 @@
                         </span>
                     </label>
                     <select class="form-control custom-select w-auto mw-100" id="exaport-share-course" data-share-filter="filtercourseid">
-                        <option value="">{{#str}} share_filter_all_courses, block_exaport {{/str}}</option>
+                        <option value="">{{#str}} share_filter_no_course_priority, block_exaport {{/str}}</option>
                         {{#courseoptions}}
                             <option value="{{id}}">{{name}}</option>
                         {{/courseoptions}}

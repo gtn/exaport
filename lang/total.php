@@ -1610,25 +1610,21 @@ return [
         'Benutzer suchen...',
         'Search User...',
     ],
-    'share_filter_any_sender' => [
-        'Alle Personen',
-        'Shared by anyone',
-    ],
     'share_filter_group_by_sender' => [
         'Nach Person gruppieren',
         'Group by sender',
     ],
     'share_filter_category_course' => [
-        'Kurs der Kategorie',
-        'Category course',
+        'Kurs zuerst anzeigen',
+        'Show course first',
     ],
     'share_filter_collection_course' => [
-        'Personen in diesem Kurs',
-        'People in this course',
+        'Personen aus diesem Kurs zuerst anzeigen',
+        'Show senders from this course first',
     ],
-    'share_filter_all_courses' => [
-        'Alle Kurse',
-        'All courses',
+    'share_filter_no_course_priority' => [
+        'Keine Kurspriorität',
+        'No course priority',
     ],
     'sharedwith' => [
         'Geteilt mit',

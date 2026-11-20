@@ -62,9 +62,7 @@ class shared_with_me_page implements renderable, templatable {
     public function export_for_template(renderer_base $output): array {
         global $DB;
 
-        $ownerids = array_unique(array_map(function($row) {
-            return $row->owner_userid;
-        }, $this->rows));
+        $ownerids = array_unique(array_column($this->rows, 'owner_userid'));
         $owners = $ownerids ? $DB->get_records_list('user', 'id', $ownerids) : [];
         $senders = [];
         foreach ($owners as $owner) {
@@ -72,10 +70,8 @@ class shared_with_me_page implements renderable, templatable {
         }
         core_collator::asort_array_of_arrays_by_key($senders, 'name');
 
-        $courseids = array_unique(array_filter(array_map(function($row) {
-            return $row->courseid;
-        }, $this->rows)));
-        $courses = $courseids ? $DB->get_records_list('course', 'id', $courseids, '', 'id, shortname, fullname') : [];
+        $courseids = array_unique(array_filter(array_column($this->rows, 'courseid')));
+        $courses = $courseids ? $DB->get_records_list('course', 'id', $courseids, '', 'id, fullname') : [];
 
         $courseoptions = [];
         foreach (enrol_get_my_courses() as $course) {
@@ -175,8 +171,7 @@ class shared_with_me_page implements renderable, templatable {
                  WHERE ctx.contextlevel = :coursecontext
                    AND ctx.instanceid $coursesql
                    AND ra.userid $ownersql
-                   AND u.deleted = 0 AND u.suspended = 0
-              ORDER BY ctx.instanceid";
+                   AND u.deleted = 0 AND u.suspended = 0";
         $rows = $DB->get_recordset_sql($sql, $ownerparams + $courseparams + ['coursecontext' => CONTEXT_COURSE]);
         $matches = [];
         foreach ($rows as $row) {

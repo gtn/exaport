@@ -91,15 +91,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
-     * Whether the incoming overview provides any of its optional discovery controls.
-     *
-     * @return {boolean}
-     */
-    function hasIncomingShareFilters() {
-        return !!(shareOwnerSelect || shareCourseSelect);
-    }
-
-    /**
      * Restore a scope only when its value is an enabled option in the current select.
      *
      * @param {HTMLSelectElement} select Scope control, if present.
@@ -152,7 +143,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         } else {
             url.searchParams.delete('entrytype');
         }
-        if (hasIncomingShareFilters()) {
+        if (incomingSharesTable) {
             url.searchParams.delete('userid');
             Object.keys(selectedShareOwners).forEach(function(id) {
                 url.searchParams.append('userid', id);
@@ -180,7 +171,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         shareCourseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
         shareCourseRegion = shareFilters.querySelector('[data-region="share-course-filter"]');
         shareOwnerChips = shareFilters.querySelector('[data-region="sender-filter-chips"]');
-        if (hasIncomingShareFilters()) {
+        if (incomingSharesTable) {
             initShareOwnerFilter(params.getAll('userid'));
             restoreShareScope(shareCourseSelect, params.get('filtercourseid'));
             if (shareCourseSelect) {
@@ -196,12 +187,11 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             searchInput.value = '';
             entryTypeSelect.value = 'all';
             if (shareOwnerSelect) {
-                shareOwnerSelect.value = '';
                 selectedShareOwners = {};
                 renderShareOwnerChips();
                 shareOwnerWidget.refresh();
             }
-            if (hasIncomingShareFilters()) {
+            if (incomingSharesTable) {
                 updateShareCourseScope(true);
             }
             searchInput.focus();
@@ -309,11 +299,10 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 selectedShareOwners[id] = knownOwners[id];
             }
         });
-        shareOwnerSelect.value = '';
         shareOwnerWidget = CategorySelect.build({
             select: shareOwnerSelect,
             inputId: 'exaport-share-sender-search',
-            placeholder: shareOwnerSelect.getAttribute('data-search-placeholder') || shareOwnerSelect.options[0].text,
+            placeholder: shareOwnerSelect.options[0].text,
             keepOpenOnPick: true,
             skipFirstOption: true,
             isSelected: function(id) {
@@ -476,7 +465,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         var appendHeading = function(name, count, type) {
             var heading = document.createElement('tr');
             heading.setAttribute('data-share-group-header', type);
-            heading.className = 'exaport-share-' + type + '-heading';
             if (type === 'course') {
                 heading.classList.add('table-active');
             }
@@ -670,7 +658,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         if (!categorySelect) {
             return;
         }
-        var widget = CategorySelect.build({
+        CategorySelect.build({
             select: categorySelect,
             inputId: 'exaport-category-search',
             placeholder: searchCategoryLabel,
@@ -683,7 +671,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 selectedCategories[id] = name;
                 renderChips();
                 filterItems();
-                widget.refresh();
             }
         });
     }

@@ -3699,16 +3699,10 @@ function block_exaport_render_search_control(?string $searchlabel = null): strin
  * @param string $selectedsort Currently active sort value in "key-dir" format, e.g. "date-desc".
  * @param string|null $datelabel Label for the date sort options.
  * @param string|null $namelabel Label for the title sort options.
- * @param string|null $searchlabel Label for the search input.
  * @return string               HTML fragment (two <div> elements: search input + sort select).
  */
-function block_exaport_render_search_and_sort_controls(
-    $selectedsort,
-    ?string $datelabel = null,
-    ?string $namelabel = null,
-    ?string $searchlabel = null
-) {
-    $html = block_exaport_render_search_control($searchlabel);
+function block_exaport_render_search_and_sort_controls($selectedsort, ?string $datelabel = null, ?string $namelabel = null) {
+    $html = block_exaport_render_search_control();
     $datelabel = $datelabel ?? get_string('date', 'block_exaport');
     $namelabel = $namelabel ?? get_string('name', 'block_exaport');
 
@@ -3761,7 +3755,7 @@ function block_exaport_render_entrytype_control($entrytype, array $options = [
  * Renders the shared filter bar controls for My shares and Shared with me.
  *
  * @param string|null $sort Requested sort value, or null when sorting uses table headers.
- * @param string|null $searchlabel Label for the search input.
+ * @param string|null $searchlabel Label for the search-only controls.
  * @return string HTML fragment.
  */
 function block_exaport_render_share_filter_controls(?string $sort, ?string $searchlabel = null): string {
@@ -3774,8 +3768,7 @@ function block_exaport_render_share_filter_controls(?string $sort, ?string $sear
         $controls = block_exaport_render_search_and_sort_controls(
             $sort,
             get_string('share_filter_updated', 'block_exaport'),
-            get_string('title', 'block_exaport'),
-            $searchlabel
+            get_string('title', 'block_exaport')
         );
     }
     return $controls . block_exaport_render_entrytype_control('all', [

@@ -486,6 +486,29 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertSame('', $rows['category']['updateddate']);
     }
 
+    /** Sender grouping defaults off and follows the current recipient's saved preference. */
+    public function test_shared_with_me_sender_grouping_preference_is_per_user(): void {
+        $recipient = $this->getDataGenerator()->create_user();
+        $otherrecipient = $this->getDataGenerator()->create_user();
+        $itemid = $this->create_item($this->owner);
+        $this->share_item_with_user($itemid, $recipient->id);
+        $this->share_item_with_user($itemid, $otherrecipient->id);
+        $output = $this->createMock(\renderer_base::class);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $this->assertFalse($page->export_for_template($output)['groupbysender']);
+        set_user_preference('block_exaport_group_by_sender', 1);
+
+        $this->setUser($otherrecipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($otherrecipient->id), SITEID);
+        $this->assertFalse($page->export_for_template($output)['groupbysender']);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $this->assertTrue($page->export_for_template($output)['groupbysender']);
+    }
+
     // -------------------------------------------------------------------------
     // Tests: tooltip integration
     // -------------------------------------------------------------------------

@@ -34,10 +34,19 @@
         headersharedwith  - Localised column header "Shared with"
         headercomments    - Localised column header "Comments"
         searchcontrols    - Pre-rendered HTML for the filter controls
+        groupbysender     - Saved display preference for grouping rows by sender
         hassenders, senders, hascourseoptions, courseoptions - Available discovery options
 }}
 <div class="block_exaport_shared_with_me">
     {{> block_exaport/share_filter_controls }}
+    {{#hassenders}}
+        <div class="mb-2">
+            <label class="mb-0 d-inline-flex align-items-center gap-2">
+                <input type="checkbox" id="exaport-group-by-sender"{{#groupbysender}} checked{{/groupbysender}}>
+                {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
+            </label>
+        </div>
+    {{/hassenders}}
     {{^hasrows}}
         <p>{{nothingtext}}</p>
     {{/hasrows}}

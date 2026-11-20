@@ -19,10 +19,6 @@
                         {{/senders}}
                     </select>
                 </div>
-                <label class="mb-0 d-inline-flex align-items-center gap-2">
-                    <input type="checkbox" data-share-filter="groupbysender">
-                    {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
-                </label>
             {{/hassenders}}
             {{^hassenders}}
                 <button type="button" class="btn btn-secondary" data-action="clear-filters" hidden>

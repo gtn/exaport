@@ -131,6 +131,7 @@ class shared_with_me_page implements renderable, templatable {
             'rows'             => $exportedrows,
             'hassenders'       => (bool)$senders,
             'senders'          => array_values($senders),
+            'groupbysender'    => (bool)get_user_preferences('block_exaport_group_by_sender', 0),
             'hascourseoptions' => (bool)$courseoptions,
             'courseoptions'    => array_values($courseoptions),
             'nothingtext'      => get_string('nothingsharedwithme', 'block_exaport'),

@@ -39,7 +39,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
      * @return {boolean}
      */
     function hasIncomingShareFilters() {
-        return !!(shareOwnerSelect || shareCourseSelect || shareSenderGrouping);
+        return !!(shareOwnerSelect || shareCourseSelect);
     }
 
     /**
@@ -105,11 +105,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             } else {
                 url.searchParams.delete('filtercourseid');
             }
-            if (shareSenderGrouping && shareSenderGrouping.checked) {
-                url.searchParams.set('groupbysender', '1');
-            } else {
-                url.searchParams.delete('groupbysender');
-            }
         }
         history.replaceState(null, '', url);
     }
@@ -126,24 +121,18 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         }
         shareOwnerSelect = shareFilters.querySelector('[data-share-filter="userid"]');
         shareCourseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
-        shareSenderGrouping = shareFilters.querySelector('[data-share-filter="groupbysender"]');
         shareCourseRegion = shareFilters.querySelector('[data-region="share-course-filter"]');
         shareOwnerChips = shareFilters.querySelector('[data-region="sender-filter-chips"]');
         if (hasIncomingShareFilters()) {
             initShareOwnerFilter(params.getAll('userid'));
             restoreShareScope(shareCourseSelect, params.get('filtercourseid'));
-            if (shareSenderGrouping) {
-                shareSenderGrouping.checked = params.get('groupbysender') === '1';
+            if (shareCourseSelect) {
+                shareCourseSelect.addEventListener('change', function() {
+                    saveShareFilters();
+                    filterItems();
+                });
             }
             updateShareCourseScope(false);
-            [shareCourseSelect, shareSenderGrouping].forEach(function(control) {
-                if (control) {
-                    control.addEventListener('change', function() {
-                        saveShareFilters();
-                        filterItems();
-                    });
-                }
-            });
             saveShareFilters();
         }
         shareFilters.querySelector('[data-action="clear-filters"]').addEventListener('click', function() {
@@ -692,6 +681,13 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             subcategoriesCheckbox = document.getElementById('exaport-subcategories-checkbox');
             entryTypeSelect = document.getElementById('exaport-entrytype-select');
             shareFilters = document.querySelector('[data-region="exaport-share-filters"]');
+            shareSenderGrouping = document.getElementById('exaport-group-by-sender');
+            if (shareSenderGrouping) {
+                shareSenderGrouping.addEventListener('change', function() {
+                    Prefs.savePreference('group_by_sender', shareSenderGrouping.checked ? 1 : 0);
+                    sortItems();
+                });
+            }
 
             var restoredFromSession = false;
             if (shareFilters) {

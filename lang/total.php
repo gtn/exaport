@@ -17,7 +17,7 @@
 
 return [
     'translation:language' => [
-        'German',
+        'Deutsch',
         'English',
     ],
     'translation:person' => [
@@ -57,11 +57,11 @@ return [
         'add Exabis ePortfolio on My home',
     ],
     'exaport:export' => [
-        'Export von SCORM-Files',
+        'Export von SCORM-Dateien',
         'Export of SCORM-Files',
     ],
     'exaport:import' => [
-        'Import von SCORM-Files',
+        'Import von SCORM-Dateien',
         'Import of SCORM-Files',
     ],
     'exaport:importfrommoodle' => [
@@ -85,27 +85,27 @@ return [
         'Allow competences',
     ],
     'exaport:audititemcontent' => [
-        null,
+        'Inhalte von Exaport-Einträgen prüfen',
         'Audit Exaport item content',
     ],
     'audititemcontent' => [
-        null,
+        'Prüfung der Migration von Eintragsinhalten',
         'Item-content migration audit',
     ],
     'audititemcontentaction' => [
-        null,
+        'Empfohlene Maßnahme',
         'Action',
     ],
     'audititemcontentaffecteditems' => [
-        null,
+        'Betroffene Einträge',
         'Affected items',
     ],
     'audititemcontentcode' => [
-        null,
+        'Befundcode',
         'Finding code',
     ],
     'audititemcontentcount' => [
-        null,
+        'Anzahl',
         'Count',
     ],
     'audititemcontentcurrentaudit' => [
@@ -113,35 +113,35 @@ return [
         'Current database and file-reference checks',
     ],
     'audititemcontentdownloadjson' => [
-        null,
+        'Prüfung ausführen und JSON herunterladen',
         'Run audit and download JSON',
     ],
     'audititemcontentfilters' => [
-        null,
+        'Prüfumfang',
         'Audit scope',
     ],
     'audititemcontentguidance' => [
-        null,
+        'Details und Empfehlungen',
         'Details and guidance',
     ],
     'audititemcontenthistoricalreport' => [
-        null,
+        'Bericht zur abgeschlossenen Migration',
         'Historical migration report',
     ],
     'audititemcontentinformation' => [
-        null,
+        'Zusätzliche Kennzahlen',
         'Informational counts',
     ],
     'audititemcontentinvalidreport' => [
-        null,
+        'Der gespeicherte Migrationsbericht konnte nicht gelesen werden.',
         'The stored migration report could not be decoded.',
     ],
     'audititemcontentitemid' => [
-        null,
+        'Eintrags-ID',
         'Item ID',
     ],
     'audititemcontentitemid_help' => [
-        null,
+        'Lassen Sie das Feld leer, um die gesamte Moodle-Instanz zu prüfen. Geben Sie eine positive Eintrags-ID ein, um die Prüfung auf Befunde zu beschränken, die diesem Eintrag zugeordnet werden können.',
         'Leave empty for a site-wide audit, or enter a positive item ID to restrict attributable checks.',
     ],
     'audititemcontentnofindings' => [
@@ -149,11 +149,11 @@ return [
         'Database and file-reference checks passed.',
     ],
     'audititemcontentnoreport' => [
-        null,
+        'Es ist kein Bericht zu einer abgeschlossenen Migration von Eintragsinhalten gespeichert (Berichtskennung 2026101902).',
         'No completed item-content migration report is stored (report identifier 2026101902).',
     ],
     'audititemcontentopen' => [
-        null,
+        'Prüfung öffnen',
         'Open audit',
     ],
     'audititemcontentorphanlegacyfile' => [
@@ -161,19 +161,19 @@ return [
         'Legacy files without a parent item exist. A known cause in earlier versions was category deletion that removed items but left their associated files behind. The migration preserves these orphaned files because their parent items no longer exist.',
     ],
     'audititemcontentperformancewarning' => [
-        null,
+        'Bei einer großen Moodle-Installation kann die Prüfung der gesamten Instanz einige Zeit dauern. Sie startet erst, wenn Sie dieses Formular absenden.',
         'A site-wide audit may take time on a large installation. The audit runs only when you submit this form.',
     ],
     'audititemcontentpositive' => [
-        null,
+        'Geben Sie eine positive Eintrags-ID ein.',
         'Enter a positive item ID.',
     ],
     'audititemcontentreadonlynotice' => [
-        null,
+        'Die Prüfung greift ausschließlich lesend auf die Inhalte zu. Sie migriert, repariert, verschiebt, erstellt und löscht keine Inhalte.',
         'This audit is read-only. It never migrates, repairs, moves, creates, or deletes content.',
     ],
     'audititemcontentrelatedids' => [
-        null,
+        'IDs zugehöriger Datensätze',
         'Related record IDs',
     ],
     'audititemcontentreportfiles' => [
@@ -190,7 +190,7 @@ return [
         'The item-content migration has reached its time budget for this upgrade attempt. Completed items have been saved. Restart the Moodle upgrade to continue; completed items will not be duplicated. The migration completion savepoint has not been recorded.',
     ],
     'audititemcontentreportmeta' => [
-        null,
+        'Berichtskennung {$a->version}, abgeschlossen am {$a->completed}.',
         'Report identifier {$a->version}, completed {$a->completed}.',
     ],
     'audititemcontentscope' => [
@@ -198,27 +198,27 @@ return [
         'This audit checks database records, file references and their relationships. It reports the current state, including inconsistencies that may already have existed before migration. A finding does not by itself mean that the migration caused the problem.',
     ],
     'audititemcontentrun' => [
-        null,
+        'Prüfung ausführen',
         'Run audit',
     ],
     'audititemcontentsamplelimit' => [
-        null,
+        'Höchstzahl der Beispiel-IDs',
         'Sample limit',
     ],
     'audititemcontentsamplelimit_help' => [
-        null,
+        'Legt fest, wie viele IDs pro Befund höchstens zur Diagnose angezeigt werden. Zulässig sind 1 bis 1000.',
         'Maximum diagnostic IDs shown for each finding, from 1 to 1000.',
     ],
     'audititemcontentsamplerange' => [
-        null,
+        'Geben Sie für die Höchstzahl der Beispiel-IDs einen Wert zwischen 1 und 1000 ein.',
         'Enter a sample limit from 1 to 1000.',
     ],
     'audititemcontentsamples' => [
-        null,
+        'Beispiel-IDs',
         'Bounded sample IDs',
     ],
     'audititemcontentseverity' => [
-        null,
+        'Schweregrad',
         'Severity',
     ],
     'audititemcontentsummary' => [
@@ -226,19 +226,19 @@ return [
         'Database and file-reference checks: {$a->errors} error findings, {$a->warnings} warning findings.',
     ],
     'audititemcontentvalue' => [
-        null,
+        'Wert',
         'Value',
     ],
     'audititemcontentverbose' => [
-        null,
+        'Zusätzliche Kennzahlen und IDs zugehöriger Datensätze anzeigen',
         'Show informational and related record IDs',
     ],
     'audititemcontentverbose_help' => [
-        null,
+        'Zeigt zusätzliche Kennzahlen und eine begrenzte Zahl weiterer Datensatz-IDs an. Sensible Werte bleiben ausgeblendet.',
         'Shows additional bounded identifiers and informational counts. Sensitive values remain hidden.',
     ],
     'exaport:viewartifactsfromstudents' => [
-        'Portfolio Seiten der eigenen SuS sehen',
+        'Portfolioseiten der eigenen Teilnehmer/innen sehen',
         'Can see portfolio pages of own students',
     ],
     'new' => [
@@ -246,7 +246,7 @@ return [
         'New',
     ],
     'addbookmark' => [
-        'Bookmark hinzufügen',
+        'Lesezeichen hinzufügen',
         'Add bookmark',
     ],
     'addcategory' => [
@@ -266,7 +266,7 @@ return [
         '($a awaiting)',
     ],
     'back' => [
-        'zurück',
+        'Zurück',
         'Back',
     ],
     'cancel_edit_comment' => [
@@ -278,7 +278,7 @@ return [
         'close',
     ],
     'backtocourse' => [
-        'zurück zum Kurs',
+        'Zurück zum Kurs',
         'Back to course',
     ],
     'categories' => [
@@ -286,7 +286,7 @@ return [
         'Categories',
     ],
     'explaincategories' => [
-        '<span class=\'block_eportfolio_bold\'>Kategorien:</span> hier kannst du die Kategorien einsehen und bearbeiten.',
+        '<span class=\'block_eportfolio_bold\'>Kategorien:</span> Hier können Sie die Kategorien einsehen und bearbeiten.',
         'Categories: here you can create and modify categories',
     ],
     'category' => [
@@ -306,7 +306,7 @@ return [
         'Category saved.',
     ],
     'categorydeleted' => [
-        'Kategorie gel&ouml;scht.',
+        'Kategorie gelöscht.',
         'Category deleted.',
     ],
     'parentcategory' => [
@@ -318,7 +318,7 @@ return [
         'Root',
     ],
     'invalidparentcategory' => [
-        'Bitte wähle eine gültige übergeordnete Kategorie.',
+        'Wählen Sie bitte eine gültige übergeordnete Kategorie.',
         'Please select a valid parent category.',
     ],
     'date' => [
@@ -326,11 +326,11 @@ return [
         'Date',
     ],
     'dontincludeurl' => [
-        'Diese Option ausw&auml;hlen um die Verknüpfung zwischen Bookmark und URL aufzuheben',
+        'Diese Option auswählen, um die Verknüpfung zwischen Lesezeichen und URL aufzuheben',
         'Check this box to unassociate the bookmark with the URL',
     ],
     'duplicatedurl' => [
-        'Diese URL ist bereits bei den Bookmarks vorhanden.',
+        'Diese URL ist bereits bei den Lesezeichen vorhanden.',
         'You already have this URL bookmarked.',
     ],
     'editcategories' => [
@@ -342,12 +342,12 @@ return [
         'The Portfolio can be used to store web addresses, files, and notes, allowing users to jot down insights or brief comments',
     ],
     'explainingmoredata' => [
-        '<strong>Dies ist dein Bereich, um Belege für deinen Lernweg zu sammeln.</strong>
+        '<strong>Dies ist Ihr Bereich, um Belege für Ihren Lernweg zu sammeln.</strong>
 			<ul>
-				<li><strong>Füge deine besten Arbeiten hinzu:</strong> Lade Dateien, Weblinks oder Beschreibungen von Projekten, Präsentationen und mehr hoch.</li>
-				<li><strong>Reflektiere über deine Erfahrungen:</strong> Erkläre, was du gelernt hast, welche Herausforderungen du bewältigt hast und deine Erfolge für jeden Eintrag.</li>
+				<li><strong>Fügen Sie Ihre besten Arbeiten hinzu:</strong> Laden Sie Dateien, Weblinks oder Beschreibungen von Projekten, Präsentationen und mehr hoch.</li>
+				<li><strong>Reflektieren Sie über Ihre Erfahrungen:</strong> Erklären Sie für jeden Eintrag, was Sie gelernt haben, welche Herausforderungen Sie bewältigt haben und welche Erfolge Sie erzielt haben.</li>
 			</ul>
-			<strong>Betrachte jeden Eintrag als eine Art Geschichte, die deine Fähigkeiten und dein Wissen beschreibt.</strong>',
+			<strong>Betrachten Sie jeden Eintrag als eine Art Geschichte, die Ihre Fähigkeiten und Ihr Wissen beschreibt.</strong>',
         '<strong>This is your space to gather evidence of your learning journey.</strong>
             <ul>
                 <li><strong>Add your best work:</strong> Upload files, web links, or descriptions of projects, presentations, and more.</li>
@@ -356,31 +356,31 @@ return [
             <strong>Think of each item as a story highlighting your skills and knowledge.</strong>',
     ],
     'explaininglink' => [
-        '<span class=\'block_eportfolio_bold\'>Externe Links:</span> diese Links k&ouml;nnen mit anderen Kursteilnehmer:innen ausgetauscht werden.',
+        '<span class=\'block_eportfolio_bold\'>Externe Links:</span> Diese Links können mit anderen Kursteilnehmer/innen ausgetauscht werden.',
         'Links.  These links may be shared with all authorized course members.',
     ],
     'explainingfile' => [
-        '<span class=\'block_eportfolio_bold\'>Dateien:</span> diese Dateien k&ouml;nnen mit anderen Kursteilnehmer:innen ausgetauscht werden.',
+        '<span class=\'block_eportfolio_bold\'>Dateien:</span> Diese Dateien können mit anderen Kursteilnehmer/innen ausgetauscht werden.',
         'Files. These files may be shared with all authorized course members.',
     ],
     'explainingnote' => [
-        '<span class=\'block_eportfolio_bold\'>Notizen:</span> diese Notizen k&ouml;nnen mit anderen Kursteilnehmer:innen ausgetauscht werden.',
+        '<span class=\'block_eportfolio_bold\'>Notizen:</span> Diese Notizen können mit anderen Kursteilnehmer/innen ausgetauscht werden.',
         'Notes. These notes may be shared with all authorized course members.',
     ],
     'explainingshare' => [
-        'Um einem/einer anderen Teilnehmer:in den Link zu ver&ouml;ffentlichen, klicke auf den jeweiligen Namen und speichere dann die &Auml;nderungen.  Du kannst mehr als eine/n Teilnehmer:in ausw&auml;hlen.',
+        'Um den Link für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
         'To allow a participant to see the link, click on their name and then click on Save Changes. You can choose more than one participant.',
     ],
     'explainingshared' => [
-        'Folgende Teilnehmer:innen haben ver&ouml;ffentlichte Links, Dateien bzw. Notizen.',
+        'Folgende Teilnehmer/innen haben veröffentlichte Links, Dateien bzw. Notizen.',
         'These participants have shared some of their external links, files or notes.',
     ],
     'explainingsharefile' => [
-        'Um einem/einer anderen Teilnehmer:in die Datei zu ver&ouml;ffentlichen, klicke auf den jeweiligen Namen und speichere dann die &Auml;nderungen.  Du kannst mehr als eine/n Teilnehmer:in ausw&auml;hlen.',
+        'Um die Datei für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
         'To allow a participant to see the file, click on their name and then click on Save Changes.  You can choose more than one participant.',
     ],
     'explainingsharenote' => [
-        'Um einem/einer anderen Teilnehmer:in die Notiz zu ver&ouml;ffentlichen, klicke auf den jeweiligen Namen und speichere dann die &Auml;nderungen.  Du kannst mehr als eine/n Teilnehmer:in ausw&auml;hlen.',
+        'Um die Notiz für andere Teilnehmer/innen zu veröffentlichen, klicken Sie auf den jeweiligen Namen und speichern Sie dann die Änderungen. Sie können mehrere Teilnehmer/innen auswählen.',
         'To allow a participant to see the note, click on their name and then click on Save Changes.  You can choose more than one participant.',
     ],
     'file' => [
@@ -396,7 +396,7 @@ return [
         'Use this field for a preview image.',
     ],
     'firstnameshared' => [
-        'Familienname',
+        'Vorname',
         'First Name',
     ],
     'go' => [
@@ -412,11 +412,11 @@ return [
         'Manage categories',
     ],
     'mandatoryfields' => [
-        'Eine Kategorienbezeichnung und eine kurze Beschreibung ist erforderlich. Bitte fülle beides aus.',
+        'Eine Kategorienbezeichnung und eine kurze Beschreibung sind erforderlich. Bitte füllen Sie beides aus.',
         'The field\'s name, category and intro are required. Please fill them in.',
     ],
     'mandatoryfieldsforcat' => [
-        'Eine Feldbezeichnung ist erforderlich. Bitte fülle diese aus.',
+        'Eine Feldbezeichnung ist erforderlich. Bitte füllen Sie diese aus.',
         'The field name is required. Please fill them in.',
     ],
     'myportfolio' => [
@@ -424,7 +424,7 @@ return [
         'My Portfolio',
     ],
     'myportfoliotitle' => [
-        'ePortfolio-Modul: Füge hier Links und Dateien hinzu.',
+        'ePortfolio-Modul: Fügen Sie hier Links und Dateien hinzu.',
         'Exabis ePortfolio module: Add your links and files here.',
     ],
     'newlink' => [
@@ -488,11 +488,11 @@ return [
         '(show summary)',
     ],
     'strshare' => [
-        'Ver&ouml;ffentlichen',
+        'Teilen',
         'Share',
     ],
     'strunshare' => [
-        'Ver&ouml;ffentlichung zurücknehmen',
+        'Veröffentlichung zurücknehmen',
         'Unshare',
     ],
     'summary' => [
@@ -516,11 +516,11 @@ return [
         'Who has access?',
     ],
     'shareallexceptthose' => [
-        'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) au&szlig;er folgenden Benutzern',
+        'Zugriff für <span class=\'block_eportfolio_bold\'>alle</span> (auch jene, die hier nicht angezeigt werden) mit Ausnahme der folgenden Nutzer/innen',
         'Access for <span class=\'block_eportfolio_bold\'>all</span> (even those who aren\'t listed here) except the following users',
     ],
     'sharenoneexceptthose' => [
-        'Zugriff für <span class=\'block_eportfolio_bold\'>keine</span> au&szlig;er folgende Benutzer',
+        'Zugriff für <span class=\'block_eportfolio_bold\'>niemanden</span> außer für folgende Nutzer/innen',
         'Access for <span class=\'block_eportfolio_bold\'>nobody</span> except the following users',
     ],
     'internalaccessall' => [
@@ -528,7 +528,7 @@ return [
         'Access for <span class=\'block_eportfolio_bold\'>all</span>',
     ],
     'internalaccessusers' => [
-        'Zugriff nur für folgende Benutzer',
+        'Zugriff nur für folgende Nutzer/innen',
         'Access only for the following users',
     ],
     'internalaccessgroups' => [
@@ -540,23 +540,23 @@ return [
         'external ePortfolio-Link',
     ],
     'emailaccess' => [
-        'Per Email teilen',
+        'Per E-Mail teilen',
         'Share by Email',
     ],
     'emailaccessdescription' => [
-        'Gib eine Email Adresse pro Zeile ein<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Das Löschen der Adresse löscht den Zugriff auf diese Sammelmappe.',
-        'Input an email address per line<br />Each email will receive a unique link with access to this collection. Deleting the email will remove access to this collection.',
+        'Geben Sie eine E-Mail-Adresse pro Zeile ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Wenn Sie eine Adresse entfernen, erlischt der Zugriff über den zugehörigen Link.',
+        'Enter one email address per line.<br />Each recipient receives a unique link to this collection. If you remove an address, access through its link is revoked.',
     ],
     'emailaccessmessagesubject' => [
-        'Eine Sammelmappe wurde mit dir geteilt',
+        'Eine Sammelmappe wurde mit Ihnen geteilt',
         'New shared collection for you',
     ],
     'emailaccessmessage' => [
-        'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit dir geteilt. Sie kann hier abgerufen werden: {$a->url}',
+        'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt. Sie kann hier abgerufen werden: {$a->url}',
         'Hello! {$a->sendername} has shared the collection "{$a->viewname}" for you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML' => [
-        'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit dir geteilt.<br />Sie ist kann <a href="{$a->url}">hier</a> aberufen werden',
+        'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden',
         'Hello!<br />{$a->sendername} has shared the collection "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
@@ -569,20 +569,20 @@ return [
         '{$a->sendername} made changes to a collection shared with you.',
     ],
     'emailaccessmessage_updatedview' => [
-        'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}", welche er mit dir geteilt hat, aktualisiert. Sie kann hier abgerufen werden: {$a->url}',
+        'Hallo! {$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert. Sie kann hier abgerufen werden: {$a->url}',
         'Hello! {$a->sendername} has updated the collection "{$a->viewname}" they shared with you. You can view it here: {$a->url}',
     ],
     'emailaccessmessageHTML_updatedview' => [
-        'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}", welche er mit dir geteilt hat, aktualisiert.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden',
+        'Hallo!<br />{$a->sendername} hat die mit Ihnen geteilte Sammelmappe "{$a->viewname}" aktualisiert.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden',
         'Hello!<br />{$a->sendername} has updated the collection "{$a->viewname}" they shared with you.<br />You can view it <a href="{$a->url}">here</a>.',
     ],
 
     'showallusers' => [
-        'Zeige Benutzer aller meiner Kurse',
+        'Nutzer/innen aus allen meinen Kursen anzeigen',
         'Show users of all my courses',
     ],
     'showcourseusers' => [
-        'Zeige nur Benutzer des aktuellen Kurses',
+        'Nur Nutzer/innen des aktuellen Kurses anzeigen',
         'Show only users of the course',
     ],
     'sharedpersons' => [
@@ -598,7 +598,7 @@ return [
         'At the moment you have no submission at any assignment!',
     ],
     'deletecategoryconfirm' => [
-        'Willst du die Kategorie "{$a->name}" wirklich l&ouml;schen? Es werden alle Eintr&auml;ge in dieser Kategorie und alle Unterkategorien mitgel&ouml;scht!',
+        'Möchten Sie die Kategorie "{$a->name}" wirklich löschen? Alle Einträge in dieser Kategorie und alle Unterkategorien werden gelöscht!',
         'Do you really want to delete the category "{$a->name}"? All entries in this category and all subcategories will be deleted!',
     ],
     'name' => [
@@ -610,11 +610,11 @@ return [
         'Role',
     ],
     'nousersfound' => [
-        'Keine Benutzer gefunden',
+        'Keine Nutzer/innen gefunden',
         'No users found',
     ],
     'delete' => [
-        'L&ouml;schen',
+        'Löschen',
         'Delete',
     ],
     'add' => [
@@ -622,7 +622,7 @@ return [
         'Add',
     ],
     'edit' => [
-        'Editieren',
+        'Bearbeiten',
         'Edit',
     ],
     'checkall' => [
@@ -642,7 +642,7 @@ return [
         'No groups found',
     ],
     'make_it_yours' => [
-        'Mach\' es zu deinem Eigenen',
+        'Machen Sie es zu Ihrem Eigenen',
         'Make it yours',
     ],
 
@@ -656,7 +656,7 @@ return [
         'Import',
     ],
     'explainexport' => [
-        '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export:</span> hier kannst du dein ePortfolio exportieren</span>',
+        '<span class=\'block_eportfolio_center\'><span class=\'block_eportfolio_bold\'>Export:</span> Hier können Sie Ihr ePortfolio exportieren</span>',
         'Export your portfolio here.',
     ],
     'createexport' => [
@@ -668,7 +668,7 @@ return [
         'Create XAPI-File',
     ],
     'clicktodownloadscorm' => [
-        'Folgenden Button drücken, um SCORM-Datei herunterzuladen:',
+        'Drücken Sie den folgenden Button, um die SCORM-Datei herunterzuladen:',
         'Press button to download the SCORM file:',
     ],
     'add_directory_structure' => [
@@ -680,15 +680,15 @@ return [
         'Download',
     ],
     'endedit' => [
-        'Editieren beenden',
+        'Bearbeiten beenden',
         'End editing',
     ],
     'change' => [
-        '&auml;ndern',
+        'Ändern',
         'Change',
     ],
     'explainpersonal' => [
-        '<span class=\'block_eportfolio_bold\'>Pers&ouml;nliche Informationen</span>',
+        '<span class=\'block_eportfolio_bold\'>Persönliche Informationen</span>',
         'Personal information',
     ],
     'personal' => [
@@ -708,7 +708,7 @@ return [
         'Import/Export',
     ],
     'explainimport' => [
-        'hier kannst du SCORM-Dateien ins Portfolio importieren. Wenn Marker gefunden werden, die darauf hinweisen, dass diese SCORM-Datei zuvor aus dem Portfolio-Modul exportiert wurde, so wird versucht, die Struktur entsprechend zu importieren.',
+        'Hier können Sie SCORM-Dateien ins Portfolio importieren. Wenn Marker gefunden werden, die darauf hinweisen, dass diese SCORM-Datei zuvor aus dem Portfolio-Modul exportiert wurde, so wird versucht, die Struktur entsprechend zu importieren.',
         'Here you can import a SCORM-File into the portfolio. If markers from previous exports are found the import tries to import the data in the existing filestructure.',
     ],
     'makeimport' => [
@@ -720,7 +720,7 @@ return [
         'add this file',
     ],
     'bookmarksall' => [
-        'Alle Eintr&auml;ge',
+        'Alle Einträge',
         'All Items',
     ],
     'bookmarkslinks' => [
@@ -736,7 +736,7 @@ return [
         'Notes',
     ],
     'noguestpost' => [
-        'G&auml;ste haben hier keinen Zugriff!',
+        'Gäste haben hier keinen Zugriff!',
         'Guests don\'t have access here!',
     ],
     'comments' => [
@@ -789,15 +789,15 @@ return [
     ],
     // === Notes.
     'deletenoteconfirm' => [
-        'Möchtest du diese Notiz wirklich l&ouml;schen?',
+        'Möchten Sie diese Notiz wirklich löschen?',
         'Do you really want to delete this note?',
     ],
     'deletelinkconfirm' => [
-        'Möchtest du diesen Link wirklich l&ouml;schen?',
+        'Möchten Sie diesen Link wirklich löschen?',
         'Do you really want to delete this link?',
     ],
     'deletefileconfirm' => [
-        'Möchtest du diese Datei wirklich l&ouml;schen?',
+        'Möchten Sie diese Datei wirklich löschen?',
         'Do you really want to delete this file?',
     ],
 
@@ -823,7 +823,7 @@ return [
         'File $a->filename in $a->url ($a->title) was not found. File not imported!',
     ],
     'couldntinsert' => [
-        'Konnte $a nicht in der Datenbank einfügen',
+        '$a konnte nicht in die Datenbank eingefügt werden',
         'Couldn\'t insert $a into database',
     ],
     'couldntcreatedirectory' => [
@@ -851,11 +851,11 @@ return [
         'Couldn\'t extract SCORM-file!',
     ],
     'couldntcreatetempdir' => [
-        'Tempor&auml;res Verzeichnis konnte nicht erstellt werden.!',
+        'Temporäres Verzeichnis konnte nicht erstellt werden!',
         'Couldn\'t create temporary directory!',
     ],
     'scormhastobezip' => [
-        'SCORM-Datei muss im zip-Format vorliegen!',
+        'SCORM-Datei muss im ZIP-Format vorliegen!',
         'SCORM-File has to be a .zip-File',
     ],
     'uploadfailed' => [
@@ -871,7 +871,7 @@ return [
         'Could not insert the description!',
     ],
     'exportcomment' => [
-        'Das ist eine exportierte Datei von exabis ePortfolio. Bitte entferne die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden k&ouml;nnen!',
+        'Dies ist eine exportierte Datei von Exabis ePortfolio. Bitte entfernen Sie die Kommentare nicht, da sie sonst nicht mehr mitimportiert werden können!',
         'This is an exported file from Exabis ePortfolio. Please do not remove the comments, they are needed for the import!',
     ],
     'comment' => [
@@ -951,7 +951,7 @@ return [
         'External Access',
     ],
     'loginasmode' => [
-        'Du hast als Administrator keine Zugriff auf fremde Portfolios',
+        'Wenn Sie als andere Person angemeldet sind, haben Sie keinen Zugriff auf Portfolios.',
         'You can\'t access portfolios in \'Login As\'-Mode.',
     ],
     'badsessionkey' => [
@@ -963,11 +963,11 @@ return [
         'That\'s an invalid instance',
     ],
     'invalidcourseid' => [
-        'Ungültige Kursnummer',
+        'Ungültige Kurs-ID',
         'That\'s an invalid course id',
     ],
     'wronglinkid' => [
-        'Falsche Link-Id',
+        'Falsche Link-ID',
         'Wrong link id',
     ],
     'incorrectlinksid' => [
@@ -975,7 +975,7 @@ return [
         'Incorrect links post id',
     ],
     'incorrectnoteid' => [
-        'Falsche Notizen Id',
+        'Falsche Notiz-ID',
         'Incorrect note id',
     ],
     'unknownaction' => [
@@ -987,15 +987,15 @@ return [
         'File not found',
     ],
     'wrongfileid' => [
-        'Falsche Datei Id',
+        'Falsche Datei-ID',
         'Wrong file id',
     ],
     'wrongfilepostid' => [
-        'Falsche Datei-Post Id',
+        'Falsche Datei-Post-ID',
         'Wrong file id',
     ],
     'wrongnoteid' => [
-        'Falsche Notiz Id',
+        'Falsche Notiz-ID',
         'Wrong note id',
     ],
     'wrongnotepostid' => [
@@ -1003,7 +1003,7 @@ return [
         'Wrong note postbid',
     ],
     'bookmarknotfound' => [
-        'Bookmark nicht gefunden',
+        'Lesezeichen nicht gefunden',
         'Bookmark not found',
     ],
     'commentnotfound' => [
@@ -1031,7 +1031,7 @@ return [
         'File does not exist at this assignment!',
     ],
     'publishedportfolios' => [
-        'Ver&ouml;ffentlichte Sammelmappen',
+        'Veröffentlichte Sammelmappen',
         'Published Collections',
     ],
     'viewcategories' => [
@@ -1043,7 +1043,7 @@ return [
         'updown arrow',
     ],
     'comment_delete_confirmation' => [
-        'Willst du wirklich diesen Kommentar löschen?',
+        'Möchten Sie diesen Kommentar wirklich löschen?',
         'Do you really want to delete this comment?',
     ],
 
@@ -1057,21 +1057,21 @@ return [
         'Nobody is sharing a portfolio with you',
     ],
     'nothingsharedwithme' => [
-        'Es wurde nichts mit dir geteilt',
+        'Es wurde nichts mit Ihnen geteilt',
         'Nothing is shared with you',
     ],
     'nothingsharedbyme' => [
-        'Du hast nichts geteilt',
+        'Sie haben nichts geteilt',
         'You haven\'t shared anything',
     ],
 
     // === Errors.
     'nouserforid' => [
-        'Kein Benutzer zu dieser Id!',
+        'Nutzer/in nicht gefunden (ID unbekannt)',
         'User not found (id unknown)',
     ],
     'nouserforaccess' => [
-        'Benutzer nicht gefunden (Zugriffscode unbekannt)',
+        'Nutzer/in nicht gefunden (Zugriffscode unbekannt)',
         'User not found (access-code unknown)',
     ],
 
@@ -1093,15 +1093,15 @@ return [
         'Create EPX-File',
     ],
     'exportviewselect' => [
-        'Um alle Einträge einer bestimmten Sammelmappe zu exportieren, bitte diese hier w&auml;hlen',
+        'Um alle Einträge einer bestimmten Sammelmappe zu exportieren, wählen Sie diese bitte hier aus.',
         'To export all items of a specific collection, please select it here',
     ],
     'export_directory' => [
-        'Exportiere Ordnerstruktur',
+        'Ordnerstruktur exportieren',
         'Export Directory-structure',
     ],
     'createexport_directory' => [
-        'Erstelle Ordnerstruktur',
+        'Ordnerstruktur erstellen',
         'Create Directory-structure',
     ],
 
@@ -1111,19 +1111,19 @@ return [
         'Type',
     ],
     'share' => [
-        'Share',
+        'Teilen',
         'Share',
     ],
     'explainingall' => [
-        'Alle Eintr&auml;ge im Portfolio',
+        'Alle Einträge im Portfolio',
         'All Items in your portfolio',
     ],
     'share_to_other_users' => [
-        'Benutzer suchen',
+        'Nutzer/innen suchen',
         'Search Users',
     ],
     'other_users_course' => [
-        'Benutzer, die nicht in meinen Kursen sind',
+        'Nutzer/innen, die nicht in meinen Kursen sind',
         'Users not in my courses',
     ],
     'other_groups_course' => [
@@ -1159,11 +1159,11 @@ return [
         'Manage your collections.',
     ],
     'noviews' => [
-        'Bitte eine Sammelmappe anlegen',
+        'Legen Sie bitte eine Sammelmappe an',
         'Please create a new Collection',
     ],
     'viewnotfound' => [
-        'Die Sammelmappe ist für den Benutzer nicht einsehbar / Keine Zugriffsberechtigung.',
+        'Die Sammelmappe ist für die Person nicht einsehbar / Keine Zugriffsberechtigung.',
         'Collection not found',
     ],
     'newview' => [
@@ -1183,7 +1183,7 @@ return [
         'Collection Design',
     ],
     'viewitems' => [
-        'Deine Seiten',
+        'Ihre Seiten',
         'Your Pages',
     ],
     'viewitem' => [
@@ -1207,7 +1207,7 @@ return [
         'Text',
     ],
     'view_specialitem_text_help' => [
-        'Der Block mit individuellem Text. Du kannst den Text nach Belieben formatieren.',
+        'Der Block mit individuellem Text. Sie können den Text nach Belieben formatieren.',
         'The block with custom text. You can format the text as you need',
     ],
     'view_specialitem_media' => [
@@ -1255,15 +1255,15 @@ return [
         'Automatically add all available pages to this collection',
     ],
     'sharetoteacher' => [
-        'Sofort mit allen Kurs-Trainer/:innen teilen',
+        'Sofort mit allen Kurs-Trainer/innen teilen',
         'Share to all teachers in this course',
     ],
     'createpage' => [
-        'Zieh das Elemente in das Feld unterhalb, um deinen Inhalt zu erstellen.',
+        'Ziehen Sie die Elemente in das Feld darunter, um Ihren Inhalt zu erstellen.',
         'Drag and drop content blocks from the tabs below to create your collection.',
     ],
     'chooselayout' => [
-        'W&aumlhle ein Layout für deine Sammelmappe.',
+        'Wählen Sie ein Layout für Ihre Sammelmappe.',
         'Select how you would like the columns in your collection to be laid out.',
     ],
     'viewtitle' => [
@@ -1291,7 +1291,7 @@ return [
         'Apply block',
     ],
     'view_template_content_instructions' => [
-        'Erstelle den Inhalt mit Überschriften und formatiertem Text. Übernimm die Änderungen an den Bausteinen und speichere dann die Vorlage.',
+        'Erstellen Sie den Inhalt mit Überschriften und formatiertem Text. Übernehmen Sie die Änderungen an den Bausteinen und speichern Sie dann die Vorlage.',
         'Create the starting content with headings and formatted text. Apply block changes, then save the template.',
     ],
     'view_template_files_unsupported' => [
@@ -1363,11 +1363,11 @@ return [
         'Equal widths',
     ],
     'personalinformation' => [
-        'Persönliche Information',
+        'Persönliche Informationen',
         'Personal Information',
     ],
     'personalinformation_help' => [
-        'Der Block mit deinen persönlichen Daten, wie: Name, E-Mail.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Profil anzeigen</a></a>',
+        'Der Block mit Ihren persönlichen Daten wie Name und E-Mail-Adresse.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Profil anzeigen</a>',
         'The block with your personal data, like: name, email.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your profile</a>',
     ],
     'cvinformation' => [
@@ -1375,7 +1375,7 @@ return [
         'CV Information',
     ],
     'cvinformation_help' => [
-        'Der Block mit deinen exabis ePortfolio-Lebenslaufdaten, wie: Ausbildung, Beschäftigung usw.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Lebenslauf anzeigen</a>',
+        'Der Block mit Ihren Lebenslaufdaten aus Exabis ePortfolio, wie: Ausbildung, Beschäftigung usw.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Lebenslauf anzeigen</a>',
         'The block with your exabis ePortfolio CV data, like: education, employment, e.t.c.<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your CV</a>',
     ],
     'cvgroup' => [
@@ -1399,7 +1399,7 @@ return [
         'My Pages',
     ],
     'items_help' => [
-        'Der Block mit deinen Seiten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Seiten anzeigen</a>',
+        'Der Block mit Ihren Seiten<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Ihre Seiten anzeigen</a>',
         'The block with your pages<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your pages</a>',
     ],
     'media' => [
@@ -1415,7 +1415,7 @@ return [
         'Fields to show',
     ],
     'listofartefacts' => [
-        'W&aumlhle eine Seite aus',
+        'Liste von Seiten',
         'List of Pages',
     ],
     'listofbadges' => [
@@ -1479,11 +1479,11 @@ return [
         'Email adress',
     ],
     'nomail' => [
-        'keine Mail-Adresse',
+        'keine E-Mail-Adresse',
         'no email',
     ],
     'noemails' => [
-        'keine Mail-Adresse vorhanden',
+        'keine E-Mail-Adresse vorhanden',
         'no email adress available',
     ],
     'aboutme' => [
@@ -1511,7 +1511,7 @@ return [
         'URL or embed code *',
     ],
     'height' => [
-        'H&ouml;he',
+        'Höhe',
         'Height',
     ],
     'width' => [
@@ -1543,11 +1543,11 @@ return [
         'Show items from subcategories',
     ],
     'show_items_from_other_users' => [
-        'Einträge von anderen Benutzern in deinen geteilten Kategorien anzeigen',
+        'Einträge von anderen Nutzer/innen in Ihren geteilten Kategorien anzeigen',
         'Show items from other users in your shared categories',
     ],
     'show_items_from_other_users_help' => [
-        'Falls du eine oder mehrere deiner Kategorien geteilt hast, können andere Benutzer Einträge in deine Kategorien hinzufügen. Mit diesem Kontrollkästchen kannst du entscheiden, ob du sie sehen möchtest oder nicht.',
+        'Falls Sie eine oder mehrere Ihrer Kategorien geteilt haben, können andere Nutzer/innen Einträge zu Ihren Kategorien hinzufügen. Mit diesem Kontrollkästchen können Sie entscheiden, ob Sie die Einträge sehen möchten.',
         'In case you shared one or more of your categories, other users are able to add items into your categories. With this checkbox you can decide if you want to see them, or not.',
     ],
     'layout_mode_folder' => [
@@ -1567,7 +1567,7 @@ return [
         'Collection',
     ],
     'filter_entry_type' => [
-        null,
+        'Anzeigen',
         'Show',
     ],
     'filter_entry_type_all' => [
@@ -1587,11 +1587,11 @@ return [
         'Shared with',
     ],
     'sharedwithotherusers' => [
-        'Intern mit anderen Benutzer:innen geteilt',
+        'Intern mit anderen Nutzer/innen geteilt',
         'Shared internally with other users',
     ],
     'sharedwith_user_cnt' => [
-        'Mit {$a} Benutzern geteilt',
+        'Mit {$a} Nutzer/innen geteilt',
         'Shared with {$a} users',
     ],
     'sharedwith_onlyme' => [
@@ -1599,7 +1599,7 @@ return [
         'Shared only with me',
     ],
     'sharedwith_shareall' => [
-        'Mit allen Benutzer::innen geteilt',
+        'Mit allen Nutzer/innen geteilt',
         'Shared with all users',
     ],
     'sharedwith_shareexternal' => [
@@ -1619,7 +1619,7 @@ return [
         'Shared with {$a} groups',
     ],
     'share_tooltip_users' => [
-        'Intern mit den folgenden Benutzer:innen geteilt: {$a}',
+        'Intern mit den folgenden Nutzer/innen geteilt: {$a}',
         'Shared internally with the following users: {$a}',
     ],
     'share_tooltip_groups' => [
@@ -1627,7 +1627,7 @@ return [
         'Shared internally with the following groups: {$a}',
     ],
     'share_tooltip_all' => [
-        'Intern mit allen Benutzer:innen geteilt.',
+        'Intern mit allen Nutzer/innen geteilt.',
         'Shared internally with all users.',
     ],
     'share_tooltip_external' => [
@@ -1643,7 +1643,7 @@ return [
         'Not shared',
     ],
     'share_summary_all' => [
-        'Intern: alle Benutzer:innen',
+        'Intern: alle Nutzer/innen',
         'Internal: all users',
     ],
     'share_summary_groups' => [
@@ -1651,7 +1651,7 @@ return [
         'Internal: selected groups',
     ],
     'share_summary_users' => [
-        'Intern: ausgewählte Benutzer:innen',
+        'Intern: ausgewählte Nutzer/innen',
         'Internal: selected users',
     ],
     'share_summary_external' => [
@@ -1659,7 +1659,7 @@ return [
         'External link',
     ],
     'share_summary_emails' => [
-        'E-Mail-Empfänger:innen',
+        'E-Mail-Empfänger/innen',
         'Email recipients',
     ],
 
@@ -1681,7 +1681,7 @@ return [
         'Configure Block',
     ],
     'selectitems' => [
-        'W&aumlehle Elemente aus',
+        'Elemente auswählen',
         'Select items',
     ],
     'configureblock_text' => [
@@ -1778,7 +1778,7 @@ return [
     Berichte über Projekte, Projektreflexionen
     Audio- und Videoclips
     Begegnungen durch Reisen in andere Länder
-    Überlegungen zu deinem Sprachenlernen
+    Überlegungen zu Ihrem Sprachenlernen
     Zeugnisse
     Zertifikate
     Bestätigungen
@@ -1839,7 +1839,7 @@ return [
 
     // === Config.
     'config_feature_copy_to_course' => [
-        'Schüler dürfen Dateien in den Kurs kopieren',
+        'Teilnehmer/innen dürfen Dateien in den Kurs kopieren',
         'Allow students to copy ePortfolio files to their courses',
     ],
     'competenceinteraction' => [
@@ -1851,7 +1851,7 @@ return [
         'Choose your competences',
     ],
     'selectcomps' => [
-        'W&auml;hle hier die Kompetenzen, die zu deinem Upload passen!',
+        'Wählen Sie hier die Kompetenzen, die zu Ihrem Upload passen!',
         'Choose competences associated with your upload!',
     ],
     'competences_old_version' => [
@@ -1867,11 +1867,11 @@ return [
         'Contract all',
     ],
     'studentcomps' => [
-        'Hier kannst du einsch&auml;tzen, ob folgende Kompetenzen durch deine Seite erreicht wurden.',
+        'Hier können Sie einschätzen, ob folgende Kompetenzen durch Ihre Seite erreicht wurden.',
         'Here you can self-assess whether you have acquired the competency with your page.',
     ],
     'teachercomps' => [
-        'Hier kannst du beurteilen, ob die Lernenden folgende Kompetenzen durch Seiten erreicht haben.',
+        'Hier können Sie beurteilen, ob die Teilnehmer/innen folgende Kompetenzen durch Seiten erreicht haben.',
         'Here you can assess whether your students have acquired the competency with this page.',
     ],
     'competences' => [
@@ -1911,11 +1911,11 @@ return [
         '',
     ],
     'settings_disable_shareall_head' => [
-        '"Mit allen Benutzer:innen teilen" deaktivieren',
+        'Freigabe an „Alle mit einem Nutzerkonto“ deaktivieren',
         'Disable sharing with all users',
     ],
     'settings_disable_shareall_body' => [
-        'Blendet „Alle mit einem Benutzerkonto“ für Kategorien, Einträge und Sammelmappen aus und deaktiviert den Zugriff über diese Zielgruppe. Vorhandene Freigaben bleiben gespeichert und werden nach erneutem Aktivieren wieder wirksam, sofern die Zielgruppe nicht geändert oder entfernt wurde. Das Speichern eines Freigabeformulars bei deaktivierter Freigabe an alle kann die Zielgruppe ändern. <a href="{$a}">Hier klicken, um vorhandene Freigaben an alle zu entfernen.</a>',
+        'Blendet „Alle mit einem Nutzerkonto“ für Kategorien, Einträge und Sammelmappen aus und deaktiviert den Zugriff über diese Zielgruppe. Vorhandene Freigaben bleiben gespeichert und werden nach erneutem Aktivieren wieder wirksam, sofern die Zielgruppe nicht geändert oder entfernt wurde. Das Speichern eines Freigabeformulars bei deaktivierter Freigabe an alle kann die Zielgruppe ändern. <a href="{$a}">Hier klicken, um vorhandene Freigaben an alle zu entfernen.</a>',
         'Hide the "Everyone with an account" audience for categories, items and collections and deactivate access through that audience. Existing everyone shares are kept and become active again when sharing with everyone is re-enabled, unless their audience has been changed or removed. Saving a sharing form while sharing with everyone is disabled may change its audience. <a href="{$a}">Click here to remove existing "everyone shares".</a>',
     ],
     'settings_disable_externaccess_head' => [
@@ -1959,11 +1959,11 @@ return [
         'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>',
     ],
     'block_exaport_userquota' => [
-        'Benutzer-Dateikontingent Exabis ePortfolio',
+        'Dateikontingent Exabis ePortfolio pro Nutzer/in',
         'User quota for Exabis ePortfolio',
     ],
     'block_exaport_userquota_body' => [
-        'Maximale Anzahl an Bytes, die ein Benutzer im Exabis ePortfolio hochladen kann. <br> Wert für diese Seite ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
+        'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio speichern kann. <br> Wert für diese Website ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
         'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
     ],
     'block_exaport_multiplefilesinitem' => [
@@ -1975,19 +1975,19 @@ return [
         'limit: 10 files',
     ],
     'block_exaport_copytomyportfolio' => [
-        'Aktiviere "In mein Portfolio kopieren"',
+        '„In mein Portfolio kopieren“ aktivieren',
         'Enable "Copy to my portfolio"',
     ],
     'block_exaport_copytomyportfolio_body' => [
-        'Benutzer können Seiten aus einer geteilten Kategorie in ihre eigene Sammelmappe kopieren.',
+        'Nutzer/innen können Seiten aus einer geteilten Kategorie in ihre eigene Sammelmappe kopieren.',
         'User will be able to copy pages from a shared category into their own collection',
     ],
     'block_exaport_app_alloweditdelete_head' => [
-        'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
+        'Teilnehmer/innen können Inhalte nach einem Feedback von Trainer/innen bearbeiten und/oder löschen.',
         'Students are allowed to edit and delete items after teacher reviews',
     ],
     'block_exaport_app_alloweditdelete_head_alternative' => [
-        'Teilnehmer:innen können Inhalte nach einem Trainer:innen-Feedback bearbeiten und/oder löschen.',
+        'Teilnehmer/innen können Inhalte nach einem Feedback von Trainer/innen bearbeiten und/oder löschen.',
         'Students are allowed to edit and delete items after teacher reviews',
     ],
     'block_exaport_app_alloweditdelete_body' => [
@@ -1995,27 +1995,27 @@ return [
         'Only useful in combination with Exabis Competence Grid and dakora',
     ],
     'delete_all_shareall' => [
-        'Alle vorhandenen Freigaben an „Alle mit einem Benutzerkonto“ für Einträge, Kategorien und Sammelmappen entfernen? Sie werden nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.',
+        'Alle vorhandenen Freigaben an „Alle mit einem Nutzerkonto“ für Einträge, Kategorien und Sammelmappen entfernen? Sie werden nach erneutem Aktivieren nicht wiederhergestellt. Andere Freigabearten bleiben unverändert.',
         'Remove all existing "Everyone with an account" shares from items, categories and collections? They will not be restored when sharing with everyone is re-enabled. Other sharing methods remain unchanged.',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head' => [
-        'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen',
+        'Trainer/innen können ALLE Seiten der eigenen Teilnehmer/innen einsehen',
         'Teacher can see ALL pages of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_head_alternative' => [
-        'Trainer:innen können ALLE Seiten der eigenen Teilnehmer:innen einsehen',
+        'Trainer/innen können ALLE Seiten der eigenen Teilnehmer/innen einsehen',
         'Teacher can see ALL pages of own students',
     ],
     'block_exaport_teachercanseeartifactsofstudents_body' => [
-        'Vertrauenswürdige Trainer:innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Die Liste der vertrauenswürdig definierbaren Trainer:innen generiert sich automatisch durch Kurseinschreibungen<br />Teilnehmer:innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer:innen.',
+        'Vertrauenswürdige Trainer/innen müssen im jeweiligen Profil als solche definiert werden. Dies funktioniert nur, wenn obige Option aktiviert ist.<br />{$a}Vertrauenswürdige Trainer/innen können die Seiten von Teilnehmer/innen in den Kursen einsehen, in denen ihnen eine Trainerrolle zugewiesen ist.<br />Teilnehmer/innen können diesen Zugriff nicht deaktivieren. Dies hat keine Auswirkungen auf die Gewährung von Zugriffen für andere Teilnehmer/innen.',
         'Trusted teachers have to be configured in their individual profiles and this will only work, if the option above has been activated.<br />{$a}The list of students for each trusted teacher are generated according to their course enrollments.<br />Students cannot disable this access. Access to other users can be given as before.',
     ],
     'block_exaport_teachercanseeartifactsofstudents_configurationlink' => [
-        'Erforderliches Profilfeld für vertrauenswürdigen Trainer erstellen',
+        'Erforderliches Profilfeld für vertrauenswürdige Trainer/innen erstellen',
         'Add required user profile field',
     ],
     'block_exaport_confirm_profilefield_create' => [
-        'Willst du wirklich das Profilfeld für vertrauenswürdige Trainer erstellen?',
+        'Möchten Sie wirklich das Profilfeld für vertrauenswürdige Trainer/innen erstellen?',
         'Do you really want to add the required profile field?',
     ],
     'block_exaport_confirm_profilefield_exists' => [
@@ -2041,7 +2041,7 @@ return [
         'About me',
     ],
     'resume_coversaved' => [
-        'Begleit-Informationen gespeichert',
+        'Begleitinformationen gespeichert',
         'Cover saved',
     ],
     'resume_eduhistory' => [
@@ -2057,7 +2057,7 @@ return [
         'Education saved',
     ],
     'resume_deleteeduconfirm' => [
-        'Willst du wirklich den Eintrag löschen?',
+        'Möchten Sie wirklich den Eintrag löschen?',
         'Do you really want to delete this education?',
     ],
     'resume_edudeleted' => [
@@ -2077,7 +2077,7 @@ return [
         'Employment saved',
     ],
     'resume_deleteemployconfirm' => [
-        'Willst du wirklich den Eintrag löschen?',
+        'Möchten Sie wirklich den Eintrag löschen?',
         'Do you really want to delete this employment?',
     ],
     'resume_employdeleted' => [
@@ -2125,7 +2125,7 @@ return [
         'Qualification description',
     ],
     'resume_files' => [
-        'Anhang',
+        'Anhänge',
         'Attachments',
     ],
     'resume_employer' => [
@@ -2157,7 +2157,7 @@ return [
         'Date',
     ],
     'resume_title' => [
-        'Title',
+        'Titel',
         'Title',
     ],
     'resume_description' => [
@@ -2169,7 +2169,7 @@ return [
         'Certification, accreditation or award saved',
     ],
     'resume_deletecertifconfirm' => [
-        'Willst du wirklich den Eintrag löschen?',
+        'Möchten Sie wirklich den Eintrag löschen?',
         'Do you really want to delete this certification, accreditation or award?',
     ],
     'resume_certifdeleted' => [
@@ -2197,7 +2197,7 @@ return [
         'Books and publications saved',
     ],
     'resume_deletepublicconfirm' => [
-        'Willst du wirklich den Eintrag löschen?',
+        'Möchten Sie wirklich den Eintrag löschen?',
         'Do you really want to delete this book or publication?',
     ],
     'resume_publicdeleted' => [
@@ -2213,7 +2213,7 @@ return [
         'Membership saved',
     ],
     'resume_deletembrshipconfirm' => [
-        'Willst du wirklich den Eintrag löschen?',
+        'Möchten Sie wirklich den Eintrag löschen?',
         'Do you really want to delete this membership?',
     ],
     'resume_mbrshipdeleted' => [
@@ -2229,7 +2229,7 @@ return [
         'LinkedIn profile saved',
     ],
     'resume_deletelinkedinconfirm' => [
-        'Willst du wirklich den Eintrag löschen?',
+        'Möchten Sie wirklich den Eintrag löschen?',
         'Do you really want to delete this membership?',
     ],
     'resume_linkedindeleted' => [
@@ -2245,7 +2245,7 @@ return [
         'Goals',
     ],
     'resume_goalspersonal' => [
-        'persönliche Ziele',
+        'Persönliche Ziele',
         'Personal goals',
     ],
     'resume_goalsacademic' => [
@@ -2309,7 +2309,7 @@ return [
         'Educational standards',
     ],
     'resume_badges' => [
-        'Moodle-Auszeichnungen',
+        'Badges',
         'Badges',
     ],
     'resume_exportto_europass' => [
@@ -2317,11 +2317,11 @@ return [
         'Export to Europass',
     ],
     'resume_exportto_europass_intro' => [
-        '<p>Das Tool hilft den Nutzer:innen und Nutzern bei der Ermittlung von Lern- und Karrieremöglichkeiten. Im Hinblick auf Beratung und Service-Angebot ist das Profil auch für Arbeitgeber, Freiwilligenorganisationen, Recruiter/:innen, Laufbahnberater/:innen, Jugendorganisationen, Bildungseinrichtungen und andere Organisationen interessant.</p>
-        <p>We provide a way for using your CV from Exabis eProtfolio in Europass profile<br>
-            The generated XML-file has to be inserted into the page <a href="https://europa.eu/europass/eportfolio/screen/cv-editor?lang=de" target="_blank">Hier kannst du deinen Lebenslauf erstellen</a><br>
-            (better to be logged in in the Europass previously)<br>
-            Press the button "<strong>Europass-Lebenslauf importieren</strong>" and upload XML-file wich will genareted the button below
+        '<p>Das Tool hilft den Nutzer/innen bei der Ermittlung von Lern- und Karrieremöglichkeiten. Im Hinblick auf Beratung und Service-Angebot ist das Profil auch für Arbeitgeber/innen, Freiwilligenorganisationen, Recruiter/innen, Laufbahnberater/innen, Jugendorganisationen, Bildungseinrichtungen und andere Organisationen interessant.</p>
+        <p>Sie können Ihren Lebenslauf aus Exabis ePortfolio in Ihr Europass-Profil übernehmen.<br>
+            Importieren Sie die erzeugte XML-Datei auf der Seite <a href="https://europa.eu/europass/eportfolio/screen/cv-editor?lang=de" target="_blank">Hier können Sie Ihren Lebenslauf erstellen</a><br>
+            (Melden Sie sich am besten vorher bei Europass an.)<br>
+            Klicken Sie auf „<strong>Europass-Lebenslauf importieren</strong>“ und laden Sie die XML-Datei hoch, die Sie über die unten stehende Schaltfläche erzeugen können.
         </p>
 
     Ein paar Kurznotizen:<br>
@@ -2330,7 +2330,7 @@ return [
         <li>Alle Datumsangaben sollten überprüft werden</li>
         <li>Bilder die über die HTML-Editoren eingefügt wurden werden nicht exportiert</li>
         <li>Texte die über die HTML-Editoren eingefügt wurden müssen unter Umständen neu formatiert werden</li>
-        <li>Vorgaben für angehängte Dateien: Formate PDF, PNG, JPG sind erlaubt, maximale Dateigröße: 2,5 MB.</li>
+        <li>Dateianhänge werden beim Export für Europass nicht in die XML-Datei aufgenommen.</li>
     </ul>',
         '<p>The Europass profile can help people to plan their learning and career development. The profile can be used by organisations – employers, volunteer organisations, recruiters, guidance practitioners, youth organisations, education and training institutions and more – as part of the support and services they offer to people.</p>
         <p>We provide a way for using your CV from Exabis eProtfolio in Europass profile<br>
@@ -2384,11 +2384,11 @@ return [
         'Copy to my Portfolio',
     ],
     'sharedArtefacts' => [
-        'Seiten, welche mit dir über Kategorien geteilt wurden',
+        'Seiten, die über Kategorien mit Ihnen geteilt wurden',
         'Pages shared with you via categories',
     ],
     'shareditems_category' => [
-        'Gruppen-Portfolios, die mit dir geteilt wurden',
+        'Gruppen-Portfolios, die mit Ihnen geteilt wurden',
         'Group portfolios shared with you',
     ],
     'create_as_note' => [
@@ -2436,11 +2436,11 @@ return [
         'My file area',
     ],
     'show_mystudents' => [
-        'Meine Teilnehmer/:innen',
+        'Meine Teilnehmer/innen',
         'My students',
     ],
     'show_sharedbyuser' => [
-        'von Teilnehmer/:innen geteilt',
+        'Von Nutzer/innen geteilt',
         'Shared by users',
     ],
     'enrolled_courses' => [
@@ -2454,18 +2454,18 @@ return [
 
     // === Language categories.
     'lang_categories' => [
-        null,
+        '',
         '',
     ],
 
     // === Message.
     'messageprovider:sharing' => [
-        'Nachricht, wenn ein Benutzer/in etwas mit mir teilt',
+        'Nachricht, wenn ein/e Nutzer/in etwas mit mir teilt',
         'Sharing notifications',
     ],
 
     'messageprovider:viewupdated' => [
-        'Nachricht, wenn ein Benutzer seine geteilte Sammelmappe aktualisiert',
+        'Nachricht, wenn ein/e Nutzer/in eine mit mir geteilte Sammelmappe aktualisiert',
         'Updated collection notifications',
     ],
 
@@ -2503,8 +2503,8 @@ return [
         'Pdf settings',
     ],
     'pdf_settings_description' => [
-        'Wenn du spezielle oder ungewöhnliche Schriftzeichen verwendest, kann es zu Problemen mit dem generierten PDF kommen. Du kannst daher versuchen, unterschiedliche Schriftarteinstellungen zu verwenden.<br>
-			Deine PDF-Einstellungen werden für diese Sammelmappe gespeichert.<br>Wenn deine Sammelmappe mit anderen Benutzern geteilt wird, sehen sie das PDF mit deinen Einstellungen.<br>
+        'Wenn Sie spezielle oder ungewöhnliche Schriftzeichen verwenden, kann es zu Problemen mit dem generierten PDF kommen. Sie können daher versuchen, unterschiedliche Schriftarteinstellungen zu verwenden.<br>
+			Ihre PDF-Einstellungen werden für diese Sammelmappe gespeichert.<br>Wenn Ihre Sammelmappe mit anderen Nutzer/innen geteilt wird, sehen diese das PDF mit Ihren Einstellungen.<br>
 			Nicht-standardisierte Schriftarten können einige Optionen wie Fett, Kursiv usw. verlieren.',
         'If you use some special or uncommon language characters the generated pdf can have problems. So, you can try to use different font settings<br>
             Your PDF settings will be saved for this collection.<br>So, if your collection is shared with other users - they will see the pdf with your settings.<br>
@@ -2523,7 +2523,7 @@ return [
         'Add collection meta data',
     ],
     'pdf_settings_showusername' => [
-        'Benutzername',
+        'Name',
         'user name',
     ],
     'pdf_settings_showuserpicture' => [
@@ -2531,15 +2531,15 @@ return [
         'user picture',
     ],
     'pdf_settings_showuseremail' => [
-        'Benutzer E-Mail',
+        'E-Mail-Adresse',
         'user email',
     ],
     'pdf_settings_showuserphone' => [
-        'Benutzer Telefon',
+        'Telefonnummer',
         'user phone',
     ],
     'pdf_customfont' => [
-        'Benutzerdefinierte Schriftart hochladen',
+        'Nutzerdefinierte Schriftart hochladen',
         'Upload custom font',
     ],
     'pdf_settings_uploadfont' => [
@@ -2563,7 +2563,7 @@ return [
         'Landscape',
     ],
     'pdf_customfont_help' => [
-        'Du kannst deine eigene .ttf-Datei hochladen. Wir werden versuchen, sie für die PDF-Erstellung zu verwenden.',
+        'Sie können Ihre eigene .ttf-Datei hochladen. Wir werden versuchen, sie für die PDF-Erstellung zu verwenden.',
         'Your can upload own .ttf file. We will try to use it for PDF generation.',
     ],
     'pdf_settings_fontfamily_fixedgroup' => [
@@ -2571,7 +2571,7 @@ return [
         'Predefined fonts',
     ],
     'pdf_settings_fontfamily_customgroup' => [
-        'Benutzerdefinierte hochgeladene Schriftarten',
+        'Nutzerdefinierte hochgeladene Schriftarten',
         'Custom uploaded fonts',
     ],
     'settings_layout_settings_heading' => [
@@ -2579,15 +2579,15 @@ return [
         'Layout settings',
     ],
     'block_exaport_allowcustomlayout_head' => [
-        'Benutzerdefinierte Optionen für das Layout der Sammelmappen für Sammelmappen-Eigentümer',
+        'Nutzerdefinierte Optionen für das Layout der Sammelmappen für Sammelmappen-Eigentümer/innen',
         'Custom options for the collection layout for collection owners',
     ],
     'block_exaport_allowcustomlayout_body' => [
-        'Ermöglicht die Verwendung benutzerdefinierter Layout-Einstellungen für Sammelmappen (ähnlich den unten aufgeführten Optionen) für reguläre Besitzer der Sammelmappen.',
+        'Ermöglicht die Verwendung nutzerdefinierter Layout-Einstellungen für Sammelmappen (ähnlich den unten aufgeführten Optionen) für reguläre Eigentümer/innen der Sammelmappen.',
         'Allows to use custom collection layout settings (similar to options below) for regular owners of the collection',
     ],
     'settings_layout_settings_description' => [
-        'Hier kannst du einige Layout-Optionen der Sammelmappe ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach deinen Wünschen zu gestalten.<br>Diese Einstellungen werden als Standardeinstellungen <strong>für alle Sammelmappen</strong> verwendet.',
+        'Hier können Sie einige Layout-Optionen der Sammelmappe ändern oder eigene nutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach Ihren Wünschen zu gestalten.<br>Diese Einstellungen werden als Standardeinstellungen <strong>für alle Sammelmappen</strong> verwendet.',
         'Here you can change some collection layout options or use own custom CSS rules to have the collection as you want<br>These settings will be used as default settings <strong>for all collections</strong>',
     ],
     'layout_settings' => [
@@ -2595,7 +2595,7 @@ return [
         'Layout settings',
     ],
     'layout_settings_description' => [
-        'Hier kannst du einige Layout-Optionen der Sammelmappe ändern oder eigene benutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach deinen Wünschen zu gestalten.',
+        'Hier können Sie einige Layout-Optionen der Sammelmappe ändern oder eigene nutzerdefinierte CSS-Regeln verwenden, um die Sammelmappe nach Ihren Wünschen zu gestalten.',
         'Here you can change some collection layout options or use own custom CSS rules to have the collection as you want',
     ],
     'layout_settings_font_size' => [
@@ -2623,11 +2623,11 @@ return [
         'Content of collection blocks',
     ],
     'layout_settings_custom_css' => [
-        'benutzerdefinierte CSS-Regeln',
+        'Nutzerdefinierte CSS-Regeln',
         'Custom CSS',
     ],
     'layout_settings_custom_css_description' => [
-        'Hier kannst du eigene benutzerdefinierte CSS-Regeln verwenden.',
+        'Hier können Sie eigene nutzerdefinierte CSS-Regeln verwenden.',
         'You can use own custom CSS rules here',
     ],
     'selected_competencies' => [
@@ -2647,10 +2647,10 @@ return [
         'The why behind this project',
     ],
     'forms.item.project_description_help' => [
-        '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
+        '<strong>Erklären Sie kurz den Zweck Ihrer Arbeit:</strong>
 			<ul>
 				<li>Welches Problem wurde damit angesprochen?</li>
-				<li>Welche Fähigkeiten wolltest du entwickeln?</li>
+				<li>Welche Fähigkeiten wollten Sie entwickeln?</li>
 				<li>Was war der Kontext?</li>
 			</ul>',
         '<strong>Briefly explain the purpose of your work:</strong><ul>
@@ -2664,10 +2664,10 @@ return [
         'The why behind this project',
     ],
     'forms.item.project_description_editor_help' => [
-        '<strong>Erkläre kurz den Zweck deiner Arbeit:</strong>
+        '<strong>Erklären Sie kurz den Zweck Ihrer Arbeit:</strong>
 			<ul>
 				<li>Welches Problem wurde angesprochen?</li>
-				<li>Welche Fähigkeiten wolltest du entwickeln?</li>
+				<li>Welche Fähigkeiten wollten Sie entwickeln?</li>
 				<li>Was war der Kontext?</li>
 			</ul>',
         '<strong>Briefly explain the purpose of your work:</strong>
@@ -2682,11 +2682,11 @@ return [
         'Making it happen',
     ],
     'forms.item.project_process_help' => [
-        '<strong>Beschreibe deinen Weg:</strong>
+        '<strong>Beschreiben Sie Ihren Weg:</strong>
 			<ul>
-				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li>
-				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li>
-				<li>Welche Ressourcen hast du genutzt?</li>
+				<li>Welche Schritte haben Sie unternommen, um dieses Projekt abzuschließen?</li>
+				<li>Welche Herausforderungen sind Ihnen begegnet und wie haben Sie sie gemeistert?</li>
+				<li>Welche Ressourcen haben Sie genutzt?</li>
 			</ul>',
         '<strong>Describe your journey:</strong>
             <ul>
@@ -2700,11 +2700,11 @@ return [
         'Making it happen',
     ],
     'forms.item.project_process_editor_help' => [
-        '<strong>Beschreibe deinen Weg:</strong>
+        '<strong>Beschreiben Sie Ihren Weg:</strong>
 			<ul>
-				<li>Welche Schritte hast du unternommen, um dieses Projekt abzuschließen?</li>
-				<li>Welche Herausforderungen sind dir begegnet und wie hast du sie gemeistert?</li>
-				<li>Welche Ressourcen hast du genutzt?</li>
+				<li>Welche Schritte haben Sie unternommen, um dieses Projekt abzuschließen?</li>
+				<li>Welche Herausforderungen sind Ihnen begegnet und wie haben Sie sie gemeistert?</li>
+				<li>Welche Ressourcen haben Sie genutzt?</li>
 			</ul>',
         '<strong>Describe your journey:</strong>
             <ul>
@@ -2718,12 +2718,12 @@ return [
         'Results and learnings',
     ],
     'forms.item.project_result_help' => [
-        '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
+        '<strong>Fassen Sie die Ergebnisse Ihres Projekts kurz zusammen:</strong>
 			<ul>
-				<li>Was hast du erreicht?</li>
-				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
-				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
-				<li>Was würdest du das nächste Mal anders machen?</li>
+				<li>Was haben Sie erreicht?</li>
+				<li>Welche Fähigkeiten und Kompetenzen haben Sie durch diese Arbeit entwickelt oder gestärkt?</li>
+				<li>Was haben Sie über sich und Ihre Fähigkeiten gelernt?</li>
+				<li>Was würden Sie das nächste Mal anders machen?</li>
 			</ul>',
         '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul>
@@ -2738,12 +2738,12 @@ return [
         'Results and learnings',
     ],
     'forms.item.project_result_editor_help' => [
-        '<strong>Fasse die Ergebnisse deines Projekts kurz zusammen:</strong>
+        '<strong>Fassen Sie die Ergebnisse Ihres Projekts kurz zusammen:</strong>
 			<ul>
-				<li>Was hast du erreicht?</li>
-				<li>Welche Fähigkeiten und Kompetenzen hast du durch diese Arbeit entwickelt oder gestärkt?</li>
-				<li>Was hast du über dich und deine Fähigkeiten gelernt?</li>
-				<li>Was würdest du das nächste Mal anders machen?</li>
+				<li>Was haben Sie erreicht?</li>
+				<li>Welche Fähigkeiten und Kompetenzen haben Sie durch diese Arbeit entwickelt oder gestärkt?</li>
+				<li>Was haben Sie über sich und Ihre Fähigkeiten gelernt?</li>
+				<li>Was würden Sie das nächste Mal anders machen?</li>
 			</ul>',
         '<strong>Briefly summarize the outcomes of your project:</strong>
                 <ul>
@@ -2762,7 +2762,7 @@ return [
         'Collection saved',
     ],
     'view_sharing_updated' => [
-        'Ver&ouml;ffentlichung gespeichert',
+        'Freigabeeinstellungen gespeichert',
         'Collection sharing updated',
     ],
     'list' => [
@@ -2774,35 +2774,35 @@ return [
         'What is embed code?',
     ],
     'what_is_embed_code_content' => [
-        '<p>Einbettungscode ist ein Code, der von einer Drittanbieter-Website wie YouTube oder Twitter generiert wird und den ein Benutzer in seine eigene Webseite kopieren und einfügen kann. Dieser eingebettete Code zeigt dann dasselbe Medium, dieselbe Anwendung oder denselben Feed auf der Webseite des Benutzers wie im Original.</p>
+        '<p>Einbettungscode ist ein Code, der von einer Drittanbieter-Website wie YouTube oder Twitter generiert wird und den Sie kopieren und auf Ihrer eigenen Webseite einfügen können. Dieser eingebettete Code zeigt dann dasselbe Medium, dieselbe Anwendung oder denselben Feed auf Ihrer Webseite wie im Original.</p>
 			<p>Wir bieten Anleitungen für die beliebtesten Videoplattformen wie YouTube oder Vimeo.</p>
-			<p><strong>So findest du den Einbettungscode auf YouTube:</strong></p>
+			<p><strong>So finden Sie den Einbettungscode auf YouTube:</strong></p>
 			<ol>
-				<li>Gehe zu YouTube.</li>
-				<li>Gehe zu dem Video, das du einbetten möchtest.</li>
-				<li>Klicke auf den <strong>Teilen-Link</strong> unter dem Video und dann auf den <strong>Einbetten-Link</strong>.</li>
-				<li>Klicke auf die Schaltfläche <strong>Kopieren</strong> im unteren Bereich des geöffneten Fensters.</li>
+				<li>Gehen Sie zu YouTube.</li>
+				<li>Gehen Sie zu dem Video, das Sie einbetten möchten.</li>
+				<li>Klicken Sie auf den <strong>Teilen-Link</strong> unter dem Video und dann auf den <strong>Einbetten-Link</strong>.</li>
+				<li>Klicken Sie auf die Schaltfläche <strong>Kopieren</strong> im unteren Bereich des geöffneten Fensters.</li>
 				<li>Der Einbettungslink wird blau markiert und in die Zwischenablage kopiert.</li>
-				<li>Füge den Code in das Textfeld von exabis E-portfolio ein.</li>
+				<li>Fügen Sie den Code in das Textfeld von exabis E-portfolio ein.</li>
 			</ol>
-			<p><strong>So findest du den Einbettungscode auf Vimeo:</strong></p>
+			<p><strong>So finden Sie den Einbettungscode auf Vimeo:</strong></p>
 			<ol>
-				<li>Gehe zu Vimeo.</li>
-				<li>Gehe zu dem Video, das du einbetten möchtest.</li>
-				<li>Klicke auf die Schaltfläche <strong>Teilen</strong> oben rechts im Video.</li>
-				<li>Ein Popup-Fenster mit den Einbettungslink-Informationen wird angezeigt. Du musst nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil des Einbettungslinks kopieren.
+				<li>Gehen Sie zu Vimeo.</li>
+				<li>Gehen Sie zu dem Video, das Sie einbetten möchten.</li>
+				<li>Klicken Sie auf die Schaltfläche <strong>Teilen</strong> oben rechts im Video.</li>
+				<li>Ein Popup-Fenster mit den Einbettungslink-Informationen wird angezeigt. Kopieren Sie nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil des Einbettungslinks.
 					Beispiel:<br>
 					<ol>
 						<li>
 							Der gesamte Einbettungslink zeigt Folgendes:<br>
-							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; von &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; auf &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quot;https://vimeo.com/1233456789&quot;&gt;1- Automation Opening[2]&lt;/a&gt; von &lt;a href=&quot;https://vimeo.com/user98765432&quot;&gt;R1 Marketing&lt;/a&gt; auf &lt;a href=&quot;https://vimeo.com&quot;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
 						</li>
 						<li>
-							Du musst nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil kopieren:<br>
-							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+							Kopieren Sie nur den <strong>&lt;<i>iframe</i>&gt;</strong>-Teil:<br>
+							<textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
 						</li>
 					</ol>
-				<li>Füge diesen Code in das Textfeld von exabis E-portfolio ein.</li>
+				<li>Fügen Sie diesen Code in das Textfeld von exabis E-portfolio ein.</li>
 			</ol>
             ',
         '<p>Embed code is code that is generated by a third-party website such as YouTube or Twitter, that a user can copy and paste into his or her own webpage.  This embedded code will then show the same media, application, or feed on the user\'s web page as it does in the original source.</p>
@@ -2826,11 +2826,11 @@ return [
                     <ol>
                         <li>
                             Entire embed link shows the following:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quote;https://vimeo.com/1233456789&quote;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quote;https://vimeo.com/user98765432&quote;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quote;https://vimeo.com&quote;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;&lt;p&gt;&lt;a href=&quot;https://vimeo.com/1233456789&quot;&gt;1- Automation Opening[2]&lt;/a&gt; from &lt;a href=&quot;https://vimeo.com/user98765432&quot;&gt;R1 Marketing&lt;/a&gt; on &lt;a href=&quot;https://vimeo.com&quot;&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;</textarea>
                         </li>
                         <li>
                             You only need to copy the <strong>&lt;<i>iframe</i>&gt;</strong> portion:<br>
-                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quote;https://player.vimeo.com/video/1233456789&quote; width=&quote;640&quote; height=&quote;360&quote; frameborder=&quote;0&quote; allow=&quote;autoplay; fullscreen&quote; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+                            <textarea disabled=\'true\' style=\'border: none;background-color:white;width:100%;font-size:0.75em;\'>&lt;iframe src=&quot;https://player.vimeo.com/video/1233456789&quot; width=&quot;640&quot; height=&quot;360&quot; frameborder=&quot;0&quot; allow=&quot;autoplay; fullscreen&quot; allowfullscreen&gt;&lt;/iframe&gt;</textarea>
                         </li>
                     </ol>
                 <li>Past this code to exabis E-portfolio textarea field.</li>
@@ -2840,11 +2840,11 @@ return [
 
     // === Privacy wordings
     'privacy:metadata:block_exaportuser' => [
-        'Benutzerdaten von exabis e-portfolio',
+        'Nutzerdaten von Exabis ePortfolio',
         'user\'s data from exabis e-portfolio',
     ],
     'privacy:metadata:block_exaportuser:user_id' => [
-        'Benutzerid',
+        'Nutzer-ID',
         'user id',
     ],
     'privacy:metadata:block_exaportuser:description' => [
@@ -2852,12 +2852,12 @@ return [
         'description',
     ],
     'privacy:metadata:block_exaportuser:view_items_layout' => [
-        'Benutzerid',
+        'Anzeigelayout für Seiten',
         'user id',
     ],
 
     'privacy:metadata:block_exaportcate' => [
-        'Kategorien des Benutzers',
+        'Kategorien der Person',
         'user\'s categories',
     ],
     'privacy:metadata:block_exaportcate:pid' => [
@@ -2865,7 +2865,7 @@ return [
         'parent category id',
     ],
     'privacy:metadata:block_exaportcate:userid' => [
-        'Benutzerid',
+        'Nutzer-ID',
         'user id',
     ],
     'privacy:metadata:block_exaportcate:name' => [
@@ -2877,7 +2877,7 @@ return [
         'last modified',
     ],
     'privacy:metadata:block_exaportcate:courseid' => [
-        'Kurse ID',
+        'Kurs-ID',
         'course id',
     ],
     'privacy:metadata:block_exaportcate:description' => [
@@ -2897,7 +2897,7 @@ return [
         'source',
     ],
     'privacy:metadata:block_exaportcate:sourceid' => [
-        'Source Id',
+        'Source-ID',
         'source id',
     ],
     'privacy:metadata:block_exaportcate:parent_ids' => [
@@ -2938,11 +2938,11 @@ return [
     ],
 
     'privacy:metadata:block_exaportitem' => [
-        'Seite des Benutzers',
+        'Seite der Person',
         'user\'s page',
     ],
     'privacy:metadata:block_exaportitem:userid' => [
-        'Seite des Besitzers',
+        'Eigentümer/in der Seite',
         'page\'s owner',
     ],
     'privacy:metadata:block_exaportitem:type' => [
@@ -2950,7 +2950,7 @@ return [
         'type of page',
     ],
     'privacy:metadata:block_exaportitem:categoryid' => [
-        'Kategorie Id',
+        'Kategorie-ID',
         'category id',
     ],
     'privacy:metadata:block_exaportitem:name' => [
@@ -2958,7 +2958,7 @@ return [
         'name',
     ],
     'privacy:metadata:block_exaportitem:url' => [
-        'Url',
+        'URL',
         'url',
     ],
     'privacy:metadata:block_exaportitem:intro' => [
@@ -2970,7 +2970,7 @@ return [
         'last modified time',
     ],
     'privacy:metadata:block_exaportitem:courseid' => [
-        'Kurs Id',
+        'Kurs-ID',
         'course id',
     ],
     'privacy:metadata:block_exaportitem:shareall' => [
@@ -3002,7 +3002,7 @@ return [
         'source',
     ],
     'privacy:metadata:block_exaportitem:sourceid' => [
-        'Source Id',
+        'Source-ID',
         'source id',
     ],
     'privacy:metadata:block_exaportitem:iseditable' => [
@@ -3010,7 +3010,7 @@ return [
         'is editable?',
     ],
     'privacy:metadata:block_exaportitem:example_url' => [
-        'Material Url',
+        'Material-URL',
         'Example url',
     ],
     'privacy:metadata:block_exaportitem:parentid' => [
@@ -3027,7 +3027,7 @@ return [
         'id of page',
     ],
     'privacy:metadata:block_exaportitemcomm:userid' => [
-        'Autor des Kommentars',
+        'Autor/in des Kommentars',
         'author of comment',
     ],
     'privacy:metadata:block_exaportitemcomm:entry' => [
@@ -3044,7 +3044,7 @@ return [
         'comments for page',
     ],
     'privacy:metadata:block_exaportview:userid' => [
-        'Besitzer der Sammelmappe',
+        'Eigentümer/in der Sammelmappe',
         'owner of collection',
     ],
     'privacy:metadata:block_exaportview:name' => [
@@ -3093,11 +3093,11 @@ return [
         'resume data',
     ],
     'privacy:metadata:block_exaportresume:user_id' => [
-        'Besitzer des Lebenslaufs',
+        'Eigentümer/in des Lebenslaufs',
         'resume owner',
     ],
     'privacy:metadata:block_exaportresume:courseid' => [
-        'Kurs ID',
+        'Kurs-ID',
         'course id',
     ],
     'privacy:metadata:block_exaportresume:cover' => [
@@ -3133,7 +3133,7 @@ return [
         'careers skills',
     ],
     'privacy:metadata:core_files' => [
-        'Exabis ePortfolio speichert Dateien, die vom Benutzer hochgeladen wurden, um Teil von Seiten, Lebenslaufeinträgen und Kommentaren zu werden.',
+        'Exabis ePortfolio speichert Dateien, die Nutzer/innen für Seiten, Lebenslaufeinträge und Kommentare hochladen.',
         'Exabis ePortfolio stores files which have been uploaded by the user to form part of pages, resume entries and comments.',
     ],
     'whyEportfolio' => [
@@ -3144,7 +3144,7 @@ return [
         '<h4>Machen Sie Arbeit sichtbar: Ihr digitales Portfolio</h4>
             <br>
             <p>Sie investieren viel Zeit und Energie in Aufgaben, Projekte oder Weiterbildungen. Oft verschwinden diese Ergebnisse jedoch nach der Abgabe oder dem Kursende in der Schublade, dabei spiegeln sie Ihr Können, Ihre Kreativität und Ihr Wissen wider.</p>
-            <p>Mit einem <strong>ePortfolio</strong> haben Sie die Möglichkeit, Ihre Arbeiten, erworbenen Kompetenzen und Lernfortschritte sichtbar zu machen. So entsteht eine Sammlung, die Sie nicht nur für sich selbst dokumentieren, sondern auch mit Lehrenden, Institutionen oder potenziellen Arbeitgeber:innen teilen können.</p>
+            <p>Mit einem <strong>ePortfolio</strong> haben Sie die Möglichkeit, Ihre Arbeiten, erworbenen Kompetenzen und Lernfortschritte sichtbar zu machen. So entsteht eine Sammlung, die Sie nicht nur für sich selbst dokumentieren, sondern auch mit Lehrenden, Institutionen oder potenziellen Arbeitgeber/innen teilen können.</p>
             <p>Von Präsentationen über Projektberichte bis hin zu Videos oder Zertifikaten – Ihr Portfolio macht Leistungen greifbar. Auch Microcredentials können integriert werden und unterstreichen Ihre Erfolge in Aus- und Weiterbildung.</p>
             <br>
             <h4>Was ist ein ePortfolio?</h4>
@@ -3152,7 +3152,7 @@ return [
             <p>Ein ePortfolio ist mehr als nur ein digitaler Lebenslauf. Es ist eine persönliche Sammlung Ihrer Arbeiten, die Ihre Fähigkeiten und Erfahrungen lebendig darstellt. Anders als ein klassischer CV bietet es echte Nachweise: Arbeitsproben, Reflexionen und den Kontext, in dem Sie Ihre Kompetenzen erworben haben.</p>
             <p>Mit Exabis ePortfolio können Sie mehrere Sammelmappen erstellen, passgenau für bestimmte Bewerbungen, Jobchancen oder Präsentationen. So zeigen Sie immer das, was für die jeweilige Situation am wichtigsten ist.</p>
             <br>
-            <h4>Wie erstellst du dein ePortfolio?</h4>
+            <h4>Wie erstellen Sie Ihr ePortfolio?</h4>
             <br>
             <ol>
                 <li><strong>Sammeln:</strong> Tragen Sie Ihre Arbeiten zusammen, seien es Aufgaben, Präsentationen, Projekte, Videos oder Ähnliches.</li>
@@ -3184,7 +3184,7 @@ return [
 ',
     ],
     'cofigureblock_cvinfo_help' => [
-        'Du wirst den aktuellen Status der ausgewählten Elemente in deinem Lebenslauf sehen. Der Blockinhalt wird aktualisiert, wenn du später Änderungen an irgendwelchen Elementen in deinem Lebenslauf vornimmst.',
+        'Sie sehen den aktuellen Status der ausgewählten Elemente in Ihrem Lebenslauf. Der Blockinhalt wird aktualisiert, wenn Sie später Änderungen an Elementen in Ihrem Lebenslauf vornehmen.',
         'You will see the current status of the selected items in your CV. The block content will be updated if you make changes to any items in your CV later.',
     ],
     'cofigureblock_cvinfo_cover' => [
@@ -3196,16 +3196,16 @@ return [
         'add actual CV "About me" content',
     ],
     'create_view_content_help_title' => [
-        'Gestalte deine einzigartige Geschichte: Erstelle dein Portfolio',
+        'Gestalten Sie Ihre einzigartige Geschichte: Erstellen Sie Ihr Portfolio',
         'Craft Your Unique Story: Build Your Portfolio',
     ],
     'create_view_content_help_text' => [
         '<ul>
-				<li><strong>Plane dein Layout:</strong> Ziehe und lasse Bausteine fallen und arrangiere sie, um deine Geschichte zu erzählen. Verwende Spalten (verfügbar im Abschnitt "Layout"), um dein Portfolio zu planen.</li>
-				<li><strong>Organisiere für Klarheit:</strong> Verwende Überschriften, Links und Notizen, um deine Inhalte effektiv zu strukturieren.</li>
-				<li><strong>Personalisiere deinen Stil:</strong> Wähle Schriftarten und Farben innerhalb der verfügbaren Optionen, um einen Hauch von dir hinzuzufügen.</li>
+				<li><strong>Planen Sie Ihr Layout:</strong> Ziehen Sie Bausteine an die gewünschte Stelle und arrangieren Sie sie, um Ihre Geschichte zu erzählen. Verwenden Sie Spalten (verfügbar im Abschnitt "Layout"), um Ihr Portfolio zu planen.</li>
+				<li><strong>Sorgen Sie für Übersichtlichkeit:</strong> Verwenden Sie Überschriften, Links und Notizen, um Ihre Inhalte effektiv zu strukturieren.</li>
+				<li><strong>Personalisieren Sie Ihren Stil:</strong> Wählen Sie Schriftarten und Farben innerhalb der verfügbaren Optionen, um Ihrem Portfolio eine persönliche Note zu geben.</li>
 			</ul>
-			<strong>Denke daran: Dein e-Portfolio erzählt der Welt von dir und deinen Fähigkeiten. Mache es klar, prägnant und ansprechend!</strong>',
+			<strong>Denken Sie daran: Ihr e-Portfolio erzählt der Welt von Ihnen und Ihren Fähigkeiten. Machen Sie es klar, prägnant und ansprechend!</strong>',
         '<ul>
                 <li><strong>Plan your layout:</strong> Drag and drop building blocks and arrange them to tell your story. Use columns (available in the "layout" section) to plan your portfolio.</li>
                 <li><strong>Organize for clarity:</strong> Use headers, links, and notes to structure your content effectively.</li>
@@ -3219,7 +3219,7 @@ return [
         'Show more info ...',
     ],
     'badges_help' => [
-        'Der Block mit dir verliehenen Abzeichen<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Deine Abzeichen anzeigen</a>',
+        'Der Block mit Ihnen verliehenen Badges<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>Ihre Badges anzeigen</a>',
         'The block with badges granted to you<br><a href=\'{$a}\' target=\'_blank\' class=\'external-link\'>View your badges</a>',
     ],
     'view_preview_help_title' => [
@@ -3320,7 +3320,7 @@ return [
         'Show course navigation bar',
     ],
     'settings_show_course_navbar_body' => [
-        'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren für eine übersichtlichere Ansicht ohne Kurs-Tabs.',
+        'Wenn aktiviert, wird die Moodle-Kurs-Navigationsleiste (Kurs, Teilnehmer/innen, Bewertungen usw.) auf ePortfolio-Seiten angezeigt. Deaktivieren für eine übersichtlichere Ansicht ohne Kurs-Tabs.',
         'When enabled, the Moodle course navigation bar (Course, Participants, Grades, etc.) is shown on ePortfolio pages. Disable to show a cleaner interface without course tabs.',
     ],
     'settings_items_display_defaults_heading' => [
@@ -3468,7 +3468,7 @@ return [
         'Always notify when sharing',
     ],
     'alwaysnotifywhenshare_description' => [
-        'Wenn aktiviert, wird das Kontrollkästchen "Benachrichtige Benutzer" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.',
+        'Wenn aktiviert, wird das Kontrollkästchen "Nutzer/innen benachrichtigen" automatisch aktiviert und deaktiviert, wenn das Kontrollkästchen "Teilen" angeklickt wird.',
         'When enabled, the notify users checkbox will be automatically checked and disabled when the share checkbox is clicked.',
     ],
 
@@ -3510,7 +3510,7 @@ return [
         'Preset structure',
     ],
     'category_distribution_description' => [
-        'Kategorien- und Sammelmappenstrukturen an Lernende verteilen',
+        'Kategorien- und Sammelmappenstrukturen an Teilnehmer/innen verteilen',
         'Manage and distribute category and collection structures to students',
     ],
     'starter_template_select' => [
@@ -3522,7 +3522,7 @@ return [
         'Load Template',
     ],
     'starter_template_load_confirm' => [
-        'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Dies wirkt sich erst auf Lernende aus, wenn Sie verteilen. Fortfahren?',
+        'Das Laden dieser Vorlage ersetzt die aktuelle Kursvorlage. Dies wirkt sich erst auf Teilnehmer/innen aus, wenn Sie verteilen. Fortfahren?',
         'Loading this template will replace the current course template. This does not affect student categories until you distribute. Continue?',
     ],
     'starter_template_loaded' => [
@@ -3562,7 +3562,7 @@ return [
         'Remove from Template',
     ],
     'remove_from_template_confirm' => [
-        'Diese Kategorie aus der Vorlage entfernen? Löscht keine Lernenden-Kategorien.',
+        'Diese Kategorie aus der Vorlage entfernen? Löscht keine Kategorien von Teilnehmer/innen.',
         'Remove this category from the template? This does not delete student categories.',
     ],
     'distribute_now' => [
@@ -3594,11 +3594,11 @@ return [
         'Categories skipped (already exist): {$a}',
     ],
     'students_processed' => [
-        'Lernende bearbeitet: {$a}',
+        'Teilnehmer/innen bearbeitet: {$a}',
         'Students processed: {$a}',
     ],
     'no_students_enrolled' => [
-        'Keine Lernende in diesem Kurs eingeschrieben',
+        'Keine Teilnehmer/innen in diesem Kurs eingeschrieben',
         'No students enrolled in this course',
     ],
     'no_template_to_distribute' => [
@@ -3666,7 +3666,7 @@ return [
         'Confirm Distribution',
     ],
     'confirm_distribute_categories_body' => [
-        'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Kategorien für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.',
+        'Sind Sie sicher, dass Sie die Kategoriestruktur an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dies erstellt Kategorien für Teilnehmer/innen, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Kategorien erstellt.',
         'Are you sure you want to distribute the category structure to all enrolled students? This will create categories for students who do not already have them. This action cannot be undone. Once distributed, the categories are created.',
     ],
     'confirm_distribute_views_title' => [
@@ -3674,7 +3674,7 @@ return [
         'Confirm Distribution',
     ],
     'confirm_distribute_views_body' => [
-        'Sind Sie sicher, dass Sie die Sammelmappenvorlagen an alle eingeschriebenen Lernenden verteilen möchten? Dies erstellt Sammelmappen für Lernende, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Sammelmappen erstellt.',
+        'Sind Sie sicher, dass Sie die Sammelmappenvorlagen an alle eingeschriebenen Teilnehmer/innen verteilen möchten? Dies erstellt Sammelmappen für Teilnehmer/innen, die diese noch nicht haben. Diese Aktion kann nicht rückgängig gemacht werden. Sobald verteilt, werden die Sammelmappen erstellt.',
         'Are you sure you want to distribute the collection templates to all enrolled students? This will create collections for students who do not already have them. This action cannot be undone. Once distributed, the collections are created.',
     ],
     'distribute' => [
@@ -3695,7 +3695,7 @@ return [
         'Collection Distribution',
     ],
     'view_distribution_description' => [
-        'Verteilen Sie Sammelmappen-Vorlagen an Lernende. Sammelmappen helfen Lernenden, ihre Arbeit zu präsentieren.',
+        'Verteilen Sie Sammelmappen-Vorlagen an Teilnehmer/innen. Sammelmappen helfen Teilnehmer/innen, ihre Arbeit zu präsentieren.',
         'Manage and distribute collection templates to students. Collections help students showcase their work.',
     ],
     'starter_view_template_select' => [
@@ -3723,7 +3723,7 @@ return [
         'Remove Collection',
     ],
     'remove_view_confirm' => [
-        'Sind Sie sicher, dass Sie diese Sammelmappe aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Sammelmappen von Lernenden.',
+        'Sind Sie sicher, dass Sie diese Sammelmappe aus der Vorlage entfernen möchten? Dies löscht keine bestehenden Sammelmappen von Teilnehmer/innen.',
         'Are you sure you want to remove this collection from the template? This will not delete existing student collections.',
     ],
     'view_name_required' => [
@@ -3822,11 +3822,11 @@ return [
         'Edit content',
     ],
     'deletecontentblock' => [
-        null,
+        'Inhalt löschen',
         'Delete content',
     ],
     'deletecontentblockconfirm' => [
-        null,
+        'Diesen Inhaltsblock löschen? Die zugehörigen Dateien werden ebenfalls endgültig gelöscht.',
         'Delete this content block? Its files will also be permanently deleted.',
     ],
     'deletecontentblockpendingconfirm' => [
@@ -3938,11 +3938,11 @@ return [
         'Who can access this?',
     ],
     'sharing_everyone' => [
-        'Alle mit einem Benutzerkonto',
+        'Alle mit einem Nutzerkonto',
         'Everyone with an account',
     ],
     'sharing_load_more_users' => [
-        'Weitere Nutzer/innen laden …',
+        'Alle Nutzer/innen dieses Kurses laden …',
         'Load all users of this course …',
     ],
     'sharing_load_users_error' => [
@@ -3979,7 +3979,7 @@ return [
         'Other users',
     ],
     'settings_sharing_courses_with_block_only_description' => [
-        'Beschränkt die Kursliste zur Empfängerauswahl auf eingeschriebene Kurse, in denen ein Exabis-ePortfolio-Block direkt hinzugefügt wurde (auch ausgeblendete Blöcke). Bestehende Empfänger außerhalb dieser Kurse bleiben unter "Andere Nutzer/innen" bearbeitbar. Die globale Benutzersuche, bestehende Zugriffsrechte und "Alle mit einem Benutzerkonto" bleiben unverändert.',
+        'Beschränkt die Kursliste zur Empfängerauswahl auf eingeschriebene Kurse, in denen ein Exabis-ePortfolio-Block direkt hinzugefügt wurde (auch ausgeblendete Blöcke). Bestehende Empfänger/innen außerhalb dieser Kurse bleiben unter "Andere Nutzer/innen" bearbeitbar. Die globale Nutzersuche, bestehende Zugriffsrechte und "Alle mit einem Nutzerkonto" bleiben unverändert.',
         'Restrict the course list for selecting recipients to enrolled courses where an Exabis ePortfolio block has been added directly (including hidden blocks). Existing recipients outside those courses remain editable under "Other users". Global user search, existing access and "Everyone with an account" are unchanged.',
     ],
     'settings_disable_sharegroups_body' => [
@@ -4000,7 +4000,7 @@ return [
         'Allow course-based naming of copied templates',
     ],
     'settings_enable_copy_root_naming_description' => [
-        'Erlaubt die Kursoption, beim Kopieren oder Wiederherstellen die oberste Kategorie der kopierten Struktur nach dem Zielkurs zu benennen. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.',
+        'Aktiviert eine Kursoption, mit der beim Kopieren oder Wiederherstellen eines Kurses die erste Kategorie auf oberster Ebene der kopierten Vorlage nach dem Zielkurs benannt werden kann. Bestehende Portfolio-Kategorien und die Quellstruktur werden nicht verändert.',
         'Allow courses to rename the first root of their copied category template during course copy or restore. Existing portfolio categories and the source template are never changed.',
     ],
     'settings_copied_template_root_name' => [
@@ -4012,7 +4012,7 @@ return [
         'Use {coursefullname} for the destination course’s full name. An empty pattern uses Ausbildungsdokumente {coursefullname}. Names are shortened to the existing limit of 255 characters.',
     ],
     'rename_root_on_copy' => [
-        'Bei Kurskopie die oberste Template-Kategorie nach dem Zielkurs benennen',
+        'Bei Kurskopie die erste Kategorie auf oberster Ebene der Vorlage nach dem Zielkurs benennen',
         'Name the first template root after the destination course when copying',
     ],
     'rename_root_on_copy_help' => [
@@ -4031,7 +4031,7 @@ return [
     'migrationissueshelp' => ['Dies ist ein schreibgeschützter Verlauf der beim Upgrade festgestellten Dateiprobleme. Die Dateidatensätze wurden mit unverändertem Inhaltshash migriert. Fehlende oder beschädigte Bytes werden dadurch nicht repariert. Speicherzugriff reparieren oder die ursprünglichen Bytes aus einer geprüften Sicherung wiederherstellen; ein erneuter Migrationslauf ist nicht erforderlich. Der Verlauf bleibt erhalten und beschreibt nicht den aktuellen Dateizustand. Ein fehlendes Ziel zeigt an, dass der Kopiervorgang damals nicht abgeschlossen wurde oder kein Ziel aufgezeichnet ist.', 'This read-only history documents file problems observed during upgrade. File records were migrated with their content hashes preserved; missing or damaged bytes were not repaired. Repair storage access or restore the original bytes from a verified backup. No migration retry is needed. Findings remain as historical evidence and do not describe current file health. A missing destination means its record copy was not completed or no destination was recorded.'],
     'migrationissuessummary' => ['Erfasste Probleme: {$a->issues_recorded}. Betroffene Dateien: {$a->files_affected}. Betroffene Einträge: {$a->items_affected}.', 'Recorded findings: {$a->issues_recorded}. Affected files: {$a->files_affected}. Affected items: {$a->items_affected}.'],
     'migrationitemid' => ['Eintrags-ID', 'Item ID'],
-    'migrationownerid' => ['Besitzer-ID', 'Owner ID'],
+    'migrationownerid' => ['Eigentümer-ID', 'Owner ID'],
     'migrationfileid' => ['Ursprüngliche Datei-ID', 'Original file ID'],
     'migrationdestinationid' => ['Migrierte Datei-ID', 'Migrated file ID'],
     'migrationcontenthash' => ['Erwarteter Inhaltshash', 'Expected content hash'],
@@ -4041,7 +4041,7 @@ return [
     'migrationattempts' => ['Fehlerbeobachtungen', 'Failed observations'],
     'migrationtimecopied' => ['Dateidatensatz migriert', 'File record migrated'],
     'privacy:metadata:block_exaportmigissue' => ['Verlauf der bei der Migration festgestellten Dateiprobleme.', 'History of file problems observed during migration.'],
-    'privacy:metadata:block_exaportmigissue:ownerid' => ['Besitzer des betroffenen Eintrags.', 'Owner of the affected item.'],
+    'privacy:metadata:block_exaportmigissue:ownerid' => ['Eigentümer/in des betroffenen Eintrags.', 'Owner of the affected item.'],
     'privacy:metadata:block_exaportmigissue:itemid' => ['Betroffener Portfolio-Eintrag.', 'Affected portfolio item.'],
     'privacy:metadata:block_exaportmigissue:fileid' => ['Ursprünglicher Dateidatensatz.', 'Original file record.'],
     'privacy:metadata:block_exaportmigissue:destinationid' => ['Migrierter Dateidatensatz.', 'Migrated file record.'],

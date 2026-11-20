@@ -101,7 +101,7 @@ $string['internalaccessusers'] = 'Accès autorisé uniquement pour les utilisate
 $string['internalaccessgroups'] = 'Accès autorisé uniquement pour les groupes suivants';
 $string['externaccess'] = 'lien E-Portfolio externe';
 $string['emailaccess'] = 'Partager par e-mail';
-$string['emailaccessdescription'] = 'Saisir une adresse e-mail par ligne<br />Chaque destinataire recevra un lien unique pour accéder à cette Collection. L\'accès à cette Collection sera impossible si vous supprimez l\'adresse e-mail.';
+$string['emailaccessdescription'] = 'Saisir une adresse e-mail par ligne<br />Chaque destinataire recevra un lien unique pour accéder à cette Collection. Si vous supprimez une adresse e-mail, le lien correspondant ne permet plus d’accéder à cette Collection.';
 $string['emailaccessmessagesubject'] = 'Nouvelle Collection partagée avec vous';
 $string['emailaccessmessage'] = 'Bonjour! {$a->sendername} a partagé la Collection "{$a->viewname}" avec vous. Vous pouvez la consulter ici: {$a->url}';
 $string['emailaccessmessageHTML'] = 'Bonjour!<br />{$a->sendername} a partagé la Collection "{$a->viewname}" avec vous.<br />Vous pouvez la consulter <a href="{$a->url}">ici</a>.';
@@ -399,7 +399,7 @@ $string['settings_disable_external_comments_body'] = '';
 $string['block_exaport_maxbytes'] = 'Maximum uploaded file size in Exabis ePortfolio';
 $string['block_exaport_maxbytes_body'] = 'This specifies a maximum size that uploaded files can be throughout the Exabis ePortfolio.<br> Value for whole site is: {$a->sitemaxbytes}. See <a href="{$a->settingsurl}">settings</a>';
 $string['block_exaport_userquota'] = 'User quota for Exabis ePortfolio';
-$string['block_exaport_userquota_body'] = 'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>';
+$string['block_exaport_userquota_body'] = 'Nombre maximal d’octets qu’une personne peut stocker dans son espace Exabis ePortfolio.<br> Quota par utilisateur au niveau du site : {$a->bytes}. Voir les <a href="{$a->settingsurl}">paramètres</a>.';
 $string['block_exaport_app_alloweditdelete_head'] = 'Students are allowed to edit and delete items after teacher reviews';
 $string['block_exaport_app_alloweditdelete_body'] = 'Only useful in combination with Exabis Competence Grid and dakora';
 $string['delete_all_shareall'] = 'Delete all shareall?';

@@ -153,6 +153,87 @@ final class view_master_switch_test extends \advanced_testcase {
     }
 
     /**
+     * Supply recipient inputs that clear or preserve the saved list.
+     *
+     * @return array
+     */
+    public static function email_recipient_list_provider(): array {
+        return [
+            'explicitly empty' => [true, '', false],
+            'only separators and whitespace' => [true, " ;,\r\n\t ", false],
+            'omitted' => [true, null, true],
+            'view email channel off' => [false, '', true],
+        ];
+    }
+
+    /**
+     * An enabled, submitted list is authoritative, even when it contains no recipients.
+     *
+     * @dataProvider email_recipient_list_provider
+     * @param bool $enabled Whether the view has email sharing enabled.
+     * @param string|null $recipientlist Submitted list, or null when omitted.
+     * @param bool $preserved Whether the saved recipient should remain.
+     */
+    public function test_save_email_recipient_list(bool $enabled, ?string $recipientlist, bool $preserved): void {
+        global $DB;
+
+        $view = $this->create_email_sharing_view($enabled);
+        $conditions = ['viewid' => $view->id];
+        $original = $DB->get_records_menu('block_exaportviewemailshar', $conditions, '', 'email, hash');
+        $this->assertNotEmpty($original);
+
+        $this->assertSame([], sharing_service::save_view_email_shares($view, $recipientlist));
+
+        $saved = $DB->get_records_menu('block_exaportviewemailshar', $conditions, '', 'email, hash');
+        $this->assertSame($preserved ? $original : [], $saved);
+    }
+
+    /**
+     * Editing a list keeps retained links and only returns invitations for new recipients.
+     */
+    public function test_update_email_recipient_list_only_affects_current_view(): void {
+        global $DB;
+
+        $view = $this->create_email_sharing_view(true);
+        $otherview = $this->create_email_sharing_view(true);
+        $otherconditions = ['viewid' => $otherview->id];
+        $othershares = $DB->get_records_menu('block_exaportviewemailshar', $otherconditions, '', 'email, hash');
+        $retainedemail = 'retained@example.test';
+        $retainedhash = md5('retained-' . $view->id);
+        $DB->insert_record('block_exaportviewemailshar', (object)[
+            'viewid' => $view->id,
+            'email' => $retainedemail,
+            'hash' => $retainedhash,
+        ]);
+        $newemail = 'new@example.test';
+
+        $invitations = sharing_service::save_view_email_shares($view, "$retainedemail\n$newemail");
+
+        $saved = $DB->get_records_menu('block_exaportviewemailshar', ['viewid' => $view->id], '', 'email, hash');
+        $this->assertCount(2, $saved);
+        $this->assertSame($retainedhash, $saved[$retainedemail] ?? null);
+        $this->assertArrayNotHasKey($this->recipient->email, $saved);
+        $this->assertNotEmpty($saved[$newemail] ?? null);
+        $this->assertSame([$newemail => $saved[$newemail]], $invitations);
+        $this->assertSame($othershares, $DB->get_records_menu('block_exaportviewemailshar', $otherconditions, '', 'email, hash'));
+    }
+
+    /**
+     * Create an owned view with one saved email recipient and a persisted channel flag.
+     *
+     * @param bool $enabled Whether the view has email sharing enabled.
+     * @return \stdClass
+     */
+    private function create_email_sharing_view(bool $enabled): \stdClass {
+        global $DB;
+
+        $fixture = $this->create_unshared_view_fixture();
+        $conditions = ['id' => $fixture->viewid];
+        $DB->set_field('block_exaportview', 'sharedemails', (int)$enabled, $conditions);
+        return $DB->get_record('block_exaportview', $conditions, '*', MUST_EXIST);
+    }
+
+    /**
      * Create a view with all three channels and one selected internal audience.
      *
      * @param int $internalmode Internal mode.

@@ -69,6 +69,64 @@ final class sharing_service {
     }
 
     /**
+     * Save the submitted email recipients for a view owned by the current user.
+     *
+     * An empty list removes the saved recipients. A disabled channel or an omitted field preserves them.
+     *
+     * @param \stdClass $view Saved view with normalized sharing flags.
+     * @param string|null $recipientlist Submitted addresses, or null if the field was omitted.
+     * @return array<string, string> Invitation hashes keyed by newly added email address.
+     */
+    public static function save_view_email_shares(\stdClass $view, ?string $recipientlist): array {
+        global $DB;
+
+        if (empty($view->sharedemails) || $recipientlist === null) {
+            return [];
+        }
+
+        $emails = preg_split('/[;,\s]+/', $recipientlist, -1, PREG_SPLIT_NO_EMPTY);
+        $emails = array_unique(array_filter(array_map('trim', $emails), static fn(string $email): bool =>
+            filter_var($email, FILTER_VALIDATE_EMAIL) !== false));
+
+        $lock = \core\lock\lock_config::get_lock_factory('block_exaport')->get_lock('viewemailshares:' . $view->id, 10);
+        if (!$lock) {
+            throw new \moodle_exception('locktimeout');
+        }
+        try {
+            if (!$emails) {
+                $DB->delete_records('block_exaportviewemailshar', ['viewid' => $view->id]);
+                return [];
+            }
+
+            $transaction = $DB->start_delegated_transaction();
+            try {
+                $saved = $DB->get_records_menu('block_exaportviewemailshar', ['viewid' => $view->id], '', 'id, email');
+                $removed = array_keys(array_diff($saved, $emails));
+                foreach (array_chunk($removed, 1000) as $ids) {
+                    $DB->delete_records_list('block_exaportviewemailshar', 'id', $ids);
+                }
+
+                $invitations = [];
+                foreach (array_diff($emails, $saved) as $email) {
+                    $hash = block_exaport_securephrase_viewemail($view, $email);
+                    $DB->insert_record('block_exaportviewemailshar', (object)[
+                        'viewid' => $view->id,
+                        'email' => $email,
+                        'hash' => $hash,
+                    ]);
+                    $invitations[$email] = $hash;
+                }
+                $transaction->allow_commit();
+                return $invitations;
+            } catch (\Throwable $exception) {
+                $transaction->rollback($exception);
+            }
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
      * Save the audience for an entity owned by the current user.
      *
      * Disabling sharing deliberately removes recipient assignments. This matches the historic

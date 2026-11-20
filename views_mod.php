@@ -636,41 +636,11 @@ if ($editform->is_cancelled()) {
                 exit;
             }
 
-            if ($dbview->sharedemails) {
-                $newemails = optional_param('emailsforshare', '', PARAM_RAW);
-                $newemails = preg_split('/(;|,|\s)/', $newemails);
-                $newemails = array_map('trim', $newemails);
-                $newemails = array_filter($newemails);
-                $newemails = array_unique($newemails);
-                if (count($newemails) > 0) {
-                    $oldemails = array_values(exaport_get_view_shared_emails($view->id));
-                    if ($oldemails !== $newemails) {
-                        // Get old hashes for keep them in the database.
-                        $oldemailshares = $DB->get_records_menu('block_exaportviewemailshar', array('viewid' => $view->id), '',
-                            'email, hash');
-                        // Delete all shares for this view.
-                        $DB->delete_records('block_exaportviewemailshar', array('viewid' => $view->id));
-                        $insertdata = new stdClass;
-                        $insertdata->viewid = $view->id;
-                        $hashesforemails = array();
-                        foreach ($newemails as $email) {
-                            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                $insertdata->email = $email;
-                                if (!in_array($email, $oldemails)) {
-                                    // Insert new share.
-                                    $insertdata->hash = block_exaport_securephrase_viewemail($view, $email);
-                                } else {
-                                    // Insert share with old hash.
-                                    $insertdata->hash = $oldemailshares[$email];
-                                }
-                                $DB->insert_record('block_exaportviewemailshar', $insertdata);
-                                $hashesforemails[$email] = $insertdata->hash;
-                            }
-                        }
-                        // Send messages.
-                        block_exaport_emailaccess_sendemails($view, $oldemails, $newemails, $hashesforemails);
-                    }
-                }
+            $recipientlist = data_submitted()->emailsforshare ?? null;
+            $invitations = \block_exaport\sharing_service::save_view_email_shares(
+                $dbview, is_string($recipientlist) ? $recipientlist : null);
+            if ($invitations) {
+                block_exaport_emailaccess_sendemails($view, [], array_keys($invitations), $invitations);
             }
             $message = block_exaport_get_string('view_sharing_updated');
             break;

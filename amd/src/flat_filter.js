@@ -141,11 +141,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                     });
                 }
             });
-            var discoveryOptions = shareFilters.querySelector('[data-region="share-discovery-options"]');
-            if (discoveryOptions && ((shareCourseSelect && shareCourseSelect.value) ||
-                    (shareSenderGrouping && shareSenderGrouping.checked))) {
-                discoveryOptions.open = true;
-            }
             saveShareFilters();
         }
         shareFilters.querySelector('[data-action="clear-filters"]').addEventListener('click', function() {

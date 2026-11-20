@@ -397,7 +397,6 @@ $string['share_filter_updated'] = 'Zuletzt aktualisiert';
 $string['share_filter_no_matches'] = 'Keine passenden Ergebnisse';
 $string['share_filter_shared_by'] = 'Geteilt von';
 $string['share_filter_any_sender'] = 'Alle Personen';
-$string['share_filter_more_options'] = 'Weitere Optionen';
 $string['share_filter_group_by_sender'] = 'Nach Person gruppieren';
 $string['share_filter_category_course'] = 'Kurs der Kategorie';
 $string['share_filter_collection_course'] = 'Personen in diesem Kurs';

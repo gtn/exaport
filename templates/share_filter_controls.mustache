@@ -16,39 +16,34 @@
                         <option value="{{id}}">{{name}}</option>
                     {{/senders}}
                 </select>
+                <label class="mb-0 d-inline-flex align-items-center gap-2">
+                    <input type="checkbox" data-share-filter="groupbysender">
+                    {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
+                </label>
             {{/hassenders}}
             <button type="button" class="btn btn-secondary" data-action="clear-filters" hidden>
                 {{#str}} clearAllFilers, block_exaport {{/str}}
             </button>
         </div>
         {{#hassenders}}
-            <details class="mt-2" data-region="share-discovery-options">
-                <summary>{{#str}} share_filter_more_options, block_exaport {{/str}}</summary>
-                <div class="d-flex flex-wrap gap-3 align-items-center mt-2">
-                    <label class="mb-0">
-                        <input type="checkbox" data-share-filter="groupbysender">
-                        {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
+            {{#hascourseoptions}}
+                <div class="mt-2" data-region="share-course-filter" hidden>
+                    <label for="exaport-share-course" class="mb-1">
+                        <span data-course-label="category" hidden>
+                            {{#str}} share_filter_category_course, block_exaport {{/str}}
+                        </span>
+                        <span data-course-label="view" hidden>
+                            {{#str}} share_filter_collection_course, block_exaport {{/str}}
+                        </span>
                     </label>
-                    {{#hascourseoptions}}
-                        <div data-region="share-course-filter" hidden>
-                            <label for="exaport-share-course" class="mb-1">
-                                <span data-course-label="category" hidden>
-                                    {{#str}} share_filter_category_course, block_exaport {{/str}}
-                                </span>
-                                <span data-course-label="view" hidden>
-                                    {{#str}} share_filter_collection_course, block_exaport {{/str}}
-                                </span>
-                            </label>
-                            <select class="form-control custom-select" id="exaport-share-course" data-share-filter="filtercourseid">
-                                <option value="">{{#str}} share_filter_all_courses, block_exaport {{/str}}</option>
-                                {{#courseoptions}}
-                                    <option value="{{id}}">{{name}}</option>
-                                {{/courseoptions}}
-                            </select>
-                        </div>
-                    {{/hascourseoptions}}
+                    <select class="form-control custom-select w-auto mw-100" id="exaport-share-course" data-share-filter="filtercourseid">
+                        <option value="">{{#str}} share_filter_all_courses, block_exaport {{/str}}</option>
+                        {{#courseoptions}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/courseoptions}}
+                    </select>
                 </div>
-            </details>
+            {{/hascourseoptions}}
         {{/hassenders}}
         <div role="status">
             <p class="mt-3 mb-0" data-region="no-matching-shares" hidden>

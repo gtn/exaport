@@ -1606,10 +1606,6 @@ return [
         'Alle Personen',
         'Shared by anyone',
     ],
-    'share_filter_more_options' => [
-        'Weitere Optionen',
-        'More options',
-    ],
     'share_filter_group_by_sender' => [
         'Nach Person gruppieren',
         'Group by sender',

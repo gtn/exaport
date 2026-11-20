@@ -37,12 +37,13 @@ $PAGE->set_url('/blocks/exaport/my_shares.php', ['courseid' => $courseid]);
 
 block_exaport_print_header("my_shares");
 
-block_exaport_require_filter_js();
-
 echo "<div class='block_eportfolio_center'>\n";
 
 $rows = share_overview::get_my_shares($USER->id);
-$searchcontrols = block_exaport_render_search_and_sort_controls($sort);
+if ($rows) {
+    block_exaport_require_filter_js();
+}
+$searchcontrols = block_exaport_render_share_filter_controls($sort);
 $page = new my_shares_page($rows, $courseid, $searchcontrols);
 echo $PAGE->get_renderer('block_exaport')->render($page);
 

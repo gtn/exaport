@@ -83,7 +83,7 @@ class share_overview {
 
         // Items — include the item type so we can show a per-type icon.
         $items = $DB->get_records_sql(
-            "SELECT i.id, i.name AS title, i.type, i.courseid, i.shareall, i.externaccess,
+            "SELECT i.id, i.name AS title, i.type, i.courseid, i.shareall, i.externaccess, i.timemodified,
                     COUNT(DISTINCT ishar.userid) AS cnt_shared_users,
                     COUNT(DISTINCT igshar.groupid) AS cnt_shared_groups,
                     COUNT(DISTINCT com.id) AS comment_cnt
@@ -94,7 +94,7 @@ class share_overview {
                LEFT JOIN {block_exaportitemgroupshar} igshar ON igshar.itemid = i.id AND ? = 1
                LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
               WHERE i.userid = ?
-           GROUP BY i.id, i.name, i.type, i.courseid, i.shareall, i.externaccess
+           GROUP BY i.id, i.name, i.type, i.courseid, i.shareall, i.externaccess, i.timemodified
              HAVING COUNT(DISTINCT ishar.userid) > 0
                  OR COUNT(DISTINCT igshar.groupid) > 0
                  " . ($shareallenabled ? 'OR i.shareall = 1' : '') . "
@@ -109,7 +109,7 @@ class share_overview {
 
         // Categories — include internshare so category_helper::build_share_info() can use it.
         $categories = $DB->get_records_sql(
-            "SELECT c.id, c.name AS title, c.courseid, c.shareall, c.externaccess, c.internshare,
+            "SELECT c.id, c.name AS title, c.courseid, c.shareall, c.externaccess, c.internshare, c.timemodified,
                     COUNT(DISTINCT cshar.userid) AS cnt_shared_users,
                     COUNT(DISTINCT cgshar.groupid) AS cnt_shared_groups,
                     0 AS comment_cnt
@@ -117,7 +117,7 @@ class share_overview {
                LEFT JOIN {block_exaportcatshar} cshar ON cshar.catid = c.id
                LEFT JOIN {block_exaportcatgroupshar} cgshar ON cgshar.catid = c.id AND ? = 1
               WHERE c.userid = ?
-           GROUP BY c.id, c.name, c.courseid, c.shareall, c.externaccess, c.internshare
+           GROUP BY c.id, c.name, c.courseid, c.shareall, c.externaccess, c.internshare, c.timemodified
              HAVING (c.internshare = 1 AND (
                         COUNT(DISTINCT cshar.userid) > 0
                         OR COUNT(DISTINCT cgshar.groupid) > 0
@@ -135,7 +135,7 @@ class share_overview {
         // Views.
         // sharedemails is TEXT on fresh installs; quote its flag for PostgreSQL.
         $views = $DB->get_records_sql(
-            "SELECT v.id, v.name AS title, 0 AS courseid, v.shareall, v.externaccess, v.sharedemails,
+            "SELECT v.id, v.name AS title, 0 AS courseid, v.shareall, v.externaccess, v.sharedemails, v.timemodified,
                     COUNT(DISTINCT vshar.userid) AS cnt_shared_users,
                     COUNT(DISTINCT vgshar.groupid) AS cnt_shared_groups,
                     0 AS comment_cnt
@@ -143,7 +143,7 @@ class share_overview {
                LEFT JOIN {block_exaportviewshar} vshar ON vshar.viewid = v.id
                LEFT JOIN {block_exaportviewgroupshar} vgshar ON vgshar.viewid = v.id AND ? = 1
               WHERE v.userid = ?
-           GROUP BY v.id, v.name, v.shareall, v.externaccess, v.sharedemails
+           GROUP BY v.id, v.name, v.shareall, v.externaccess, v.sharedemails, v.timemodified
              HAVING COUNT(DISTINCT vshar.userid) > 0
                  OR COUNT(DISTINCT vgshar.groupid) > 0
                  " . ($shareallenabled ? 'OR v.shareall = 1' : '') . "
@@ -190,7 +190,7 @@ class share_overview {
         $now = time();
         $items = $DB->get_records_sql(
             "SELECT i.id, i.name AS title, i.type, i.userid AS owner_userid, i.courseid,
-                    i.shareall, i.externaccess, COUNT(DISTINCT com.id) AS comment_cnt
+                    i.shareall, i.externaccess, i.timemodified, COUNT(DISTINCT com.id) AS comment_cnt
                FROM {block_exaportitem} i
                JOIN {user} u ON u.id = i.userid
           LEFT JOIN {block_exaportitemcomm} com ON com.itemid = i.id
@@ -200,7 +200,7 @@ class share_overview {
                                AND (us.timestart IS NULL OR us.timestart = 0 OR us.timestart <= ?)
                                AND (us.timeend IS NULL OR us.timeend = 0 OR us.timeend >= ?))
                     OR {$itemgroupsql})
-           GROUP BY i.id, i.name, i.type, i.userid, i.courseid, i.shareall, i.externaccess",
+           GROUP BY i.id, i.name, i.type, i.userid, i.courseid, i.shareall, i.externaccess, i.timemodified",
             array_merge([$userid, $userid, $now, $now], $groupparams)
         );
         foreach ($items as $item) {
@@ -214,7 +214,7 @@ class share_overview {
             : '1 = 0';
         $categories = $DB->get_records_sql(
             "SELECT c.id, c.name AS title, '' AS type, c.userid AS owner_userid, c.courseid,
-                    c.shareall, c.externaccess, c.internshare, 0 AS comment_cnt
+                    c.shareall, c.externaccess, c.internshare, c.timemodified, 0 AS comment_cnt
                FROM {block_exaportcate} c
                JOIN {user} u ON u.id = c.userid
               WHERE u.deleted = 0 AND c.userid != ? AND c.internshare = 1
@@ -235,7 +235,7 @@ class share_overview {
             : '1 = 0';
         $views = $DB->get_records_sql(
             "SELECT v.id, v.name AS title, '' AS type, v.userid AS owner_userid,
-                    0 AS courseid, v.shareall, v.externaccess, 0 AS comment_cnt
+                    0 AS courseid, v.shareall, v.externaccess, v.timemodified, 0 AS comment_cnt
                FROM {block_exaportview} v
                JOIN {user} u ON u.id = v.userid
               WHERE u.deleted = 0 AND v.userid != ? AND (" . sprintf($shareallsql, 'v') . "

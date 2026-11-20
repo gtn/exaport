@@ -1273,26 +1273,6 @@ function block_exaport_print_create_button($courseid, $categoryid, $type) {
 
 
 /**
- * Renders the items/views entry-type filter dropdown.
- *
- * @param string $entrytype Currently active value: 'all', 'item' or 'view'.
- * @return string HTML fragment.
- */
-function block_exaport_render_entrytype_control($entrytype) {
-    $html = '<div style="min-width:160px; max-width:250px;">';
-    $html .= '<label class="sr-only" for="exaport-entrytype-select">'
-        . get_string('filter_entry_type', 'block_exaport') . '</label>';
-    $html .= '<select id="exaport-entrytype-select" class="form-control custom-select">';
-    foreach (['all' => 'filter_entry_type_all', 'item' => 'filter_entry_type_items',
-                 'view' => 'filter_entry_type_views'] as $val => $key) {
-        $html .= '<option value="' . $val . '"' . ($entrytype === $val ? ' selected="selected"' : '')
-            . '>' . get_string($key, 'block_exaport') . '</option>';
-    }
-    $html .= '</select></div>';
-    return $html;
-}
-
-/**
  * Recursively prints <option> elements for the folder-mode category select, indented by depth.
  * The select is progressively enhanced client-side (see block_exaport/folder_category_select),
  * so this only needs to provide the plain option data.

@@ -23,7 +23,7 @@
     Context variables:
         hasrows           - Boolean: at least one share row
         rows              - List of rows:
-                              typeicon (pre-rendered HTML), typelabel, title, titlenamelower,
+                               typeicon (pre-rendered HTML), typelabel, title, titlenamelower, entitytype, timemodified,
                               url, ownername, coursename, sharemodetext, sharetooltip, hastooltip,
                               commentcount, hascomments
         nothingtext       - Localised text shown when nothing is shared with the user
@@ -33,14 +33,10 @@
         headercourse      - Localised column header "Course"
         headersharedwith  - Localised column header "Shared with"
         headercomments    - Localised column header "Comments"
-        searchcontrols    - Pre-rendered HTML for search input + sort dropdown
+        searchcontrols    - Pre-rendered HTML for the filter controls
 }}
 <div class="block_exaport_shared_with_me">
-    {{#searchcontrols}}
-    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
-        {{{searchcontrols}}}
-    </div>
-    {{/searchcontrols}}
+    {{> block_exaport/share_filter_controls }}
     {{^hasrows}}
         <p>{{nothingtext}}</p>
     {{/hasrows}}
@@ -60,7 +56,8 @@
                 {{#rows}}
                     <tr class="exaport-flat-item"
                         data-item-name="{{titlenamelower}}"
-                        data-item-date="0">
+                        data-item-date="{{timemodified}}"
+                        data-entry-type="{{entitytype}}">
                         <td><a href="{{url}}">{{title}}</a></td>
                         <td>{{{typeicon}}}&nbsp;{{typelabel}}</td>
                         <td>{{ownername}}</td>

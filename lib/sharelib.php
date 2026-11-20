@@ -684,7 +684,8 @@ namespace {
          */
         $shared = $DB->record_exists('block_exaportviewshar', array('viewid' => $view->id, 'notify' => 1)) ||
             (block_exaport_sharegroups_enabled() && $DB->record_exists('block_exaportviewgroupshar', array('viewid' => $view->id))) || // TODO: add notify to group sharing?
-            (isset($view->sharedemails) && $view->sharedemails && $DB->record_exists('block_exaportviewemailshar', array('viewid' => $view->id))); // TODO: check this in general
+            (block_exaport_shareemails_enabled() && ($view->sharedemails ?? 0) == 1 &&
+                $DB->record_exists('block_exaportviewemailshar', ['viewid' => $view->id]));
         return $shared;
     }
 
@@ -814,14 +815,17 @@ namespace {
             }
         }
 
-        // Notify shared emails.
-        // TODO: test if this works... does it do what we want?
-        $sharedemails = exaport_get_view_shared_emails($dbview->id);
-        if ($sharedemails && count($sharedemails) > 0) {
-            $oldemails = []; // No previous state, just send to all.
-            $newemails = array_values($sharedemails);
-            $hashesforemails = $DB->get_records_menu('block_exaportviewemailshar', array('viewid' => $dbview->id), '', 'email, hash');
-            block_exaport_emailaccess_sendemails($dbview, $oldemails, $newemails, $hashesforemails, true);
+        if (!block_exaport_shareemails_enabled()) {
+            return;
+        }
+        // The calling form can pass a partial view record. Use the stored setting and link data.
+        $emailview = $DB->get_record('block_exaportview', ['id' => $dbview->id], 'id, name, hash, sharedemails');
+        if (!$emailview || $emailview->sharedemails != 1) {
+            return;
+        }
+        $hashesforemails = $DB->get_records_menu('block_exaportviewemailshar', ['viewid' => $emailview->id], '', 'email, hash');
+        if ($hashesforemails) {
+            block_exaport_emailaccess_sendemails($emailview, [], array_keys($hashesforemails), $hashesforemails, true);
         }
     }
 

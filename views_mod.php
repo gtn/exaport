@@ -459,8 +459,19 @@ if ($editform->is_cancelled()) {
             if ($type === 'share') {
                 $searching = optional_param('share_to_other_users_submit', '', PARAM_RAW);
                 $recipientlist = data_submitted()->emailsforshare ?? null;
+                if ($searching) {
+                    // Searching the internal audience leaves the email settings alone.
+                    unset($dbview->sharedemails);
+                }
+                $shareuserids = $dbview->internaccess && (int)$dbview->shareall === 0
+                    ? \block_exaport\param::optional_array('shareusers', PARAM_INT) : [];
+                $notifyuserids = $dbview->internaccess && (int)$dbview->shareall === 0
+                    ? optional_param_array('notifyusers', [], PARAM_INT) : [];
+                $sharegroupids = $dbview->internaccess && (int)$dbview->shareall === 2
+                    ? \block_exaport\param::optional_array('sharegroups', PARAM_INT) : [];
                 $invitations = \block_exaport\sharing_service::save_view_sharing_settings(
-                    $dbview, $shareenabled, !$searching && is_string($recipientlist) ? $recipientlist : null);
+                    $dbview, $shareenabled, !$searching && is_string($recipientlist) ? $recipientlist : null,
+                    $shareuserids, $notifyuserids, $sharegroupids);
             } else if (!$DB->update_record('block_exaportview', $dbview)) {
                 print_error('updateposterror', 'block_exaport', $returnurl);
             }
@@ -576,22 +587,6 @@ if ($editform->is_cancelled()) {
 
             break;
         case 'share':
-            $shareuserids = $dbview->internaccess && (int)$dbview->shareall === 0
-                ? \block_exaport\param::optional_array('shareusers', PARAM_INT) : [];
-            $notifyuserids = $dbview->internaccess && (int)$dbview->shareall === 0
-                ? optional_param_array('notifyusers', [], PARAM_INT) : [];
-            $sharegroupids = $dbview->internaccess && (int)$dbview->shareall === 2
-                ? \block_exaport\param::optional_array('sharegroups', PARAM_INT) : [];
-            \block_exaport\sharing_service::save_internal_shares(
-                'view',
-                (int)$dbview->id,
-                (bool)$dbview->internaccess,
-                (int)$dbview->shareall,
-                $shareuserids,
-                $notifyuserids,
-                $sharegroupids
-            );
-
             // Message users, if they have shared. Read the notify flag back from the just-saved
             // rows instead of the raw submission, so only users this save actually (still)
             // shares with can ever be notified.
@@ -1145,9 +1140,9 @@ data-modal-content-str=\'["create_view_content_help_text", "block_exaport"]\' hr
         $showemail = block_exaport_shareemails_enabled();
         $internenabled = !empty($postview->internaccess);
         $shareenabled = ($canexternal && !empty($postview->externaccess)) || $internenabled ||
-            ($showemail && !empty($postview->sharedemails));
+            !empty($postview->sharedemails);
         $externalurl = ($canexternal && $view && !empty($view->id)) ? block_exaport_get_external_view_url($view) : '';
-        $emailaddresses = ($view && !empty($view->id))
+        $emailaddresses = ($showemail && $view && !empty($view->id) && !empty($view->sharedemails))
             ? implode("\n", exaport_get_view_shared_emails($view->id)) : '';
         $sharingform = new \block_exaport\output\sharing_form([
             'componentid' => 'view-sharing',

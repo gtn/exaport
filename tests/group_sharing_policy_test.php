@@ -284,4 +284,58 @@ final class group_sharing_policy_test extends \advanced_testcase {
             $sink->close();
         }
     }
+
+    public function test_disabled_site_email_policy_hides_notification_action_and_skips_email_recipients(): void {
+        $view = $this->view_with_email_recipient(true);
+        $savedview = $this->record($view);
+        $submittedview = (object)['id' => $savedview->id, 'name' => $savedview->name];
+
+        set_config('block_exaport_disable_shareemails', 0);
+        $this->assertTrue(exaport_is_any_notifying_enabled_for_view($savedview));
+        set_config('block_exaport_disable_shareemails', 1);
+        $this->assertFalse(exaport_is_any_notifying_enabled_for_view($savedview));
+
+        $sink = $this->redirectMessages();
+        try {
+            exaport_send_notifications($submittedview, SITEID);
+            $this->assertSame([], $sink->get_messages());
+
+            sharing_service::save_internal_shares('view', $view->id, true, 0,
+                [$this->recipient->id], [$this->recipient->id]);
+            $this->assertTrue(exaport_is_any_notifying_enabled_for_view($this->record($view)));
+
+            exaport_send_notifications($submittedview, SITEID);
+            $messages = $sink->get_messages();
+            $this->assertCount(1, $messages);
+            $this->assertEquals($this->recipient->id, $messages[0]->useridto);
+        } finally {
+            $sink->close();
+        }
+    }
+
+    public function test_email_notifications_use_persisted_view_flag(): void {
+        set_config('block_exaport_disable_shareemails', 0);
+        $savedview = $this->record($this->view_with_email_recipient(false));
+        $submittedview = (object)['id' => $savedview->id, 'name' => $savedview->name, 'sharedemails' => 1];
+        $sink = $this->redirectMessages();
+        try {
+            exaport_send_notifications($submittedview, SITEID);
+            $this->assertSame([], $sink->get_messages());
+        } finally {
+            $sink->close();
+        }
+    }
+
+    /** Create a view retaining a grant for the email recipient, regardless of its channel state. */
+    private function view_with_email_recipient(bool $enabled): \stdClass {
+        global $DB;
+        $view = $this->entity('view');
+        $DB->set_field('block_exaportview', 'sharedemails', (int)$enabled, ['id' => $view->id]);
+        $DB->insert_record('block_exaportviewemailshar', [
+            'viewid' => $view->id,
+            'email' => $this->outsider->email,
+            'hash' => md5('email-recipient-' . $view->id),
+        ]);
+        return $view;
+    }
 }

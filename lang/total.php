@@ -1598,6 +1598,34 @@ return [
         'Keine passenden Ergebnisse',
         'No matching results',
     ],
+    'share_filter_shared_by' => [
+        'Geteilt von',
+        'Shared by',
+    ],
+    'share_filter_any_sender' => [
+        'Alle Personen',
+        'Shared by anyone',
+    ],
+    'share_filter_more_options' => [
+        'Weitere Optionen',
+        'More options',
+    ],
+    'share_filter_group_by_sender' => [
+        'Nach Person gruppieren',
+        'Group by sender',
+    ],
+    'share_filter_category_course' => [
+        'Kurs der Kategorie',
+        'Category course',
+    ],
+    'share_filter_collection_course' => [
+        'Personen in diesem Kurs',
+        'People in this course',
+    ],
+    'share_filter_all_courses' => [
+        'Alle Kurse',
+        'All courses',
+    ],
     'sharedwith' => [
         'Geteilt mit',
         'Shared with',

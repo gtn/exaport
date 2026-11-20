@@ -25,6 +25,57 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var searchCategoryLabel = 'Search Category...'; // Translatable via init() parameter.
     var entryTypeSelect;    // Entry-type filter dropdown (All / Only items / Only views).
     var shareFilters;       // Filter bar on My shares or Shared with me.
+    var shareOwnerSelect; // Incoming shares only: narrow the list to one sender.
+    var shareCourseSelect; // Incoming shares only: put one course before other courses.
+    var shareSenderGrouping; // Incoming shares only: group matching rows by sender.
+    var shareCourseRegion; // Course scope is available for categories and collections only.
+
+    /**
+     * Whether the incoming overview provides any of its optional discovery controls.
+     *
+     * @return {boolean}
+     */
+    function hasIncomingShareFilters() {
+        return !!(shareOwnerSelect || shareCourseSelect || shareSenderGrouping);
+    }
+
+    /**
+     * Restore a scope only when its value is an enabled option in the current select.
+     *
+     * @param {HTMLSelectElement} select Scope control, if present.
+     * @param {string|null} value Requested URL value.
+     */
+    function restoreShareScope(select, value) {
+        if (!select) {
+            return;
+        }
+        var valid = Array.from(select.options).some(function(option) {
+            return option.value === value && !option.disabled;
+        });
+        select.value = valid ? value : '';
+    }
+
+    /**
+     * Keep course discovery specific to the active type, without carrying its semantics across types.
+     *
+     * @param {boolean} reset Whether the entry type has changed.
+     */
+    function updateShareCourseScope(reset) {
+        var type = entryTypeSelect ? entryTypeSelect.value : 'all';
+        var supported = type === 'category' || type === 'view';
+        if (shareCourseSelect) {
+            if (reset || !supported) {
+                shareCourseSelect.value = '';
+            }
+            shareCourseSelect.disabled = !supported;
+        }
+        if (shareCourseRegion) {
+            shareCourseRegion.hidden = !supported;
+            shareCourseRegion.querySelectorAll('[data-course-label]').forEach(function(label) {
+                label.hidden = label.getAttribute('data-course-label') !== type;
+            });
+        }
+    }
 
     /**
      * Keep share filters in the current URL, separate from Portfolio preferences.
@@ -41,6 +92,23 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         } else {
             url.searchParams.delete('entrytype');
         }
+        if (hasIncomingShareFilters()) {
+            if (shareOwnerSelect && shareOwnerSelect.value) {
+                url.searchParams.set('userid', shareOwnerSelect.value);
+            } else {
+                url.searchParams.delete('userid');
+            }
+            if (shareCourseSelect && !shareCourseSelect.disabled && shareCourseSelect.value) {
+                url.searchParams.set('filtercourseid', shareCourseSelect.value);
+            } else {
+                url.searchParams.delete('filtercourseid');
+            }
+            if (shareSenderGrouping && shareSenderGrouping.checked) {
+                url.searchParams.set('groupbysender', '1');
+            } else {
+                url.searchParams.delete('groupbysender');
+            }
+        }
         history.replaceState(null, '', url);
     }
 
@@ -54,9 +122,44 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         if (!entryTypeSelect.value) {
             entryTypeSelect.value = 'all';
         }
+        shareOwnerSelect = shareFilters.querySelector('[data-share-filter="userid"]');
+        shareCourseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
+        shareSenderGrouping = shareFilters.querySelector('[data-share-filter="groupbysender"]');
+        shareCourseRegion = shareFilters.querySelector('[data-region="share-course-filter"]');
+        if (hasIncomingShareFilters()) {
+            restoreShareScope(shareOwnerSelect, params.get('userid'));
+            restoreShareScope(shareCourseSelect, params.get('filtercourseid'));
+            if (shareSenderGrouping) {
+                shareSenderGrouping.checked = params.get('groupbysender') === '1';
+            }
+            updateShareCourseScope(false);
+            [shareOwnerSelect, shareCourseSelect, shareSenderGrouping].forEach(function(control) {
+                if (control) {
+                    control.addEventListener('change', function() {
+                        saveShareFilters();
+                        filterItems();
+                    });
+                }
+            });
+            var discoveryOptions = shareFilters.querySelector('[data-region="share-discovery-options"]');
+            if (discoveryOptions && ((shareCourseSelect && shareCourseSelect.value) ||
+                    (shareSenderGrouping && shareSenderGrouping.checked))) {
+                discoveryOptions.open = true;
+            }
+            saveShareFilters();
+        }
         shareFilters.querySelector('[data-action="clear-filters"]').addEventListener('click', function() {
             searchInput.value = '';
             entryTypeSelect.value = 'all';
+            if (shareOwnerSelect) {
+                shareOwnerSelect.value = '';
+            }
+            if (shareSenderGrouping) {
+                shareSenderGrouping.checked = false;
+            }
+            if (hasIncomingShareFilters()) {
+                updateShareCourseScope(true);
+            }
             searchInput.focus();
             saveShareFilters();
             filterItems();
@@ -175,8 +278,10 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 return catIds.indexOf(catId) !== -1;
             });
             var matchesEntryType = !selectedEntryType || selectedEntryType === 'all' || entryType === selectedEntryType;
+            var matchesOwner = !shareOwnerSelect || !shareOwnerSelect.value ||
+                item.getAttribute('data-owner-id') === shareOwnerSelect.value;
 
-            var matches = matchesSearch && matchesCategory && matchesEntryType;
+            var matches = matchesSearch && matchesCategory && matchesEntryType && matchesOwner;
             item.style.display = matches ? '' : 'none';
             hasMatches = hasMatches || matches;
         });
@@ -188,12 +293,145 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         });
 
         if (shareFilters) {
-            shareFilters.querySelector('[data-action="clear-filters"]').hidden = !searchText && selectedEntryType === 'all';
+            var hasDiscoveryState = (shareOwnerSelect && shareOwnerSelect.value) ||
+                (shareCourseSelect && shareCourseSelect.value) || (shareSenderGrouping && shareSenderGrouping.checked);
+            shareFilters.querySelector('[data-action="clear-filters"]').hidden =
+                !searchText && selectedEntryType === 'all' && !hasDiscoveryState;
             shareFilters.querySelector('[data-region="no-matching-shares"]').hidden = hasMatches;
-            document.querySelector('.exaport-share-overview-table').hidden = !hasMatches;
+            var shareTable = document.querySelector('.exaport-share-overview-table');
+            if (shareTable) {
+                shareTable.hidden = !hasMatches;
+            }
         }
 
         sortItems();
+    }
+
+    /**
+     * Compare entry rows using the existing title, date or type ordering.
+     *
+     * @param {HTMLElement} a First row or card.
+     * @param {HTMLElement} b Second row or card.
+     * @param {string} field Sort field.
+     * @param {string} dir Sort direction.
+     * @return {number}
+     */
+    function compareItems(a, b, field, dir) {
+        var valA, valB;
+        if (field === 'date') {
+            valA = parseInt(a.getAttribute('data-item-date') || '0', 10);
+            valB = parseInt(b.getAttribute('data-item-date') || '0', 10);
+        } else if (field === 'type') {
+            valA = a.getAttribute('data-item-type') || '';
+            valB = b.getAttribute('data-item-type') || '';
+        } else {
+            valA = a.getAttribute('data-item-name') || '';
+            valB = b.getAttribute('data-item-name') || '';
+        }
+        var cmp = typeof valA === 'number' ? valA - valB : valA.localeCompare(valB);
+        return dir === 'asc' ? cmp : -cmp;
+    }
+
+    /**
+     * Rebuild incoming sections using the real rows, so filtering and sorting never duplicate entries.
+     *
+     * @param {string} field Sort field.
+     * @param {string} dir Sort direction.
+     */
+    function sortIncomingShares(field, dir) {
+        var table = document.querySelector('.exaport-share-overview-table');
+        var body = table ? table.querySelector('tbody') : null;
+        if (!body) {
+            return;
+        }
+        body.querySelectorAll('[data-share-group-header]').forEach(function(heading) {
+            heading.remove();
+        });
+        var rows = Array.from(body.querySelectorAll('.exaport-flat-item'));
+        rows.sort(function(a, b) {
+            return compareItems(a, b, field, dir);
+        });
+        var visible = rows.filter(function(row) {
+            return row.style.display !== 'none';
+        });
+        var columns = rows.length ? rows[0].cells.length : 1;
+        var fragment = document.createDocumentFragment();
+        var courseScoped = shareCourseSelect && !shareCourseSelect.disabled && shareCourseSelect.value;
+
+        var appendHeading = function(name, count, type) {
+            var heading = document.createElement('tr');
+            heading.setAttribute('data-share-group-header', type);
+            heading.className = 'exaport-share-' + type + '-heading';
+            if (type === 'course') {
+                heading.classList.add('table-active');
+            }
+            var cell = document.createElement('th');
+            cell.colSpan = columns;
+            if (type === 'sender' && courseScoped) {
+                cell.className = 'pl-4 ps-4';
+            }
+            cell.textContent = name + ' (' + count + ')';
+            heading.appendChild(cell);
+            fragment.appendChild(heading);
+        };
+        var appendRows = function(sectionRows) {
+            if (!shareSenderGrouping || !shareSenderGrouping.checked) {
+                sectionRows.forEach(function(row) {
+                    fragment.appendChild(row);
+                });
+                return;
+            }
+            var owners = Object.create(null);
+            sectionRows.forEach(function(row) {
+                var id = row.getAttribute('data-owner-id') || '';
+                if (!owners[id]) {
+                    owners[id] = {id: id, name: row.getAttribute('data-owner-name') || '', rows: []};
+                }
+                owners[id].rows.push(row);
+            });
+            Object.keys(owners).map(function(id) {
+                return owners[id];
+            }).sort(function(a, b) {
+                return a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+            }).forEach(function(owner) {
+                appendHeading(owner.name, owner.rows.length, 'sender');
+                owner.rows.forEach(function(row) {
+                    fragment.appendChild(row);
+                });
+            });
+        };
+
+        if (courseScoped) {
+            var courseid = shareCourseSelect.value;
+            var courseRows = [];
+            var otherRows = [];
+            visible.forEach(function(row) {
+                var matches;
+                if (entryTypeSelect.value === 'category') {
+                    matches = row.getAttribute('data-category-course-id') === courseid;
+                } else {
+                    var courseids = (row.getAttribute('data-owner-course-ids') || '').split(',').map(function(id) {
+                        return id.trim();
+                    });
+                    matches = courseids.indexOf(courseid) !== -1;
+                }
+                (matches ? courseRows : otherRows).push(row);
+            });
+            appendHeading(shareCourseSelect.options[shareCourseSelect.selectedIndex].text, courseRows.length, 'course');
+            appendRows(courseRows);
+            if (otherRows.length) {
+                appendHeading(table.getAttribute('data-other-courses') || '', otherRows.length, 'course');
+                appendRows(otherRows);
+            }
+        } else {
+            appendRows(visible);
+        }
+        rows.forEach(function(row) {
+            if (row.style.display === 'none') {
+                fragment.appendChild(row);
+            }
+        });
+        body.appendChild(fragment);
     }
 
     /**
@@ -209,6 +447,11 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         var field = parts[0];
         var dir = parts[1] || 'desc';
 
+        if (hasIncomingShareFilters()) {
+            sortIncomingShares(field, dir);
+            return;
+        }
+
         // Sort within each view section independently to avoid moving items across sections.
         document.querySelectorAll('.exaport-view-section[data-exaport-view]').forEach(function(section) {
             var items = Array.from(section.querySelectorAll('.exaport-flat-item'));
@@ -218,24 +461,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             var parent = items[0].parentElement;
 
             items.sort(function(a, b) {
-                var valA, valB;
-                if (field === 'date') {
-                    valA = parseInt(a.getAttribute('data-item-date') || '0', 10);
-                    valB = parseInt(b.getAttribute('data-item-date') || '0', 10);
-                } else if (field === 'type') {
-                    valA = a.getAttribute('data-item-type') || '';
-                    valB = b.getAttribute('data-item-type') || '';
-                } else {
-                    valA = a.getAttribute('data-item-name') || '';
-                    valB = b.getAttribute('data-item-name') || '';
-                }
-                var cmp;
-                if (typeof valA === 'number') {
-                    cmp = valA - valB;
-                } else {
-                    cmp = valA.localeCompare(valB);
-                }
-                return dir === 'asc' ? cmp : -cmp;
+                return compareItems(a, b, field, dir);
             });
 
             items.forEach(function(item) {
@@ -440,6 +666,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             if (entryTypeSelect) {
                 entryTypeSelect.addEventListener('change', function() {
                     if (shareFilters) {
+                        updateShareCourseScope(true);
                         saveShareFilters();
                     } else {
                         Prefs.savePreference('entrytype', entryTypeSelect.value);

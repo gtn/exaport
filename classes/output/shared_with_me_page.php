@@ -135,12 +135,15 @@ class shared_with_me_page implements renderable, templatable {
             'hascourseoptions' => (bool)$courseoptions,
             'courseoptions'    => array_values($courseoptions),
             'nothingtext'      => get_string('nothingsharedwithme', 'block_exaport'),
-            'headertitle'      => get_string('title', 'block_exaport'),
-            'headertype'       => get_string('type', 'block_exaport'),
-            'headeruser'       => get_string('share_filter_shared_by', 'block_exaport'),
-            'headercourse'     => get_string('course', 'block_exaport'),
-            'headersharedwith' => get_string('sharedwith', 'block_exaport'),
-            'headercomments'   => get_string('comments', 'block_exaport'),
+            'columns'          => [
+                ['sortfield' => 'name', 'label' => get_string('title', 'block_exaport')],
+                ['sortfield' => 'type', 'label' => get_string('type', 'block_exaport')],
+                ['sortfield' => 'sender', 'label' => get_string('share_filter_shared_by', 'block_exaport')],
+                ['sortfield' => 'course', 'label' => get_string('course', 'block_exaport')],
+                ['sortfield' => 'date', 'label' => get_string('share_filter_updated', 'block_exaport')],
+                ['sortfield' => 'sharedwith', 'label' => get_string('sharedwith', 'block_exaport')],
+                ['sortfield' => 'comments', 'label' => get_string('comments', 'block_exaport')],
+            ],
             'searchcontrols'   => $this->searchcontrols,
         ];
     }

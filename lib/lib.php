@@ -3674,6 +3674,23 @@ function block_exaport_require_filter_js($childrenmap = [], $preselectedcategory
 
 
 /**
+ * Renders the shared search input.
+ *
+ * @param string|null $searchlabel Label for the search input.
+ * @return string HTML fragment.
+ */
+function block_exaport_render_search_control(?string $searchlabel = null): string {
+    $searchlabel = $searchlabel ?? get_string('search');
+    $searchid = 'exaport-search';
+    $html = '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
+    $html .= '<label class="sr-only" for="' . s($searchid) . '">' . s($searchlabel) . '</label>';
+    $html .= '<input type="text" id="' . s($searchid) . '" class="form-control"'
+        . ' placeholder="' . s($searchlabel) . '...">';
+    $html .= '</div>';
+    return $html;
+}
+
+/**
  * Renders the shared search input and sort dropdown HTML fragment.
  *
  * Called from both the flat-layout filter bar and the folder-layout controls so
@@ -3691,18 +3708,9 @@ function block_exaport_render_search_and_sort_controls(
     ?string $namelabel = null,
     ?string $searchlabel = null
 ) {
-    $html = '';
+    $html = block_exaport_render_search_control($searchlabel);
     $datelabel = $datelabel ?? get_string('date', 'block_exaport');
     $namelabel = $namelabel ?? get_string('name', 'block_exaport');
-    $searchlabel = $searchlabel ?? get_string('search');
-
-    // Search input.
-    $searchid = 'exaport-search';
-    $html .= '<div class="flex-grow-1" style="min-width: 150px; max-width: 300px;">';
-    $html .= '<label class="sr-only" for="' . s($searchid) . '">' . s($searchlabel) . '</label>';
-    $html .= '<input type="text" id="' . s($searchid) . '" class="form-control"'
-        . ' placeholder="' . s($searchlabel) . '...">';
-    $html .= '</div>';
 
     // Sort dropdown.
     $sortid = 'exaport-sort-select';
@@ -3752,20 +3760,25 @@ function block_exaport_render_entrytype_control($entrytype, array $options = [
 /**
  * Renders the shared filter bar controls for My shares and Shared with me.
  *
- * @param string $sort Requested sort value.
+ * @param string|null $sort Requested sort value, or null when sorting uses table headers.
  * @param string|null $searchlabel Label for the search input.
  * @return string HTML fragment.
  */
-function block_exaport_render_share_filter_controls(string $sort, ?string $searchlabel = null): string {
-    if (!in_array($sort, ['name-asc', 'name-desc', 'date-asc', 'date-desc'], true)) {
-        $sort = 'name-asc';
+function block_exaport_render_share_filter_controls(?string $sort, ?string $searchlabel = null): string {
+    if ($sort === null) {
+        $controls = block_exaport_render_search_control($searchlabel);
+    } else {
+        if (!in_array($sort, ['name-asc', 'name-desc', 'date-asc', 'date-desc'], true)) {
+            $sort = 'name-asc';
+        }
+        $controls = block_exaport_render_search_and_sort_controls(
+            $sort,
+            get_string('share_filter_updated', 'block_exaport'),
+            get_string('title', 'block_exaport'),
+            $searchlabel
+        );
     }
-    return block_exaport_render_search_and_sort_controls(
-        $sort,
-        get_string('share_filter_updated', 'block_exaport'),
-        get_string('title', 'block_exaport'),
-        $searchlabel
-    ) . block_exaport_render_entrytype_control('all', [
+    return $controls . block_exaport_render_entrytype_control('all', [
         'all' => 'share_filter_all_types',
         'item' => 'mixed',
         'view' => 'share_filter_collections',

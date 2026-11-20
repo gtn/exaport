@@ -32,6 +32,63 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var selectedShareOwners = {}; // Map of selected incoming sender IDs to their display names.
     var shareOwnerChips; // Container for the incoming sender selection chips.
     var shareOwnerWidget; // Searchable sender dropdown, refreshed after external selection changes.
+    var incomingSharesTable; // Incoming headers own their sort state without a sort dropdown.
+    var incomingSort = 'name-asc';
+    var sortAttributes = {
+        name: 'data-item-name',
+        type: 'data-item-type',
+        sender: 'data-owner-name',
+        course: 'data-course-name',
+        date: 'data-item-date',
+        sharedwith: 'data-shared-with',
+        comments: 'data-comment-count'
+    };
+
+    /**
+     * Return the active header sort for incoming shares, or the legacy dropdown sort.
+     *
+     * @return {string}
+     */
+    function currentSort() {
+        if (incomingSharesTable) {
+            return incomingSort;
+        }
+        return sortSelect ? sortSelect.value : '';
+    }
+
+    /**
+     * Keep the active sort in the URL without changing any filter or display preferences.
+     */
+    function saveSort() {
+        var url = new URL(window.location.href);
+        url.searchParams.set('sort', currentSort());
+        history.replaceState(null, '', url);
+    }
+
+    /**
+     * Restore incoming sorting only for fields actually offered by the table headers.
+     */
+    function initIncomingSort() {
+        incomingSharesTable = document.querySelector('[data-region="incoming-shares-table"]');
+        incomingSort = 'name-asc';
+        if (!incomingSharesTable) {
+            return;
+        }
+        var requested = new URL(window.location.href).searchParams.get('sort');
+        if (requested === null) {
+            return;
+        }
+        var parts = requested.split('-');
+        var headings = incomingSharesTable.querySelectorAll('.exaport-sort-heading[data-sort-field]');
+        var validField = Array.from(headings).some(function(heading) {
+            return heading.getAttribute('data-sort-field') === parts[0];
+        });
+        if (validField && parts.length === 2 && (parts[1] === 'asc' || parts[1] === 'desc')) {
+            incomingSort = requested;
+        } else {
+            saveSort();
+        }
+    }
 
     /**
      * Whether the incoming overview provides any of its optional discovery controls.
@@ -370,7 +427,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
-     * Compare entry rows using the existing title, date or type ordering.
+     * Compare rows by numeric values or the displayed text associated with a column.
      *
      * @param {HTMLElement} a First row or card.
      * @param {HTMLElement} b Second row or card.
@@ -379,16 +436,12 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
      * @return {number}
      */
     function compareItems(a, b, field, dir) {
-        var valA, valB;
-        if (field === 'date') {
-            valA = parseInt(a.getAttribute('data-item-date') || '0', 10);
-            valB = parseInt(b.getAttribute('data-item-date') || '0', 10);
-        } else if (field === 'type') {
-            valA = a.getAttribute('data-item-type') || '';
-            valB = b.getAttribute('data-item-type') || '';
-        } else {
-            valA = a.getAttribute('data-item-name') || '';
-            valB = b.getAttribute('data-item-name') || '';
+        var attribute = sortAttributes[field] || sortAttributes.name;
+        var valA = a.getAttribute(attribute) || '';
+        var valB = b.getAttribute(attribute) || '';
+        if (field === 'date' || field === 'comments') {
+            valA = parseInt(valA, 10) || 0;
+            valB = parseInt(valB, 10) || 0;
         }
         var cmp = typeof valA === 'number' ? valA - valB : valA.localeCompare(valB);
         return dir === 'asc' ? cmp : -cmp;
@@ -401,8 +454,8 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
      * @param {string} dir Sort direction.
      */
     function sortIncomingShares(field, dir) {
-        var table = document.querySelector('.exaport-share-overview-table');
-        var body = table ? table.querySelector('tbody') : null;
+        var table = incomingSharesTable;
+        var body = table.querySelector('tbody');
         if (!body) {
             return;
         }
@@ -454,7 +507,8 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             Object.keys(owners).map(function(id) {
                 return owners[id];
             }).sort(function(a, b) {
-                return a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+                var cmp = a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+                return field === 'sender' && dir === 'desc' ? -cmp : cmp;
             }).forEach(function(owner) {
                 appendHeading(owner.name, owner.rows.length, 'sender');
                 owner.rows.forEach(function(row) {
@@ -498,18 +552,18 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
 
     /**
      * Sort visible items by reordering DOM elements within their parent container.
-     * Reads the currently selected sort field/direction from the sort dropdown.
+     * Reads the current incoming header state or the legacy sort dropdown.
      */
     function sortItems() {
-        if (!sortSelect) {
+        var sortVal = currentSort(); // e.g. "date-desc", "name-asc"
+        if (!sortVal) {
             return;
         }
-        var sortVal = sortSelect.value; // e.g. "date-desc", "name-asc"
         var parts = sortVal.split('-');
         var field = parts[0];
         var dir = parts[1] || 'desc';
 
-        if (hasIncomingShareFilters()) {
+        if (incomingSharesTable) {
             sortIncomingShares(field, dir);
             return;
         }
@@ -533,13 +587,14 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
-     * Update table sort heading arrows and aria-sort attributes from current select value.
+     * Update table sort heading arrows and aria-sort attributes from the current sort state.
      */
     function updateSortHeadings() {
         var field = '';
         var dir = '';
-        if (sortSelect && sortSelect.value) {
-            var parts = sortSelect.value.split('-');
+        var sort = currentSort();
+        if (sort) {
+            var parts = sort.split('-');
             field = parts[0];
             dir = parts[1] || 'desc';
         }
@@ -569,24 +624,34 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         document.querySelectorAll('.exaport-sort-heading').forEach(function(heading) {
             heading.addEventListener('click', function(e) {
                 e.preventDefault();
-                if (!sortSelect) {
+                if (!incomingSharesTable && !sortSelect) {
                     return;
                 }
                 var field = heading.getAttribute('data-sort-field');
                 if (!field) {
                     return;
                 }
+                if (incomingSharesTable && !incomingSharesTable.contains(heading)) {
+                    return;
+                }
 
-                var current = sortSelect.value.split('-');
+                var current = currentSort().split('-');
                 var currentField = current[0];
                 var currentDir = current[1] || 'desc';
                 var nextDir;
                 if (field === currentField) {
                     nextDir = currentDir === 'asc' ? 'desc' : 'asc';
                 } else {
-                    nextDir = field === 'date' ? 'desc' : 'asc';
+                    nextDir = field === 'date' || field === 'comments' ? 'desc' : 'asc';
                 }
 
+                if (incomingSharesTable) {
+                    incomingSort = field + '-' + nextDir;
+                    sortItems();
+                    updateSortHeadings();
+                    saveSort();
+                    return;
+                }
                 sortSelect.value = field + '-' + nextDir;
                 if (!sortSelect.value) {
                     return;
@@ -688,6 +753,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             subcategoriesCheckbox = document.getElementById('exaport-subcategories-checkbox');
             entryTypeSelect = document.getElementById('exaport-entrytype-select');
             shareFilters = document.querySelector('[data-region="exaport-share-filters"]');
+            initIncomingSort();
             shareSenderGrouping = document.getElementById('exaport-group-by-sender');
             if (shareSenderGrouping) {
                 shareSenderGrouping.addEventListener('change', function() {
@@ -732,9 +798,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                     if (!shareFilters) {
                         Prefs.savePreference('sort', sortSelect.value);
                     }
-                    var url = new URL(window.location.href);
-                    url.searchParams.set('sort', sortSelect.value);
-                    history.replaceState(null, '', url);
+                    saveSort();
                 });
             }
 

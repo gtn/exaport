@@ -21,16 +21,18 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var chipsContainer;     // Container where selected category chips are rendered below the filter bar.
     var subcategoriesCheckbox; // "Show items from subcategories" checkbox.
     var categoryChildrenMap = {}; // Map of {parentId: [childId, ...]} for expanding filters to subcategories.
-    var clearAllLabel = 'Clear all filters'; // Translatable via init() parameter.
+    var clearCategoryLabel = 'Clear category filter'; // Translatable via init() parameter.
     var searchCategoryLabel = 'Search Category...'; // Translatable via init() parameter.
     var entryTypeSelect;    // Entry-type filter dropdown (All / Only items / Only views).
     var shareFilters;       // Filter bar on My shares or Shared with me.
-    var shareOwnerSelect; // Incoming shares only: narrow the list to one sender.
+    var shareClearFilters; // Clear search and type on the outgoing overview.
+    var shareOwnerSelect; // Incoming shares only: source of searchable sender options.
     var shareCourseSelect; // Incoming shares only: put one course before other courses.
     var shareSenderGrouping; // Incoming shares only: group matching rows by sender.
     var shareCourseRegion; // Course scope is available for categories and collections only.
     var selectedShareOwners = {}; // Map of selected incoming sender IDs to their display names.
     var shareOwnerChips; // Container for the incoming sender selection chips.
+    var shareClearOwners; // Clear the incoming sender selection.
     var shareOwnerWidget; // Searchable sender dropdown, refreshed after external selection changes.
     var incomingSharesTable; // Incoming headers own their sort state without a sort dropdown.
     var incomingSort = 'name-asc';
@@ -171,6 +173,8 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         shareCourseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
         shareCourseRegion = shareFilters.querySelector('[data-region="share-course-filter"]');
         shareOwnerChips = shareFilters.querySelector('[data-region="sender-filter-chips"]');
+        shareClearFilters = shareFilters.querySelector('[data-action="clear-filters"]');
+        shareClearOwners = shareFilters.querySelector('[data-action="clear-senders"]');
         if (incomingSharesTable) {
             initShareOwnerFilter(params.getAll('userid'));
             restoreShareScope(shareCourseSelect, params.get('filtercourseid'));
@@ -183,21 +187,23 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             updateShareCourseScope(false);
             saveShareFilters();
         }
-        shareFilters.querySelector('[data-action="clear-filters"]').addEventListener('click', function() {
-            searchInput.value = '';
-            entryTypeSelect.value = 'all';
-            if (shareOwnerSelect) {
+        if (shareClearFilters) {
+            shareClearFilters.addEventListener('click', function() {
+                searchInput.value = '';
+                entryTypeSelect.value = 'all';
+                searchInput.focus();
+                saveShareFilters();
+                filterItems();
+            });
+        }
+        if (shareClearOwners) {
+            shareClearOwners.addEventListener('click', function() {
                 selectedShareOwners = {};
-                renderShareOwnerChips();
+                applyShareOwnerSelection();
                 shareOwnerWidget.refresh();
-            }
-            if (incomingSharesTable) {
-                updateShareCourseScope(true);
-            }
-            searchInput.focus();
-            saveShareFilters();
-            filterItems();
-        });
+                document.getElementById('exaport-share-sender-search').focus();
+            });
+        }
     }
 
     /**
@@ -251,7 +257,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         var removeAll = document.createElement('button');
         removeAll.type = 'button';
         removeAll.className = 'badge bg-primary text-light border-0 m-1 exaport-clear-filters-chip';
-        removeAll.textContent = clearAllLabel;
+        removeAll.textContent = clearCategoryLabel;
         removeAll.addEventListener('click', function() {
             selectedCategories = {};
             renderChips();
@@ -264,18 +270,28 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
      * Render incoming sender chips and refresh filtering after an individual removal.
      */
     function renderShareOwnerChips() {
+        if (shareClearOwners) {
+            shareClearOwners.hidden = Object.keys(selectedShareOwners).length === 0;
+        }
         var removeLabel = shareOwnerChips ? shareOwnerChips.getAttribute('data-remove-label') : '';
         renderSelectionChips(shareOwnerChips, selectedShareOwners, 'data-sender-id', function(id) {
             var restoreFocus = shareOwnerChips.contains(document.activeElement);
             delete selectedShareOwners[id];
-            renderShareOwnerChips();
+            applyShareOwnerSelection();
             shareOwnerWidget.refresh();
-            saveShareFilters();
-            filterItems();
             if (restoreFocus) {
                 document.getElementById('exaport-share-sender-search').focus();
             }
         }, removeLabel || 'Remove');
+    }
+
+    /**
+     * Apply a change to the selected senders.
+     */
+    function applyShareOwnerSelection() {
+        renderShareOwnerChips();
+        saveShareFilters();
+        filterItems();
     }
 
     /**
@@ -311,9 +327,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             },
             onPick: function(id, name) {
                 selectedShareOwners[id] = name;
-                renderShareOwnerChips();
-                saveShareFilters();
-                filterItems();
+                applyShareOwnerSelection();
             }
         });
         Array.from(shareOwnerSelect.labels).forEach(function(label) {
@@ -402,9 +416,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         });
 
         if (shareFilters) {
-            var hasDiscoveryFilters = selectedOwnerIds.length > 0 || (shareCourseSelect && shareCourseSelect.value);
-            shareFilters.querySelector('[data-action="clear-filters"]').hidden =
-                !searchText && selectedEntryType === 'all' && !hasDiscoveryFilters;
+            if (shareClearFilters) {
+                shareClearFilters.hidden = !searchText && selectedEntryType === 'all';
+            }
             shareFilters.querySelector('[data-region="no-matching-shares"]').hidden = hasMatches;
             var shareTable = document.querySelector('.exaport-share-overview-table');
             if (shareTable) {
@@ -724,13 +738,13 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         /**
          * Initialise the flat filter module.
          *
-         * @param {string} clearAllString The translated "clear all filters" label.
+         * @param {string} clearCategoryString The translated category clear label.
          * @param {string} searchCategoryString The translated "Search Category..." placeholder.
          * @param {Object} childrenMap Map of parent category ID to array of child category IDs.
          * @param {number} preSelectedCategoryId Optional pre-selected category ID to add as chip on load.
          */
-        init: function(clearAllString, searchCategoryString, childrenMap, preSelectedCategoryId) {
-            clearAllLabel = clearAllString || clearAllLabel;
+        init: function(clearCategoryString, searchCategoryString, childrenMap, preSelectedCategoryId) {
+            clearCategoryLabel = clearCategoryString || clearCategoryLabel;
             searchCategoryLabel = searchCategoryString || searchCategoryLabel;
             categoryChildrenMap = childrenMap || {};
             searchInput = document.getElementById('exaport-search');

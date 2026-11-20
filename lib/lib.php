@@ -3665,7 +3665,7 @@ function block_exaport_get_comment_author_name($userid) {
 function block_exaport_require_filter_js($childrenmap = [], $preselectedcategoryid = 0) {
     global $PAGE;
     $PAGE->requires->js_call_amd('block_exaport/flat_filter', 'init', [
-        get_string('clearAllFilers', 'block_exaport'),
+        get_string('clear_category_filter', 'block_exaport'),
         get_string('searchcategory', 'block_exaport'),
         $childrenmap,
         (int)$preselectedcategoryid,

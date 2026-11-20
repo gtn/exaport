@@ -1538,6 +1538,10 @@ return [
         'Alle Filter zurücksetzen',
         'Clear all filters',
     ],
+    'clear_category_filter' => [
+        'Kategoriefilter zurücksetzen',
+        'Clear category filter',
+    ],
     'show_items_from_subcategories' => [
         'Einträge aus Unterkategorien anzeigen',
         'Show items from subcategories',
@@ -1609,6 +1613,10 @@ return [
     'share_filter_search_user' => [
         'Benutzer suchen...',
         'Search User...',
+    ],
+    'share_filter_clear_users' => [
+        'Benutzerfilter zurücksetzen',
+        'Clear user filter',
     ],
     'share_filter_group_by_sender' => [
         'Nach Person gruppieren',

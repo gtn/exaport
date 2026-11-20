@@ -492,7 +492,7 @@ return [
         'Share',
     ],
     'strunshare' => [
-        'Ver&ouml;ffentlichung zurücknehmen',
+        'Veröffentlichung zurücknehmen',
         'Unshare',
     ],
     'summary' => [

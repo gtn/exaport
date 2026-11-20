@@ -50,6 +50,12 @@ div.item-detail-image img {
     text-align: right;
 }
 
+.exaport-clear-filters-chip {
+    font-size: 0.85rem;
+    padding: 0.35em 0.6em;
+    cursor: pointer;
+}
+
 #exaport .view-group-content .table-responsive {
     width: 100%;
     display: block;

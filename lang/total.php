@@ -1602,9 +1602,9 @@ return [
         'Geteilt von',
         'Shared by',
     ],
-    'share_filter_search_senders' => [
-        'Personen suchen...',
-        'Search senders...',
+    'share_filter_search_user' => [
+        'Benutzer suchen...',
+        'Search User...',
     ],
     'share_filter_any_sender' => [
         'Alle Personen',

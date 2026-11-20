@@ -155,9 +155,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 renderShareOwnerChips();
                 shareOwnerWidget.refresh();
             }
-            if (shareSenderGrouping) {
-                shareSenderGrouping.checked = false;
-            }
             if (hasIncomingShareFilters()) {
                 updateShareCourseScope(true);
             }
@@ -215,11 +212,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             return;
         }
 
-        // "Remove all" button — badge-danger for BS4, bg-danger for BS5.
         var removeAll = document.createElement('button');
         removeAll.type = 'button';
-        removeAll.className = 'badge bg-primary text-light border-0 m-1';
-        removeAll.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
+        removeAll.className = 'badge bg-primary text-light border-0 m-1 exaport-clear-filters-chip';
         removeAll.textContent = clearAllLabel;
         removeAll.addEventListener('click', function() {
             selectedCategories = {};
@@ -372,10 +367,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         });
 
         if (shareFilters) {
-            var hasDiscoveryState = selectedOwnerIds.length > 0 ||
-                (shareCourseSelect && shareCourseSelect.value) || (shareSenderGrouping && shareSenderGrouping.checked);
+            var hasDiscoveryFilters = selectedOwnerIds.length > 0 || (shareCourseSelect && shareCourseSelect.value);
             shareFilters.querySelector('[data-action="clear-filters"]').hidden =
-                !searchText && selectedEntryType === 'all' && !hasDiscoveryState;
+                !searchText && selectedEntryType === 'all' && !hasDiscoveryFilters;
             shareFilters.querySelector('[data-region="no-matching-shares"]').hidden = hasMatches;
             var shareTable = document.querySelector('.exaport-share-overview-table');
             if (shareTable) {

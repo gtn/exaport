@@ -54,6 +54,7 @@ final class view_master_switch_test extends \advanced_testcase {
             'everyone' => [1],
             'direct user' => [0],
             'group' => [2],
+            'email hidden by site policy' => [1, false],
         ];
     }
 
@@ -62,8 +63,9 @@ final class view_master_switch_test extends \advanced_testcase {
      *
      * @dataProvider internal_mode_provider
      * @param int $internalmode Internal sharing mode.
+     * @param bool $siteemailenabled Whether the site exposes email sharing.
      */
-    public function test_disabled_master_switch_revokes_all_channels(int $internalmode): void {
+    public function test_disabled_master_switch_revokes_all_channels(int $internalmode, bool $siteemailenabled = true): void {
         global $DB;
 
         $fixture = $this->create_shared_view_fixture($internalmode);
@@ -71,6 +73,7 @@ final class view_master_switch_test extends \advanced_testcase {
         $this->assertNotEmpty(block_exaport_get_view_from_access($fixture->externalaccess));
         $this->assertNotEmpty(block_exaport_get_view_from_access($fixture->internalaccess));
         $this->assertNotEmpty(block_exaport_get_view_from_access($fixture->emailaccess));
+        set_config('block_exaport_disable_shareemails', (int)!$siteemailenabled);
 
         // Model a forged form submission: every child control is checked while the authoritative
         // master switch is off. Normalization must discard every subordinate value.
@@ -89,8 +92,9 @@ final class view_master_switch_test extends \advanced_testcase {
         $this->assertSame(0, $normalized->sharedemails);
 
         $this->setUser($this->owner);
-        $this->persist_normalized_state($fixture->viewid, $normalized, false,
-            [$this->recipient->id], [$fixture->cohortid]);
+        $invitations = $this->persist_normalized_state($fixture->viewid, $normalized, false,
+            [$this->recipient->id], [$fixture->cohortid], $this->recipient->email);
+        $this->assertSame([], $invitations);
 
         $view = $DB->get_record('block_exaportview', ['id' => $fixture->viewid], '*', MUST_EXIST);
         $this->assertEquals(0, $view->externaccess);
@@ -99,8 +103,7 @@ final class view_master_switch_test extends \advanced_testcase {
         $this->assertFalse($DB->record_exists('block_exaportviewshar', ['viewid' => $fixture->viewid]));
         $this->assertFalse($DB->record_exists('block_exaportviewgroupshar', ['viewid' => $fixture->viewid]));
 
-        // Email rows intentionally retain their stable hashes, but sharedemails=0 makes them unusable.
-        $this->assertTrue($DB->record_exists('block_exaportviewemailshar', ['viewid' => $fixture->viewid]));
+        $this->assertFalse($DB->record_exists('block_exaportviewemailshar', ['viewid' => $fixture->viewid]));
         $this->setUser($this->recipient);
         $this->assertEmpty(block_exaport_get_view_from_access($fixture->externalaccess));
         $this->assertEmpty(block_exaport_get_view_from_access($fixture->internalaccess));
@@ -162,7 +165,8 @@ final class view_master_switch_test extends \advanced_testcase {
             'explicitly empty' => [true, '', false],
             'only separators and whitespace' => [true, " ;,\r\n\t ", false],
             'omitted' => [true, null, true],
-            'view email channel off' => [false, '', true],
+            'view email channel off with list omitted' => [false, null, false],
+            'view email channel off with stale list' => [false, 'stale@example.test', false],
         ];
     }
 
@@ -177,15 +181,65 @@ final class view_master_switch_test extends \advanced_testcase {
     public function test_save_email_recipient_list(bool $enabled, ?string $recipientlist, bool $preserved): void {
         global $DB;
 
-        $view = $this->create_email_sharing_view($enabled);
+        $view = $this->create_email_sharing_view();
         $conditions = ['viewid' => $view->id];
         $original = $DB->get_records_menu('block_exaportviewemailshar', $conditions, '', 'email, hash');
         $this->assertNotEmpty($original);
 
-        $this->assertSame([], sharing_service::save_view_email_shares($view, $recipientlist));
+        $view->sharedemails = (int)$enabled;
+        $this->assertSame([], sharing_service::save_view_sharing_settings($view, true, $recipientlist));
 
         $saved = $DB->get_records_menu('block_exaportviewemailshar', $conditions, '', 'email, hash');
         $this->assertSame($preserved ? $original : [], $saved);
+        $this->assertEquals((int)$enabled, $DB->get_field('block_exaportview', 'sharedemails', ['id' => $view->id]));
+    }
+
+    /**
+     * Hiding email sharing at site level preserves the owner's setting and recipients.
+     */
+    public function test_site_policy_preserves_email_sharing_while_master_switch_is_enabled(): void {
+        global $DB;
+
+        $view = $this->create_email_sharing_view();
+        $conditions = ['viewid' => $view->id];
+        $original = $DB->get_records_menu('block_exaportviewemailshar', $conditions, '', 'email, hash');
+        $this->assertNotEmpty($original);
+        set_config('block_exaport_disable_shareemails', 1);
+        $view = sharing_service::normalize_view_channels($view, true);
+        $this->assertSame(0, $view->sharedemails);
+
+        $this->assertSame([], sharing_service::save_view_sharing_settings($view, true, 'stale@example.test'));
+
+        $this->assertEquals(1, $DB->get_field('block_exaportview', 'sharedemails', ['id' => $view->id]));
+        $this->assertSame($original, $DB->get_records_menu('block_exaportviewemailshar', $conditions, '', 'email, hash'));
+    }
+
+    /**
+     * Reinviting a recipient after disabling email sharing creates a fresh link.
+     */
+    public function test_reinviting_after_disabling_email_sharing_keeps_old_link_revoked(): void {
+        global $DB;
+
+        $viewid = $this->create_view($this->owner);
+        $view = $DB->get_record('block_exaportview', ['id' => $viewid], '*', MUST_EXIST);
+        $email = $this->recipient->email;
+        $view->sharedemails = 1;
+        $view = sharing_service::normalize_view_channels($view, true);
+        $original = sharing_service::save_view_sharing_settings($view, true, $email);
+        $this->assertNotEmpty($original[$email] ?? null);
+
+        $view->sharedemails = 0;
+        $this->assertSame([], sharing_service::save_view_sharing_settings($view, true, null));
+        $view->sharedemails = 1;
+        $this->assertSame([], sharing_service::save_view_sharing_settings($view, true, null));
+        $this->assertFalse($DB->record_exists('block_exaportviewemailshar', ['viewid' => $viewid]));
+
+        $reinvited = sharing_service::save_view_sharing_settings($view, true, $email);
+        $this->assertNotEmpty($reinvited[$email] ?? null);
+        $this->assertNotSame($original[$email], $reinvited[$email]);
+        $this->setUser($this->recipient);
+        $this->assertEmpty(block_exaport_get_view_from_access('email/' . $view->hash . '-' . $original[$email]));
+        $this->assertNotEmpty(block_exaport_get_view_from_access('email/' . $view->hash . '-' . $reinvited[$email]));
     }
 
     /**
@@ -194,8 +248,8 @@ final class view_master_switch_test extends \advanced_testcase {
     public function test_update_email_recipient_list_only_affects_current_view(): void {
         global $DB;
 
-        $view = $this->create_email_sharing_view(true);
-        $otherview = $this->create_email_sharing_view(true);
+        $view = $this->create_email_sharing_view();
+        $otherview = $this->create_email_sharing_view();
         $otherconditions = ['viewid' => $otherview->id];
         $othershares = $DB->get_records_menu('block_exaportviewemailshar', $otherconditions, '', 'email, hash');
         $retainedemail = 'retained@example.test';
@@ -207,7 +261,7 @@ final class view_master_switch_test extends \advanced_testcase {
         ]);
         $newemail = 'new@example.test';
 
-        $invitations = sharing_service::save_view_email_shares($view, "$retainedemail\n$newemail");
+        $invitations = sharing_service::save_view_sharing_settings($view, true, "$retainedemail\n$newemail");
 
         $saved = $DB->get_records_menu('block_exaportviewemailshar', ['viewid' => $view->id], '', 'email, hash');
         $this->assertCount(2, $saved);
@@ -219,17 +273,16 @@ final class view_master_switch_test extends \advanced_testcase {
     }
 
     /**
-     * Create an owned view with one saved email recipient and a persisted channel flag.
+     * Create an owned view with email sharing enabled and one saved recipient.
      *
-     * @param bool $enabled Whether the view has email sharing enabled.
      * @return \stdClass
      */
-    private function create_email_sharing_view(bool $enabled): \stdClass {
+    private function create_email_sharing_view(): \stdClass {
         global $DB;
 
         $fixture = $this->create_unshared_view_fixture();
         $conditions = ['id' => $fixture->viewid];
-        $DB->set_field('block_exaportview', 'sharedemails', (int)$enabled, $conditions);
+        $DB->set_field('block_exaportview', 'sharedemails', 1, $conditions);
         return $DB->get_record('block_exaportview', $conditions, '*', MUST_EXIST);
     }
 
@@ -297,19 +350,15 @@ final class view_master_switch_test extends \advanced_testcase {
      * @param bool $shareenabled Master sharing state.
      * @param int[] $userids Direct recipients.
      * @param int[] $groupids Cohort recipients.
+     * @param string|null $recipientlist Submitted email recipients.
+     * @return array Invitation hashes keyed by new email addresses.
      */
     private function persist_normalized_state(int $viewid, \stdClass $state, bool $shareenabled,
-            array $userids = [], array $groupids = []): void {
-        global $DB;
-
-        $DB->update_record('block_exaportview', (object)[
-            'id' => $viewid,
-            'externaccess' => $state->externaccess,
-            'externcomment' => $state->externcomment,
-            'shareall' => $state->shareall,
-            'sharedemails' => $state->sharedemails,
-        ]);
+            array $userids = [], array $groupids = [], ?string $recipientlist = null): array {
+        $state->id = $viewid;
+        $invitations = sharing_service::save_view_sharing_settings($state, $shareenabled, $recipientlist);
         sharing_service::save_internal_shares('view', $viewid,
             $shareenabled && !empty($state->internaccess), (int)$state->shareall, $userids, [], $groupids);
+        return $invitations;
     }
 }

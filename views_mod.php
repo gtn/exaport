@@ -456,17 +456,20 @@ if ($editform->is_cancelled()) {
             if (isset($dbview->sharetoteacher) and $dbview->sharetoteacher == 1) {
                 block_exaport_share_view_to_teachers($dbview->id);
             }
-            if ($DB->update_record('block_exaportview', $dbview)) {
-                // Sync category assignments if this is the title/metadata step.
-                if ($type == 'title') {
-                    $viewcategoryids = block_exaport_normalize_view_categoryids($formview->categoryids ?? []);
-                    \block_exaport\view_category_helper::sync_view_categories($dbview->id, $viewcategoryids);
-                }
-                block_exaport_add_to_log(SITEID, 'bookmark', 'update',
-                    'item.php?courseid=' . $courseid . '&id=' . $dbview->id . '&action=edit', $dbview->name);
-            } else {
+            if ($type === 'share') {
+                $searching = optional_param('share_to_other_users_submit', '', PARAM_RAW);
+                $recipientlist = data_submitted()->emailsforshare ?? null;
+                $invitations = \block_exaport\sharing_service::save_view_sharing_settings(
+                    $dbview, $shareenabled, !$searching && is_string($recipientlist) ? $recipientlist : null);
+            } else if (!$DB->update_record('block_exaportview', $dbview)) {
                 print_error('updateposterror', 'block_exaport', $returnurl);
             }
+            if ($type == 'title') {
+                $viewcategoryids = block_exaport_normalize_view_categoryids($formview->categoryids ?? []);
+                \block_exaport\view_category_helper::sync_view_categories($dbview->id, $viewcategoryids);
+            }
+            block_exaport_add_to_log(SITEID, 'bookmark', 'update',
+                'item.php?courseid=' . $courseid . '&id=' . $dbview->id . '&action=edit', $dbview->name);
 
             // Notification logic for "save and notify" button.
             // Check if the submit and notify button was clicked
@@ -628,7 +631,7 @@ if ($editform->is_cancelled()) {
             }
 
 
-            if (optional_param('share_to_other_users_submit', '', PARAM_RAW)) {
+            if ($searching) {
                 // Search button pressed -> redirect to search form.
                 redirect(new moodle_url('/blocks/exaport/views_mod_share_user_search.php',
                     array('courseid' => $courseid, 'id' => $dbview->id,
@@ -636,9 +639,6 @@ if ($editform->is_cancelled()) {
                 exit;
             }
 
-            $recipientlist = data_submitted()->emailsforshare ?? null;
-            $invitations = \block_exaport\sharing_service::save_view_email_shares(
-                $dbview, is_string($recipientlist) ? $recipientlist : null);
             if ($invitations) {
                 block_exaport_emailaccess_sendemails($view, [], array_keys($invitations), $invitations);
             }

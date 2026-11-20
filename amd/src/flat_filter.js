@@ -548,7 +548,14 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             var headingField = heading.getAttribute('data-sort-field');
             var arrow = heading.querySelector('.exaport-sort-arrow');
             var active = headingField && headingField === field;
-            heading.setAttribute('aria-sort', active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none');
+            var column = heading.closest('th');
+            if (column) {
+                if (active) {
+                    column.setAttribute('aria-sort', dir === 'asc' ? 'ascending' : 'descending');
+                } else {
+                    column.removeAttribute('aria-sort');
+                }
+            }
             if (arrow) {
                 arrow.textContent = active ? (dir === 'asc' ? '↑' : '↓') : '';
             }

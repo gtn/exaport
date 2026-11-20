@@ -56,11 +56,22 @@
                    style="width: 100%;" data-other-courses="{{#str}} othercourses, block_exaport {{/str}}">
                 <thead>
                     <tr>
-                        <th>{{headertitle}}</th>
+                        <th scope="col">
+                            <button type="button" class="exaport-sort-heading btn btn-link p-0 align-baseline font-weight-bold fw-bold"
+                                    data-sort-field="name">
+                                {{headertitle}} <span class="exaport-sort-arrow" aria-hidden="true"></span>
+                            </button>
+                        </th>
                         <th>{{headertype}}</th>
                         <th>{{headeruser}}</th>
                         <th>{{headercourse}}</th>
-                        <th>{{#str}} share_filter_updated, block_exaport {{/str}}</th>
+                        <th scope="col">
+                            <button type="button" class="exaport-sort-heading btn btn-link p-0 align-baseline font-weight-bold fw-bold"
+                                    data-sort-field="date">
+                                {{#str}} share_filter_updated, block_exaport {{/str}}
+                                <span class="exaport-sort-arrow" aria-hidden="true"></span>
+                            </button>
+                        </th>
                         <th>{{headersharedwith}}</th>
                         <th>{{headercomments}}</th>
                     </tr>

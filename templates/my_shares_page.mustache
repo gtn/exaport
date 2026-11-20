@@ -44,7 +44,12 @@
         <table class="generaltable table table-striped table-hover exaport-share-overview-table" style="width: 100%;">
             <thead>
                 <tr>
-                    <th>{{headertitle}}</th>
+                    <th scope="col">
+                        <button type="button" class="exaport-sort-heading btn btn-link p-0 align-baseline font-weight-bold fw-bold"
+                                data-sort-field="name">
+                            {{headertitle}} <span class="exaport-sort-arrow" aria-hidden="true"></span>
+                        </button>
+                    </th>
                     <th>{{headertype}}</th>
                     <th>{{headershared}}</th>
                     <th>{{headercomments}}</th>

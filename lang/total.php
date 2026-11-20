@@ -1598,6 +1598,10 @@ return [
         'Keine passenden Ergebnisse',
         'No matching results',
     ],
+    'share_filter_search_titles' => [
+        'Titel suchen',
+        'Search titles',
+    ],
     'share_filter_shared_by' => [
         'Geteilt von',
         'Shared by',

@@ -429,6 +429,7 @@ $string['share_filter_all_types'] = 'All types';
 $string['share_filter_collections'] = 'Collections';
 $string['share_filter_updated'] = 'Last updated';
 $string['share_filter_no_matches'] = 'No matching results';
+$string['share_filter_search_titles'] = 'Search titles';
 $string['share_filter_shared_by'] = 'Shared by';
 $string['share_filter_search_user'] = 'Search User...';
 $string['share_filter_any_sender'] = 'Shared by anyone';

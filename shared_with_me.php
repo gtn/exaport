@@ -43,7 +43,7 @@ $rows = share_overview::get_shared_with_me($USER->id);
 if ($rows) {
     block_exaport_require_filter_js();
 }
-$searchcontrols = block_exaport_render_share_filter_controls($sort);
+$searchcontrols = block_exaport_render_share_filter_controls($sort, get_string('share_filter_search_titles', 'block_exaport'));
 $page = new shared_with_me_page($rows, $courseid, $searchcontrols);
 echo $PAGE->get_renderer('block_exaport')->render($page);
 

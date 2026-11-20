@@ -395,6 +395,7 @@ $string['share_filter_all_types'] = 'Alle Typen';
 $string['share_filter_collections'] = 'Sammelmappen';
 $string['share_filter_updated'] = 'Zuletzt aktualisiert';
 $string['share_filter_no_matches'] = 'Keine passenden Ergebnisse';
+$string['share_filter_search_titles'] = 'Titel suchen';
 $string['share_filter_shared_by'] = 'Geteilt von';
 $string['share_filter_search_user'] = 'Benutzer suchen...';
 $string['share_filter_any_sender'] = 'Alle Personen';

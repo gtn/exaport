@@ -430,6 +430,7 @@ $string['share_filter_collections'] = 'Collections';
 $string['share_filter_updated'] = 'Last updated';
 $string['share_filter_no_matches'] = 'No matching results';
 $string['share_filter_shared_by'] = 'Shared by';
+$string['share_filter_search_senders'] = 'Search senders...';
 $string['share_filter_any_sender'] = 'Shared by anyone';
 $string['share_filter_group_by_sender'] = 'Group by sender';
 $string['share_filter_category_course'] = 'Category course';

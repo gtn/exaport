@@ -29,6 +29,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var shareCourseSelect; // Incoming shares only: put one course before other courses.
     var shareSenderGrouping; // Incoming shares only: group matching rows by sender.
     var shareCourseRegion; // Course scope is available for categories and collections only.
+    var selectedShareOwners = {}; // Map of selected incoming sender IDs to their display names.
+    var shareOwnerChips; // Container for the incoming sender selection chips.
+    var shareOwnerWidget; // Searchable sender dropdown, refreshed after external selection changes.
 
     /**
      * Whether the incoming overview provides any of its optional discovery controls.
@@ -93,11 +96,10 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             url.searchParams.delete('entrytype');
         }
         if (hasIncomingShareFilters()) {
-            if (shareOwnerSelect && shareOwnerSelect.value) {
-                url.searchParams.set('userid', shareOwnerSelect.value);
-            } else {
-                url.searchParams.delete('userid');
-            }
+            url.searchParams.delete('userid');
+            Object.keys(selectedShareOwners).forEach(function(id) {
+                url.searchParams.append('userid', id);
+            });
             if (shareCourseSelect && !shareCourseSelect.disabled && shareCourseSelect.value) {
                 url.searchParams.set('filtercourseid', shareCourseSelect.value);
             } else {
@@ -126,14 +128,15 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         shareCourseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
         shareSenderGrouping = shareFilters.querySelector('[data-share-filter="groupbysender"]');
         shareCourseRegion = shareFilters.querySelector('[data-region="share-course-filter"]');
+        shareOwnerChips = shareFilters.querySelector('[data-region="sender-filter-chips"]');
         if (hasIncomingShareFilters()) {
-            restoreShareScope(shareOwnerSelect, params.get('userid'));
+            initShareOwnerFilter(params.getAll('userid'));
             restoreShareScope(shareCourseSelect, params.get('filtercourseid'));
             if (shareSenderGrouping) {
                 shareSenderGrouping.checked = params.get('groupbysender') === '1';
             }
             updateShareCourseScope(false);
-            [shareOwnerSelect, shareCourseSelect, shareSenderGrouping].forEach(function(control) {
+            [shareCourseSelect, shareSenderGrouping].forEach(function(control) {
                 if (control) {
                     control.addEventListener('change', function() {
                         saveShareFilters();
@@ -148,6 +151,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             entryTypeSelect.value = 'all';
             if (shareOwnerSelect) {
                 shareOwnerSelect.value = '';
+                selectedShareOwners = {};
+                renderShareOwnerChips();
+                shareOwnerWidget.refresh();
             }
             if (shareSenderGrouping) {
                 shareSenderGrouping.checked = false;
@@ -162,43 +168,57 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
-     * Render category chips and a "remove all" button into the chips container.
-     * Each chip represents one active category filter and can be removed individually.
-     * This is the visual counterpart to the selectedCategories state object.
+     * Render removable chips for an existing selection, preserving its identifying attributes.
+     *
+     * @param {HTMLElement} container Chip container, if present.
+     * @param {Object} selection Map of selected IDs to display names.
+     * @param {string} attribute Attribute identifying each chip's selection ID.
+     * @param {Function} onRemove Remove the selection by ID and refresh the relevant filter.
+     * @param {string} removeLabel Accessible removal label.
      */
-    function renderChips() {
-        if (!chipsContainer) {
+    function renderSelectionChips(container, selection, attribute, onRemove, removeLabel) {
+        if (!container) {
             return;
         }
-        chipsContainer.innerHTML = '';
-        var ids = Object.keys(selectedCategories);
-        if (ids.length === 0) {
-            return;
-        }
-        ids.forEach(function(id) {
+        container.innerHTML = '';
+        Object.keys(selection).forEach(function(id) {
             var chip = document.createElement('span');
-            // badge-primary for BS4 (Moodle 3.x), bg-primary for BS5 (Moodle 4.x).
             chip.className = 'badge bg-secondary text-dark m-1';
             chip.style.cssText = 'font-size: 100%';
-            chip.setAttribute('data-cat-id', id);
-            var closeBtn = document.createElement('span');
-            closeBtn.innerHTML = '&times;';
+            chip.setAttribute(attribute, id);
+            var closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'border-0 bg-transparent text-reset p-0';
+            closeBtn.textContent = '\u00d7';
             closeBtn.style.cssText = 'margin-right: 0.3em; font-size: 1.1em; line-height: 1; cursor: pointer;';
-            closeBtn.setAttribute('aria-label', 'Remove');
+            closeBtn.setAttribute('aria-label', removeLabel + ': ' + selection[id]);
             closeBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                delete selectedCategories[id];
-                renderChips();
-                filterItems();
+                onRemove(id);
             });
             chip.appendChild(closeBtn);
-            chip.appendChild(document.createTextNode(selectedCategories[id]));
-            chipsContainer.appendChild(chip);
+            chip.appendChild(document.createTextNode(selection[id]));
+            container.appendChild(chip);
         });
+    }
+
+    /**
+     * Render category chips and their existing "remove all" action.
+     */
+    function renderChips() {
+        renderSelectionChips(chipsContainer, selectedCategories, 'data-cat-id', function(id) {
+            delete selectedCategories[id];
+            renderChips();
+            filterItems();
+        }, 'Remove');
+        if (!chipsContainer || Object.keys(selectedCategories).length === 0) {
+            return;
+        }
 
         // "Remove all" button — badge-danger for BS4, bg-danger for BS5.
-        var removeAll = document.createElement('span');
-        removeAll.className = 'badge bg-primary text-light m-1';
+        var removeAll = document.createElement('button');
+        removeAll.type = 'button';
+        removeAll.className = 'badge bg-primary text-light border-0 m-1';
         removeAll.style.cssText = 'font-size: 0.85rem; padding: 0.35em 0.6em; cursor: pointer; gap: 0.3em;';
         removeAll.textContent = clearAllLabel;
         removeAll.addEventListener('click', function() {
@@ -207,6 +227,69 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             filterItems();
         });
         chipsContainer.appendChild(removeAll);
+    }
+
+    /**
+     * Render incoming sender chips and refresh filtering after an individual removal.
+     */
+    function renderShareOwnerChips() {
+        var removeLabel = shareOwnerChips ? shareOwnerChips.getAttribute('data-remove-label') : '';
+        renderSelectionChips(shareOwnerChips, selectedShareOwners, 'data-sender-id', function(id) {
+            var restoreFocus = shareOwnerChips.contains(document.activeElement);
+            delete selectedShareOwners[id];
+            renderShareOwnerChips();
+            shareOwnerWidget.refresh();
+            saveShareFilters();
+            filterItems();
+            if (restoreFocus) {
+                document.getElementById('exaport-share-sender-search').focus();
+            }
+        }, removeLabel || 'Remove');
+    }
+
+    /**
+     * Enhance the incoming sender select into a searchable multiple selection with chips.
+     *
+     * @param {string[]} ids Sender IDs restored from repeated or single userid URL parameters.
+     */
+    function initShareOwnerFilter(ids) {
+        selectedShareOwners = {};
+        if (!shareOwnerSelect) {
+            return;
+        }
+        var knownOwners = Object.create(null);
+        Array.from(shareOwnerSelect.options).forEach(function(option) {
+            if (option.value && !option.disabled) {
+                knownOwners[option.value] = option.text;
+            }
+        });
+        ids.forEach(function(id) {
+            if (Object.prototype.hasOwnProperty.call(knownOwners, id)) {
+                selectedShareOwners[id] = knownOwners[id];
+            }
+        });
+        shareOwnerSelect.value = '';
+        shareOwnerWidget = CategorySelect.build({
+            select: shareOwnerSelect,
+            inputId: 'exaport-share-sender-search',
+            placeholder: shareOwnerSelect.getAttribute('data-search-placeholder') || shareOwnerSelect.options[0].text,
+            keepOpenOnPick: true,
+            skipFirstOption: true,
+            isSelected: function(id) {
+                return !Object.prototype.hasOwnProperty.call(knownOwners, id) ||
+                    Object.prototype.hasOwnProperty.call(selectedShareOwners, id);
+            },
+            onPick: function(id, name) {
+                selectedShareOwners[id] = name;
+                renderShareOwnerChips();
+                saveShareFilters();
+                filterItems();
+            }
+        });
+        Array.from(shareOwnerSelect.labels).forEach(function(label) {
+            label.htmlFor = 'exaport-share-sender-search';
+        });
+        renderShareOwnerChips();
     }
 
     /**
@@ -244,6 +327,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     function filterItems() {
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
         var selectedCatIds = Object.keys(selectedCategories).map(Number);
+        var selectedOwnerIds = Object.keys(selectedShareOwners);
         var selectedEntryType = entryTypeSelect ? entryTypeSelect.value : 'all';
 
         // If "show subcategories" is checked, expand each selected category to include descendants.
@@ -273,8 +357,8 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 return catIds.indexOf(catId) !== -1;
             });
             var matchesEntryType = !selectedEntryType || selectedEntryType === 'all' || entryType === selectedEntryType;
-            var matchesOwner = !shareOwnerSelect || !shareOwnerSelect.value ||
-                item.getAttribute('data-owner-id') === shareOwnerSelect.value;
+            var matchesOwner = !shareOwnerSelect || selectedOwnerIds.length === 0 ||
+                selectedOwnerIds.indexOf(item.getAttribute('data-owner-id')) !== -1;
 
             var matches = matchesSearch && matchesCategory && matchesEntryType && matchesOwner;
             item.style.display = matches ? '' : 'none';
@@ -288,7 +372,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         });
 
         if (shareFilters) {
-            var hasDiscoveryState = (shareOwnerSelect && shareOwnerSelect.value) ||
+            var hasDiscoveryState = selectedOwnerIds.length > 0 ||
                 (shareCourseSelect && shareCourseSelect.value) || (shareSenderGrouping && shareSenderGrouping.checked);
             shareFilters.querySelector('[data-action="clear-filters"]').hidden =
                 !searchText && selectedEntryType === 'all' && !hasDiscoveryState;

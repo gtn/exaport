@@ -396,6 +396,7 @@ $string['share_filter_collections'] = 'Sammelmappen';
 $string['share_filter_updated'] = 'Zuletzt aktualisiert';
 $string['share_filter_no_matches'] = 'Keine passenden Ergebnisse';
 $string['share_filter_shared_by'] = 'Geteilt von';
+$string['share_filter_search_senders'] = 'Personen suchen...';
 $string['share_filter_any_sender'] = 'Alle Personen';
 $string['share_filter_group_by_sender'] = 'Nach Person gruppieren';
 $string['share_filter_category_course'] = 'Kurs der Kategorie';

@@ -9,13 +9,16 @@
         <div class="d-flex flex-wrap gap-2 align-items-center">
             {{{searchcontrols}}}
             {{#hassenders}}
-                <label class="sr-only" for="exaport-share-sender">{{#str}} share_filter_shared_by, block_exaport {{/str}}</label>
-                <select class="form-control custom-select w-auto mw-100" id="exaport-share-sender" data-share-filter="userid">
-                    <option value="">{{#str}} share_filter_any_sender, block_exaport {{/str}}</option>
-                    {{#senders}}
-                        <option value="{{id}}">{{name}}</option>
-                    {{/senders}}
-                </select>
+                <div style="min-width: 160px; max-width: 250px;">
+                    <label class="sr-only" for="exaport-share-sender">{{#str}} share_filter_shared_by, block_exaport {{/str}}</label>
+                    <select class="form-control custom-select" id="exaport-share-sender" data-share-filter="userid"
+                            data-search-placeholder="{{#str}} share_filter_search_senders, block_exaport {{/str}}">
+                        <option value="">{{#str}} share_filter_any_sender, block_exaport {{/str}}</option>
+                        {{#senders}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/senders}}
+                    </select>
+                </div>
                 <label class="mb-0 d-inline-flex align-items-center gap-2">
                     <input type="checkbox" data-share-filter="groupbysender">
                     {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
@@ -26,6 +29,7 @@
             </button>
         </div>
         {{#hassenders}}
+            <div class="d-flex flex-wrap gap-1" data-region="sender-filter-chips" data-remove-label="{{#str}} remove {{/str}}"></div>
             {{#hascourseoptions}}
                 <div class="mt-2" data-region="share-course-filter" hidden>
                     <label for="exaport-share-course" class="mb-1">

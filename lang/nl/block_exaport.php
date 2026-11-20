@@ -182,6 +182,7 @@ $string['selectall'] = 'Selecteer Alle';
 $string['deselectall'] = 'Verwijder Selectie bij Alle';
 $string['internalaccess'] = 'Interne Toegang';
 $string['externalaccess'] = 'Externe Toegang';
+$string['emailaccessdescription'] = 'Voer één e-mailadres per regel in.<br />Elke ontvanger krijgt een unieke link naar deze collectie. Als u een adres verwijdert, vervalt de toegang via de bijbehorende link.';
 $string['loginasmode'] = 'Je kunt geen portfolios bereiken in \'Login Als\'-Modus.';
 $string['badsessionkey'] = 'Slechte Session Key';
 $string['invalidinstance'] = 'Dat is een ongeldige instantie';
@@ -262,6 +263,7 @@ $string['config_feature_copy_to_course'] = null;
 $string['version_5.2.0_needed'] = null;
 $string['settings_interaktion_exacomp_head'] = 'interaction exabis ePortfolio - Exabis Competence Grid';
 $string['settings_interaktion_exacomp_body'] = 'interaction with block Exabis Competence Grid, if installed.';
+$string['block_exaport_userquota_body'] = 'Het maximale aantal bytes dat een gebruiker in het eigen Exabis ePortfolio kan opslaan.<br> Opslagquotum per gebruiker voor de hele site: {$a->bytes}. Zie <a href="{$a->settingsurl}">instellingen</a>.';
 // Not Used Anymore.
 $stringnotused['nobookmarks'] = '(nog geen verwijzingen)';
 $stringnotused['explainingexternal'] = 'Externe links. Deze links kunnen gedeeld worden met alle cursusleden, die toestemming hebben.';

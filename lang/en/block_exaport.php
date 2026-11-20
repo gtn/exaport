@@ -148,7 +148,7 @@ $string['internalaccessusers'] = 'Access only for the following users';
 $string['internalaccessgroups'] = 'Access only for the following groups';
 $string['externaccess'] = 'external ePortfolio-Link';
 $string['emailaccess'] = 'Share by Email';
-$string['emailaccessdescription'] = 'Input an email address per line<br />Each email will receive a unique link with access to this collection. Deleting the email will remove access to this collection.';
+$string['emailaccessdescription'] = 'Enter one email address per line.<br />Each recipient receives a unique link to this collection. If you remove an address, access through its link is revoked.';
 $string['emailaccessmessagesubject'] = 'New shared collection for you';
 $string['emailaccessmessage'] = 'Hello! {$a->sendername} has shared the collection "{$a->viewname}" for you. You can view it here: {$a->url}';
 $string['emailaccessmessageHTML'] = 'Hello!<br />{$a->sendername} has shared the collection "{$a->viewname}" for you.<br />You can view it <a href="{$a->url}">here</a>.';

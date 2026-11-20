@@ -544,8 +544,8 @@ return [
         'Share by Email',
     ],
     'emailaccessdescription' => [
-        'Geben Sie eine E-Mail-Adresse pro Zeile ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Das Löschen der Adresse löscht den Zugriff auf diese Sammelmappe.',
-        'Input an email address per line<br />Each email will receive a unique link with access to this collection. Deleting the email will remove access to this collection.',
+        'Geben Sie eine E-Mail-Adresse pro Zeile ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Wenn Sie eine Adresse entfernen, erlischt der Zugriff über den zugehörigen Link.',
+        'Enter one email address per line.<br />Each recipient receives a unique link to this collection. If you remove an address, access through its link is revoked.',
     ],
     'emailaccessmessagesubject' => [
         'Eine Sammelmappe wurde mit Ihnen geteilt',
@@ -1963,7 +1963,7 @@ return [
         'User quota for Exabis ePortfolio',
     ],
     'block_exaport_userquota_body' => [
-        'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio hochladen kann. <br> Wert für diese Website ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
+        'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio speichern kann. <br> Wert für diese Website ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>',
         'The maximum number of bytes that a user can store in their own Exabis ePortfolio.<br> Value for whole site is: {$a->bytes}. See <a href="{$a->settingsurl}">settings</a>',
     ],
     'block_exaport_multiplefilesinitem' => [

@@ -114,7 +114,7 @@ $string['internalaccessusers'] = 'Zugriff nur für folgende Nutzer/innen';
 $string['internalaccessgroups'] = 'Zugriff für folgende Gruppen';
 $string['externaccess'] = 'externer ePortfolio-Link';
 $string['emailaccess'] = 'Per E-Mail teilen';
-$string['emailaccessdescription'] = 'Geben Sie eine E-Mail-Adresse pro Zeile ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Das Löschen der Adresse löscht den Zugriff auf diese Sammelmappe.';
+$string['emailaccessdescription'] = 'Geben Sie eine E-Mail-Adresse pro Zeile ein.<br />Jede Adresse erhält einen eindeutigen Link mit Zugriff auf diese Sammelmappe. Wenn Sie eine Adresse entfernen, erlischt der Zugriff über den zugehörigen Link.';
 $string['emailaccessmessagesubject'] = 'Eine Sammelmappe wurde mit Ihnen geteilt';
 $string['emailaccessmessage'] = 'Hallo! {$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt. Sie kann hier abgerufen werden: {$a->url}';
 $string['emailaccessmessageHTML'] = 'Hallo!<br />{$a->sendername} hat die Sammelmappe "{$a->viewname}" mit Ihnen geteilt.<br />Sie kann <a href="{$a->url}">hier</a> abgerufen werden';
@@ -513,7 +513,7 @@ $string['settings_disable_external_comments_body'] = 'Blendet Kommentare beim Zu
 $string['block_exaport_maxbytes'] = 'Maximale Upload-Dateigröße in Exabis ePortfolio';
 $string['block_exaport_maxbytes_body'] = 'Maximale Dateigröße, die Dateien haben können, die im Exabis ePortfolio hochgeladen werden. <br> Wert für diese Seite ist: {$a->sitemaxbytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_userquota'] = 'Dateikontingent Exabis ePortfolio pro Nutzer/in';
-$string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio hochladen kann. <br> Wert für diese Website ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
+$string['block_exaport_userquota_body'] = 'Maximale Anzahl an Bytes, die eine Person im Exabis ePortfolio speichern kann. <br> Wert für diese Website ist: {$a->bytes}. Siehe <a href="{$a->settingsurl}">Einstellungen</a>';
 $string['block_exaport_multiplefilesinitem'] = 'Mehrere Dateien in Datei-Seite hochladen';
 $string['block_exaport_multiplefilesinitem_body'] = 'Limit: 10 Dateien';
 $string['block_exaport_copytomyportfolio'] = '„In mein Portfolio kopieren“ aktivieren';

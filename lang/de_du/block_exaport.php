@@ -220,7 +220,7 @@ $string['whyEportfolio_description'] = '<h4>Mach Arbeit sichtbar: dein digitales
                 <li><strong>Reflektieren:</strong> Ergänze kurze Beschreibungen, die deine Kompetenzen verdeutlichen und den Kontext erklären.</li>
                 <li><strong>Gestalten:</strong> Bau ein Portfolio Schritt für Schritt auf und entwickle es laufend weiter.</li>
             </ol>
-            <p>Mit Exabis ePortfolio geht das unkompliziert, flexibel und effizient. Du hast jederzeit die Kontrolle darüber, wie du dich und dein Können präsentierst, und machst sichtbar, was dich einzigartig macht.</p>';
+            <p>Mit Exabis ePortfolio geht das unkompliziert, flexibel und effizient. Du hast jederzeit die Kontrolle darüber, wie du dich und dein Können präsentierst und machst sichtbar, was dich einzigartig macht.</p>';
 $string['cofigureblock_cvinfo_help'] = 'Du siehst den aktuellen Status der ausgewählten Elemente in deinem Lebenslauf. Der Blockinhalt wird aktualisiert, wenn du später Änderungen an Elementen in deinem Lebenslauf vornimmst.';
 $string['create_view_content_help_title'] = 'Gestalte deine einzigartige Geschichte: Erstelle dein Portfolio';
 $string['create_view_content_help_text'] = '<ul>
@@ -251,7 +251,7 @@ $string['audititemcontentitemid_help'] = 'Lass das Feld leer, um die gesamte Moo
 $string['audititemcontentperformancewarning'] = 'Bei einer großen Moodle-Installation kann die Prüfung der gesamten Instanz einige Zeit dauern. Sie startet erst, wenn du dieses Formular absendest.';
 $string['audititemcontentpositive'] = 'Gib eine positive Eintrags-ID ein.';
 $string['audititemcontentsamplerange'] = 'Gib für die Höchstzahl der Beispiel-IDs einen Wert zwischen 1 und 1000 ein.';
-$string['itemcontentmigrationpaused'] = 'Das Zeitbudget der Migration von Eintragsinhalten für diesen Upgrade-Versuch wurde erreicht. Abgeschlossene Einträge wurden gespeichert. Starte das Moodle-Upgrade erneut, um fortzufahren. Abgeschlossene Einträge werden nicht dupliziert. Der abschließende Migrations-Speicherpunkt wurde noch nicht gesetzt.';
+$string['itemcontentmigrationpaused'] = 'Das Zeitbudget der Migration von Eintragsinhalten für diesen Upgrade-Versuch wurde erreicht. Abgeschlossene Einträge wurden gespeichert. Starte das Moodle-Upgrade erneut, um fortzufahren; abgeschlossene Einträge werden nicht dupliziert. Der abschließende Migrations-Speicherpunkt wurde noch nicht gesetzt.';
 $string['linkedcontentnotice'] = 'Wähle die anzuzeigenden Informationen. Änderungen an ausgewählten Informationen erscheinen auch in geteilten Einträgen. Neue Lebenslauf-Einträge und Badges werden nicht automatisch hinzugefügt.';
 $string['linkedcontentselectionrequired'] = 'Wähle mindestens ein verfügbares Feld, einen Lebenslauf-Eintrag oder ein erworbenes Badge.';
 $string['linkedcontentmissing'] = 'Die ausgewählten Informationen sind nicht mehr verfügbar. Bearbeite diesen Inhaltsblock, um die Auswahl zu aktualisieren.';
@@ -263,5 +263,5 @@ $string['uploadtour_content_title'] = 'Inhalte zu deiner Seite hinzufügen';
 $string['uploadtour_content_content'] = 'Unter Inhalt fügst du Dokumente, Texte und Links hinzu. Änderungen werden erst mit der Seite gespeichert. Abbrechen in diesem Formular verwirft ungespeicherte Änderungen.';
 $string['uploadtour_file_content'] = 'Wähle + und anschließend Datei. Lade dein Dokument hoch und wähle Übernehmen, um zu diesem Formular zurückzukehren. Speichern und schließen speichert die Seite und ihre Inhalte.';
 $string['itemeditorinvalid'] = 'Einige Änderungen an der Seite fehlen oder sind ungültig. Deine Änderungen wurden nicht gespeichert.';
-$string['itemeditorlocked'] = 'Diese Seite kann nicht mehr bearbeitet werden. Deine noch nicht gespeicherten Änderungen werden unten angezeigt. Es wurde jedoch nichts gespeichert.';
+$string['itemeditorlocked'] = 'Diese Seite kann nicht mehr bearbeitet werden. Deine noch nicht gespeicherten Änderungen werden unten angezeigt; es wurde jedoch nichts gespeichert.';
 $string['itemeditorpendinghint_help'] = 'Speichere abschließend die Seite. Abbrechen verwirft ungespeicherte Änderungen.';

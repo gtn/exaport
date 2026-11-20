@@ -44,7 +44,7 @@ class my_shares_page implements renderable, templatable {
      *
      * @param array  $rows           Rows returned by \block_exaport\share_overview::get_my_shares().
      * @param int    $courseid       The current course id.
-     * @param string $searchcontrols Pre-rendered HTML for the search/sort controls bar (optional).
+     * @param string $searchcontrols Pre-rendered HTML for the filter bar (optional).
      */
     public function __construct(array $rows, int $courseid, string $searchcontrols = '') {
         $this->rows           = $rows;
@@ -64,11 +64,14 @@ class my_shares_page implements renderable, templatable {
             $share = $row->shareinfo ??
                 \block_exaport\share_overview::build_share_info($row->entity_type, (int)$row->id, $row);
             $tooltip = block_exaport_get_share_tooltip($share);
+            $title = format_string($row->title);
             $exportedrows[] = [
                 'typeicon'       => $this->build_type_icon($row),
                 'typelabel'      => get_string($row->entity_type, 'block_exaport'),
-                'title'          => format_string($row->title),
-                'titlenamelower' => core_text::strtolower(strip_tags(format_string($row->title))),
+                'title'          => $title,
+                'titlenamelower' => core_text::strtolower(html_entity_decode(strip_tags($title))),
+                'entitytype'     => $row->entity_type,
+                'timemodified'   => (int)($row->timemodified ?? 0),
                 'editurl'        => $this->build_edit_url($row),
                 'shareurl'       => $this->build_share_url($row),
                 'sharedwithtext' => block_exaport_get_share_summary($share),

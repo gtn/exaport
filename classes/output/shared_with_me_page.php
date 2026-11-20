@@ -44,7 +44,7 @@ class shared_with_me_page implements renderable, templatable {
      *
      * @param array  $rows           Rows returned by \block_exaport\share_overview::get_shared_with_me().
      * @param int    $courseid       The current course id.
-     * @param string $searchcontrols Pre-rendered HTML for the search/sort controls bar (optional).
+     * @param string $searchcontrols Pre-rendered HTML for the filter bar (optional).
      */
     public function __construct(array $rows, int $courseid, string $searchcontrols = '') {
         $this->rows           = $rows;
@@ -79,12 +79,15 @@ class shared_with_me_page implements renderable, templatable {
             $coursename = !empty($row->courseid) && isset($courses[$row->courseid])
                 ? format_string($courses[$row->courseid]->fullname)
                 : '';
+            $title = format_string($row->title);
 
             $exportedrows[] = [
                 'typeicon'        => $this->build_type_icon($row),
                 'typelabel'       => get_string($row->entity_type, 'block_exaport'),
-                'title'           => format_string($row->title),
-                'titlenamelower'  => core_text::strtolower(strip_tags(format_string($row->title))),
+                'title'           => $title,
+                'titlenamelower'  => core_text::strtolower(html_entity_decode(strip_tags($title))),
+                'entitytype'      => $row->entity_type,
+                'timemodified'    => (int)($row->timemodified ?? 0),
                 'url'             => $this->build_url($row),
                 'ownername'       => $owner ? fullname($owner) : '',
                 'coursename'      => $coursename,

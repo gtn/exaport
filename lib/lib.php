@@ -3680,10 +3680,14 @@ function block_exaport_require_filter_js($childrenmap = [], $preselectedcategory
  * there is no duplicated rendering logic.
  *
  * @param string $selectedsort Currently active sort value in "key-dir" format, e.g. "date-desc".
+ * @param string|null $datelabel Label for the date sort options.
+ * @param string|null $namelabel Label for the title sort options.
  * @return string               HTML fragment (two <div> elements: search input + sort select).
  */
-function block_exaport_render_search_and_sort_controls($selectedsort) {
+function block_exaport_render_search_and_sort_controls($selectedsort, ?string $datelabel = null, ?string $namelabel = null) {
     $html = '';
+    $datelabel = $datelabel ?? get_string('date', 'block_exaport');
+    $namelabel = $namelabel ?? get_string('name', 'block_exaport');
 
     // Search input.
     $searchid = 'exaport-search';
@@ -3696,12 +3700,12 @@ function block_exaport_render_search_and_sort_controls($selectedsort) {
     // Sort dropdown.
     $sortid = 'exaport-sort-select';
     $opts = [
-        'date-desc' => get_string('date', 'block_exaport') . ' ↓',
-        'date-asc' => get_string('date', 'block_exaport') . ' ↑',
+        'date-desc' => $datelabel . ' ↓',
+        'date-asc' => $datelabel . ' ↑',
         // 'type-asc'  => get_string('type', 'block_exaport') . ' A-Z',
         // 'type-desc' => get_string('type', 'block_exaport') . ' Z-A',
-        'name-asc' => get_string('name', 'block_exaport') . ' A-Z',
-        'name-desc' => get_string('name', 'block_exaport') . ' Z-A',
+        'name-asc' => $namelabel . ' A-Z',
+        'name-desc' => $namelabel . ' Z-A',
     ];
     $html .= '<div style="min-width: 180px; max-width: 250px;">';
     $html .= '<label class="sr-only" for="' . s($sortid) . '">' . get_string('sort') . '</label>';
@@ -3714,4 +3718,48 @@ function block_exaport_render_search_and_sort_controls($selectedsort) {
     $html .= '</div>';
 
     return $html;
+}
+
+/**
+ * Renders the entry-type filter dropdown.
+ *
+ * @param string $entrytype Currently active entry type.
+ * @param array $options Map of entry types to component string identifiers. Defaults to the Portfolio options.
+ * @return string HTML fragment.
+ */
+function block_exaport_render_entrytype_control($entrytype, array $options = [
+    'all' => 'filter_entry_type_all', 'item' => 'filter_entry_type_items', 'view' => 'filter_entry_type_views',
+]) {
+    $html = '<div style="min-width:160px; max-width:250px;">';
+    $html .= '<label class="sr-only" for="exaport-entrytype-select">'
+        . get_string('filter_entry_type', 'block_exaport') . '</label>';
+    $html .= '<select id="exaport-entrytype-select" class="form-control custom-select">';
+    foreach ($options as $val => $key) {
+        $html .= '<option value="' . s($val) . '"' . ($entrytype === $val ? ' selected="selected"' : '')
+            . '>' . get_string($key, 'block_exaport') . '</option>';
+    }
+    $html .= '</select></div>';
+    return $html;
+}
+
+/**
+ * Renders the shared filter bar controls for My shares and Shared with me.
+ *
+ * @param string $sort Requested sort value.
+ * @return string HTML fragment.
+ */
+function block_exaport_render_share_filter_controls(string $sort): string {
+    if (!in_array($sort, ['name-asc', 'name-desc', 'date-asc', 'date-desc'], true)) {
+        $sort = 'name-asc';
+    }
+    return block_exaport_render_search_and_sort_controls(
+        $sort,
+        get_string('share_filter_updated', 'block_exaport'),
+        get_string('title', 'block_exaport')
+    ) . block_exaport_render_entrytype_control('all', [
+        'all' => 'share_filter_all_types',
+        'item' => 'mixed',
+        'view' => 'share_filter_collections',
+        'category' => 'categories',
+    ]);
 }

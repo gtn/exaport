@@ -24,6 +24,44 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var clearAllLabel = 'Clear all filters'; // Translatable via init() parameter.
     var searchCategoryLabel = 'Search Category...'; // Translatable via init() parameter.
     var entryTypeSelect;    // Entry-type filter dropdown (All / Only items / Only views).
+    var shareFilters;       // Filter bar on My shares or Shared with me.
+
+    /**
+     * Keep share filters in the current URL, separate from Portfolio preferences.
+     */
+    function saveShareFilters() {
+        var url = new URL(window.location.href);
+        if (searchInput.value) {
+            url.searchParams.set('search', searchInput.value);
+        } else {
+            url.searchParams.delete('search');
+        }
+        if (entryTypeSelect.value !== 'all') {
+            url.searchParams.set('entrytype', entryTypeSelect.value);
+        } else {
+            url.searchParams.delete('entrytype');
+        }
+        history.replaceState(null, '', url);
+    }
+
+    /**
+     * Restore the overview's own filters and wire up its clear button.
+     */
+    function initShareFilters() {
+        var params = new URL(window.location.href).searchParams;
+        searchInput.value = params.get('search') || '';
+        entryTypeSelect.value = params.get('entrytype') || 'all';
+        if (!entryTypeSelect.value) {
+            entryTypeSelect.value = 'all';
+        }
+        shareFilters.querySelector('[data-action="clear-filters"]').addEventListener('click', function() {
+            searchInput.value = '';
+            entryTypeSelect.value = 'all';
+            searchInput.focus();
+            saveShareFilters();
+            filterItems();
+        });
+    }
 
     /**
      * Render category chips and a "remove all" button into the chips container.
@@ -125,6 +163,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         }
 
         var items = document.querySelectorAll('.exaport-flat-item');
+        var hasMatches = false;
         items.forEach(function(item) {
             var name = item.getAttribute('data-item-name') || '';
             var catIdsStr = item.getAttribute('data-category-ids') || '';
@@ -137,7 +176,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             });
             var matchesEntryType = !selectedEntryType || selectedEntryType === 'all' || entryType === selectedEntryType;
 
-            item.style.display = (matchesSearch && matchesCategory && matchesEntryType) ? '' : 'none';
+            var matches = matchesSearch && matchesCategory && matchesEntryType;
+            item.style.display = matches ? '' : 'none';
+            hasMatches = hasMatches || matches;
         });
 
         document.querySelectorAll('.exaport-folder-category[data-item-name]').forEach(function(tile) {
@@ -145,6 +186,12 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             var pinned = tile.getAttribute('data-pinned') === 'true';
             tile.style.display = (pinned || !searchText || name.indexOf(searchText) !== -1) ? '' : 'none';
         });
+
+        if (shareFilters) {
+            shareFilters.querySelector('[data-action="clear-filters"]').hidden = !searchText && selectedEntryType === 'all';
+            shareFilters.querySelector('[data-region="no-matching-shares"]').hidden = hasMatches;
+            document.querySelector('.exaport-share-overview-table').hidden = !hasMatches;
+        }
 
         sortItems();
     }
@@ -345,13 +392,21 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             chipsContainer = document.getElementById('exaport-filter-chips');
             subcategoriesCheckbox = document.getElementById('exaport-subcategories-checkbox');
             entryTypeSelect = document.getElementById('exaport-entrytype-select');
+            shareFilters = document.querySelector('[data-region="exaport-share-filters"]');
 
-            // Try to restore filter state from sessionStorage (after a reload).
-            var restoredFromSession = restoreFilterStateFromSession();
+            var restoredFromSession = false;
+            if (shareFilters) {
+                initShareFilters();
+            } else {
+                restoredFromSession = restoreFilterStateFromSession();
+            }
 
             // Bind text search input event.
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
+                    if (shareFilters) {
+                        saveShareFilters();
+                    }
                     filterItems();
                 });
             }
@@ -372,7 +427,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 sortSelect.addEventListener('change', function() {
                     sortItems();
                     updateSortHeadings();
-                    Prefs.savePreference('sort', sortSelect.value);
+                    if (!shareFilters) {
+                        Prefs.savePreference('sort', sortSelect.value);
+                    }
                     var url = new URL(window.location.href);
                     url.searchParams.set('sort', sortSelect.value);
                     history.replaceState(null, '', url);
@@ -382,14 +439,21 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             // Bind entry-type filter dropdown.
             if (entryTypeSelect) {
                 entryTypeSelect.addEventListener('change', function() {
-                    Prefs.savePreference('entrytype', entryTypeSelect.value);
+                    if (shareFilters) {
+                        saveShareFilters();
+                    } else {
+                        Prefs.savePreference('entrytype', entryTypeSelect.value);
+                    }
                     filterItems();
                 });
             }
             bindSortHeadings();
 
             // If state was restored from session, render chips and apply filters.
-            if (restoredFromSession) {
+            if (shareFilters) {
+                // The overview queries return each type separately, so sort the combined list on load.
+                filterItems();
+            } else if (restoredFromSession) {
                 renderChips();
                 filterItems();
             } else if (preSelectedCategoryId && preSelectedCategoryId > 0 && categorySelect) {

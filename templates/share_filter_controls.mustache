@@ -1,0 +1,22 @@
+{{!
+    @template block_exaport/share_filter_controls
+
+    Search, sort and type filters for the sharing overviews.
+}}
+{{#hasrows}}
+{{#searchcontrols}}
+    <div data-region="exaport-share-filters" class="mb-3">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            {{{searchcontrols}}}
+            <button type="button" class="btn btn-secondary" data-action="clear-filters" hidden>
+                {{#str}} clearAllFilers, block_exaport {{/str}}
+            </button>
+        </div>
+        <div role="status">
+            <p class="mt-3 mb-0" data-region="no-matching-shares" hidden>
+                {{#str}} share_filter_no_matches, block_exaport {{/str}}
+            </p>
+        </div>
+    </div>
+{{/searchcontrols}}
+{{/hasrows}}

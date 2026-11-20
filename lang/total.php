@@ -1582,6 +1582,22 @@ return [
         'Nur Sammelmappen',
         'Collections only',
     ],
+    'share_filter_all_types' => [
+        'Alle Typen',
+        'All types',
+    ],
+    'share_filter_collections' => [
+        'Sammelmappen',
+        'Collections',
+    ],
+    'share_filter_updated' => [
+        'Zuletzt aktualisiert',
+        'Last updated',
+    ],
+    'share_filter_no_matches' => [
+        'Keine passenden Ergebnisse',
+        'No matching results',
+    ],
     'sharedwith' => [
         'Geteilt mit',
         'Shared with',

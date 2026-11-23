@@ -24,16 +24,20 @@ $courseid = required_param('courseid', PARAM_INT);
 $sort = optional_param('sort', 'user', PARAM_TEXT);
 $action = optional_param('action', 'list', PARAM_TEXT);
 
-if ($sort == 'mystudents' && !block_exaport_user_can_see_artifacts_of_students()) {
-    $sort = 'user';
-}
-
 require_login($courseid);
 
 $context = context_system::instance();
 require_capability('block/exaport:use', $context);
 
+$parsedsort = block_exaport_parse_sort($sort, ['user', 'category', 'mystudents']);
+if ($parsedsort[0] === 'mystudents' && !block_exaport_user_can_see_artifacts_of_students()) {
+    $parsedsort = ['user', 'asc'];
+}
+
 if (empty($CFG->block_exaport_enable_shared_categories)) {
+    if ($parsedsort[0] === 'mystudents' && $action === 'list' && !empty($CFG->block_exaport_enable_shared_with_me)) {
+        redirect(new moodle_url('/blocks/exaport/shared_with_me.php', ['courseid' => $courseid, 'mode' => 'students']));
+    }
     print_error('areaisdisabled', 'block_exaport');
 }
 
@@ -44,7 +48,6 @@ $PAGE->set_url($url, ['courseid' => $courseid]);
 block_exaport_add_iconpack();
 block_exaport_init_js_css();
 
-$parsedsort = block_exaport_parse_sort($sort, array('user', 'category', 'mystudents'));
 if ($parsedsort[0] == 'category') {
     $sqlsort = " ORDER BY c.name, u.lastname, u.firstname";
     if (strcmp($CFG->dbtype, "sqlsrv") == 0) {

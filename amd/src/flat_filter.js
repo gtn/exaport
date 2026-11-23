@@ -451,6 +451,29 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
+     * Keep incoming ties independent of earlier sorts and the database's initial row order.
+     *
+     * @param {HTMLElement} a First incoming row.
+     * @param {HTMLElement} b Second incoming row.
+     * @param {string} field Primary sort field.
+     * @param {string} dir Primary sort direction.
+     * @return {number}
+     */
+    function compareIncomingItems(a, b, field, dir) {
+        var cmp = compareItems(a, b, field, dir) || compareItems(a, b, 'name', 'asc');
+        if (cmp) {
+            return cmp;
+        }
+        var typeA = a.getAttribute('data-entry-type') || '';
+        var typeB = b.getAttribute('data-entry-type') || '';
+        if (typeA !== typeB) {
+            return typeA < typeB ? -1 : 1;
+        }
+        return parseInt(a.getAttribute('data-entry-id') || '0', 10) -
+            parseInt(b.getAttribute('data-entry-id') || '0', 10);
+    }
+
+    /**
      * Rebuild incoming sections using the real rows, so filtering and sorting never duplicate entries.
      *
      * @param {string} field Sort field.
@@ -467,7 +490,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         });
         var rows = Array.from(body.querySelectorAll('.exaport-flat-item'));
         rows.sort(function(a, b) {
-            return compareItems(a, b, field, dir);
+            return compareIncomingItems(a, b, field, dir);
         });
         var visible = rows.filter(function(row) {
             return row.style.display !== 'none';

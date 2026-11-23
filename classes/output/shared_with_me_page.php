@@ -73,8 +73,9 @@ class shared_with_me_page implements renderable, templatable {
         $courseids = array_unique(array_filter(array_column($this->rows, 'courseid')));
         $courses = $courseids ? $DB->get_records_list('course', 'id', $courseids, '', 'id, fullname') : [];
 
+        $enrolledcourses = enrol_get_my_courses();
         $courseoptions = [];
-        foreach (enrol_get_my_courses() as $course) {
+        foreach ($enrolledcourses as $course) {
             $name = html_entity_decode(strip_tags(format_string($course->fullname)), ENT_QUOTES, 'UTF-8');
             $courseoptions[$course->id] = ['id' => (int)$course->id, 'name' => $name];
         }
@@ -86,7 +87,7 @@ class shared_with_me_page implements renderable, templatable {
                 $collectionowners[$row->owner_userid] = true;
             }
         }
-        $ownercourseids = $this->get_collection_owner_courseids(array_keys($collectionowners), array_keys($courseoptions));
+        $ownercourseids = $this->get_collection_owner_courseids(array_keys($collectionowners), $enrolledcourses);
 
         $dateformat = get_string('strftimedate', 'langconfig');
         $exportedrows = [];
@@ -106,6 +107,7 @@ class shared_with_me_page implements renderable, templatable {
                 'title'           => $title,
                 'titlenamelower'  => core_text::strtolower(html_entity_decode(strip_tags($title))),
                 'entitytype'      => $row->entity_type,
+                'entityid'        => (int)$row->id,
                 'timemodified'    => $timemodified,
                 'updateddate'     => $timemodified ? userdate($timemodified, $dateformat) : '',
                 'url'             => $this->build_url($row),
@@ -145,39 +147,47 @@ class shared_with_me_page implements renderable, templatable {
     }
 
     /**
-     * Find selectable courses where each collection owner belongs to the legacy course roster.
-     *
-     * The roster uses assignments directly in the course context for non-deleted, non-suspended users.
-     * An enrolment alone or a role inherited from another context does not qualify the owner.
+     * Find courses where each collection owner is visible to the viewer in the course roster.
      *
      * @param int[] $ownerids Collection owner IDs in the overview.
-     * @param int[] $courseids Selectable course IDs.
+     * @param \stdClass[] $courses The viewer's enrolled courses.
      * @return string[] Comma-separated course IDs keyed by collection owner ID.
      */
-    private function get_collection_owner_courseids(array $ownerids, array $courseids): array {
-        global $DB;
+    private function get_collection_owner_courseids(array $ownerids, array $courses): array {
+        global $CFG, $DB, $USER;
 
-        if (!$ownerids || !$courseids) {
+        if (!$ownerids || !$courses) {
             return [];
         }
 
+        require_once($CFG->dirroot . '/course/lib.php');
+
         [$ownersql, $ownerparams] = $DB->get_in_or_equal($ownerids, SQL_PARAMS_NAMED, 'owner');
-        [$coursesql, $courseparams] = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'course');
-        $sql = "SELECT DISTINCT ra.userid, ctx.instanceid AS courseid
-                  FROM {role_assignments} ra
-                  JOIN {context} ctx ON ctx.id = ra.contextid
-                  JOIN {role} r ON r.id = ra.roleid
-                  JOIN {user} u ON u.id = ra.userid
-                 WHERE ctx.contextlevel = :coursecontext
-                   AND ctx.instanceid $coursesql
-                   AND ra.userid $ownersql
-                   AND u.deleted = 0 AND u.suspended = 0";
-        $rows = $DB->get_recordset_sql($sql, $ownerparams + $courseparams + ['coursecontext' => CONTEXT_COURSE]);
         $matches = [];
-        foreach ($rows as $row) {
-            $matches[$row->userid][] = $row->courseid;
+        foreach ($courses as $course) {
+            $context = \context_course::instance($course->id);
+            if (!course_can_view_participants($context)) {
+                continue;
+            }
+
+            $groupids = [];
+            if ((int)$course->groupmode === SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $context)) {
+                $groupids = array_keys(groups_get_all_groups($course->id, $USER->id));
+                if (!$groupids) {
+                    // An empty group list would otherwise query the whole course.
+                    continue;
+                }
+            }
+
+            $onlyactive = !has_all_capabilities(['moodle/course:enrolreview', 'moodle/course:viewsuspendedusers'], $context);
+            [$enrolledsql, $enrolledparams] = get_enrolled_sql($context, '', $groupids, $onlyactive);
+            $sql = "SELECT u.id
+                      FROM {user} u
+                     WHERE u.id $ownersql AND u.suspended = 0 AND u.id IN ($enrolledsql)";
+            foreach ($DB->get_fieldset_sql($sql, $ownerparams + $enrolledparams) as $ownerid) {
+                $matches[$ownerid][] = $course->id;
+            }
         }
-        $rows->close();
 
         return array_map(static fn(array $ids): string => implode(',', $ids), $matches);
     }

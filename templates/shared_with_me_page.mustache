@@ -24,7 +24,7 @@
         hasrows           - Boolean: at least one share row
         rows              - List of rows:
                                typeicon (pre-rendered HTML), typelabel, title, titlenamelower, entitytype, timemodified,
-                              url, ownerid, ownername, coursename, categorycourseid, ownercourseids, updateddate,
+                              url, entityid, ownerid, ownername, coursename, categorycourseid, ownercourseids, updateddate,
                               sharemodetext, sharetooltip, hastooltip, commentcount, hascomments
         nothingtext       - Localised text shown when nothing is shared with the user
         columns           - Localised column labels and their sort fields, in display order
@@ -70,6 +70,7 @@
                             data-item-date="{{timemodified}}"
                             data-item-type="{{typelabel}}"
                             data-entry-type="{{entitytype}}"
+                            data-entry-id="{{entityid}}"
                             data-owner-id="{{ownerid}}"
                             data-owner-name="{{ownername}}"
                             data-course-name="{{coursename}}"

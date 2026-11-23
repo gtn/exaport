@@ -125,9 +125,11 @@ if ($type != 'shared' && $type != 'sharedstudent' && $type != 'extern_category')
     $type = 'mine';
 }
 
+$studentsinsharedwithme = $type === 'sharedstudent' && !empty($CFG->block_exaport_enable_shared_with_me);
 if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
     print_error('areaisdisabled', 'block_exaport');
-} elseif (($type == 'shared' || $type == 'sharedstudent') && empty($CFG->block_exaport_enable_shared_categories)) {
+} elseif (($type === 'shared' || $type === 'sharedstudent') && !$studentsinsharedwithme
+        && empty($CFG->block_exaport_enable_shared_categories)) {
     print_error('areaisdisabled', 'block_exaport');
 }
 
@@ -186,6 +188,10 @@ if ($type == 'sharedstudent') {
     if (!$selecteduser) {
         throw new moodle_exception('wrong userid');
     } else {
+        $studentsoverviewurl = $studentsinsharedwithme
+            ? new moodle_url('/blocks/exaport/shared_with_me.php', ['courseid' => $COURSE->id, 'mode' => 'students'])
+            : new moodle_url('/blocks/exaport/shared_categories.php', ['courseid' => $COURSE->id, 'sort' => 'mystudents']);
+
         // Read all categories.
         $categorycolumns = g::$DB->get_column_names_prefixed('block_exaportcate', 'c');
         $categories = $DB->get_records_sql("
@@ -228,10 +234,9 @@ if ($type == 'sharedstudent') {
         if ($currentcategory->id && isset($categories[$currentcategory->pid])) {
             $parentcategory = $categories[$currentcategory->pid];
         } else {
-            // Link to shared categories
             $parentcategory = (object)[
                 'id' => 0,
-                'url' => new moodle_url('shared_categories.php', ['courseid' => $COURSE->id, 'sort' => 'mystudents']),
+                'url' => $studentsoverviewurl,
                 'name' => '',
             ];
         }
@@ -581,7 +586,8 @@ if (($type === 'extern_category') && $externaccess_category) {
     echo $OUTPUT->header();
     echo block_exaport_wrapperdivstart();
 } else {
-    block_exaport_print_header($type == 'shared' || $type == 'sharedstudent' ? 'shared_categories' : "myportfolio");
+    $header = $type === 'shared' || $type === 'sharedstudent' ? 'shared_categories' : 'myportfolio';
+    block_exaport_print_header($studentsinsharedwithme ? 'shared_with_me' : $header);
 
     echo "<div class='box generalbox'>";
     if (block_exaport_course_has_desp()) {
@@ -604,6 +610,9 @@ if (!in_array($flatsort, ['date-desc', 'date-asc', 'name-asc', 'name-desc'])) {
 }
 
 echo '<div class="excomdos_cont layout_' . block_exaport_used_layout() . ' excomdos_cont-type-' . $type . '">';
+if ($type === 'sharedstudent') {
+    echo html_writer::div(html_writer::link($studentsoverviewurl, get_string('show_mystudents', 'block_exaport')), 'mb-2');
+}
 if ($type == 'mine' && $layout == 'folder') {
     echo '<div class="exaport-folder-filter mb-3">';
     // Row 1: search + sort + entry-type filter + category dropdown + create button

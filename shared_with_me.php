@@ -19,6 +19,7 @@ require_once(__DIR__ . '/inc.php');
 
 use function block_exaport\common\print_error;
 use block_exaport\share_overview;
+use block_exaport\output\my_students_page;
 use block_exaport\output\shared_with_me_page;
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -32,41 +33,59 @@ if (empty($CFG->block_exaport_enable_shared_with_me)) {
     print_error('areaisdisabled', 'block_exaport');
 }
 
-$PAGE->set_url('/blocks/exaport/shared_with_me.php', ['courseid' => $courseid]);
-
-$copycategoryid = null;
-if (optional_param('action', '', PARAM_ALPHA) === 'copy') {
-    if (empty($CFG->block_exaport_copy_category_to_my)) {
-        print_error('areaisdisabled', 'block_exaport');
-    }
-    if (!data_submitted()) {
-        throw new moodle_exception('invalidrequest');
-    }
-    require_sesskey();
-    $copycategoryid = required_param('categoryid', PARAM_INT);
+$showstudents = optional_param('mode', '', PARAM_ALPHA) === 'students';
+$canviewstudents = block_exaport_user_can_see_artifacts_of_students();
+if ($showstudents && !$canviewstudents) {
+    throw new moodle_exception('nopermissions', 'error', '', get_string('show_mystudents', 'block_exaport'));
 }
 
-$rows = share_overview::get_shared_with_me($USER->id);
-if ($copycategoryid !== null) {
-    // Copy only a Category shared with the current user, as shown in this overview.
-    foreach ($rows as $row) {
-        if ($row->entity_type === 'category' && (int)$row->id === $copycategoryid) {
-            $copy = \block_exaport\copy_category_to_myself($copycategoryid);
-            redirect(new moodle_url('/blocks/exaport/view_items.php', ['courseid' => $courseid, 'categoryid' => $copy->id]));
+$sharesurl = new moodle_url('/blocks/exaport/shared_with_me.php', ['courseid' => $courseid]);
+$studentsurl = new moodle_url($sharesurl, ['mode' => 'students']);
+$PAGE->set_url($showstudents ? $studentsurl : $sharesurl);
+
+if ($showstudents) {
+    $page = new my_students_page(block_exaport_get_students_for_teacher(), $courseid);
+} else {
+    $copycategoryid = null;
+    if (optional_param('action', '', PARAM_ALPHA) === 'copy') {
+        if (empty($CFG->block_exaport_copy_category_to_my)) {
+            print_error('areaisdisabled', 'block_exaport');
         }
+        if (!data_submitted()) {
+            throw new moodle_exception('invalidrequest');
+        }
+        require_sesskey();
+        $copycategoryid = required_param('categoryid', PARAM_INT);
     }
-    throw new moodle_exception('invalidcategoryid');
+
+    $rows = share_overview::get_shared_with_me($USER->id);
+    if ($copycategoryid !== null) {
+        // Copy only a Category shared with the current user, as shown in this overview.
+        foreach ($rows as $row) {
+            if ($row->entity_type === 'category' && (int)$row->id === $copycategoryid) {
+                $copy = \block_exaport\copy_category_to_myself($copycategoryid);
+                redirect(new moodle_url('/blocks/exaport/view_items.php', ['courseid' => $courseid, 'categoryid' => $copy->id]));
+            }
+        }
+        throw new moodle_exception('invalidcategoryid');
+    }
+
+    if ($rows) {
+        block_exaport_require_filter_js();
+    }
+    $searchcontrols = block_exaport_render_share_filter_controls(null, get_string('share_filter_search_titles', 'block_exaport'));
+    $page = new shared_with_me_page($rows, $courseid, $searchcontrols);
 }
 
 block_exaport_print_header("shared_with_me");
 
 echo "<div class='block_eportfolio_center'>\n";
 
-if ($rows) {
-    block_exaport_require_filter_js();
+if ($canviewstudents) {
+    $switchurl = $showstudents ? $sharesurl : $studentsurl;
+    $switchlabel = get_string($showstudents ? 'shared_with_me' : 'show_mystudents', 'block_exaport');
+    echo html_writer::div(html_writer::link($switchurl, $switchlabel), 'd-flex mb-2');
 }
-$searchcontrols = block_exaport_render_share_filter_controls(null, get_string('share_filter_search_titles', 'block_exaport'));
-$page = new shared_with_me_page($rows, $courseid, $searchcontrols);
 echo $PAGE->get_renderer('block_exaport')->render($page);
 
 echo "</div>";

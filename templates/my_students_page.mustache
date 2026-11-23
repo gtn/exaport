@@ -1,0 +1,64 @@
+{{!
+    This file is part of Exabis Eportfolio (extension for Moodle).
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_exaport/my_students_page
+
+    Trusted-teacher roster, with students in the current course first.
+
+    Context variables:
+        hasstudents - Whether the roster has students
+        groups - Nonempty groups containing key, label and students
+        students - Rows with id, name, courses and url
+        emptytext - Empty-roster message
+        headeruser, headercourses, headeractions - Table column labels
+        browselabel - Portfolio link label
+}}
+<div class="block_exaport_my_students text-left text-start" data-region="my-students">
+    <h2 class="h4 mb-3">{{#str}} show_mystudents, block_exaport {{/str}}</h2>
+    {{^hasstudents}}
+        <p data-region="no-students">{{emptytext}}</p>
+    {{/hasstudents}}
+    {{#groups}}
+        <section class="mb-4" data-student-group="{{key}}">
+            <h3 class="h5 mb-2">{{label}}</h3>
+            <div class="table-responsive">
+                <table class="generaltable table table-sm table-striped table-hover mb-0" data-region="student-table">
+                    <caption class="sr-only">{{label}}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{{headeruser}}</th>
+                            <th scope="col">{{headercourses}}</th>
+                            <th scope="col">{{headeractions}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#students}}
+                            <tr data-student-id="{{id}}">
+                                <th scope="row">{{name}}</th>
+                                <td>{{courses}}</td>
+                                <td>
+                                    <a href="{{url}}" class="btn btn-secondary btn-sm"
+                                       data-action="browse-student" aria-label="{{browselabel}}: {{name}}">{{browselabel}}</a>
+                                </td>
+                            </tr>
+                        {{/students}}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {{/groups}}
+</div>

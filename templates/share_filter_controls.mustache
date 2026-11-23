@@ -18,6 +18,18 @@
                         {{/senders}}
                     </select>
                 </div>
+                {{#hascourseoptions}}
+                    <div style="min-width: 160px; max-width: 250px;">
+                        <label class="sr-only" for="exaport-share-course">{{#str}} course {{/str}}</label>
+                        <select class="form-control custom-select" id="exaport-share-course" data-share-filter="filtercourseid"
+                                data-default-course-id="{{defaultcourseid}}">
+                            <option value="">{{#str}} share_filter_search_course, block_exaport {{/str}}</option>
+                            {{#courseoptions}}
+                                <option value="{{id}}">{{name}}</option>
+                            {{/courseoptions}}
+                        </select>
+                    </div>
+                {{/hascourseoptions}}
             {{/hassenders}}
             {{^hassenders}}
                 <button type="button" class="btn btn-secondary" data-action="clear-filters" hidden>
@@ -26,37 +38,31 @@
             {{/hassenders}}
         </div>
         {{#hassenders}}
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="d-flex flex-wrap align-items-center gap-1">
+                    <div class="d-flex flex-wrap gap-1" data-region="sender-filter-chips"
+                         data-remove-label="{{#str}} remove {{/str}}"></div>
+                    <button type="button" class="badge bg-primary text-light border-0 m-1 exaport-clear-filters-chip"
+                            data-action="clear-senders" hidden>
+                        {{#str}} share_filter_clear_users, block_exaport {{/str}}
+                    </button>
+                </div>
+                {{#hascourseoptions}}
+                    <div class="d-flex flex-wrap align-items-center gap-1">
+                        <div class="d-flex flex-wrap gap-1" data-region="course-filter-chips"
+                             data-remove-label="{{#str}} remove {{/str}}"></div>
+                        <button type="button" class="badge bg-primary text-light border-0 m-1 exaport-clear-filters-chip"
+                                data-action="clear-courses" hidden>
+                            {{#str}} share_filter_clear_courses, block_exaport {{/str}}
+                        </button>
+                    </div>
+                {{/hascourseoptions}}
+            </div>
             <div class="mt-2 d-flex align-items-center">
                 <label class="mb-0 font-weight-normal fw-normal">
                     <input type="checkbox" id="exaport-group-by-sender"{{#groupbysender}} checked{{/groupbysender}}>
                     {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
                 </label>
-            </div>
-            {{#hascourseoptions}}
-                <div class="mt-2" data-region="share-course-filter" hidden>
-                    <label for="exaport-share-course" class="mb-1">
-                        <span data-course-label="category" hidden>
-                            {{#str}} share_filter_category_course, block_exaport {{/str}}
-                        </span>
-                        <span data-course-label="view" hidden>
-                            {{#str}} share_filter_collection_course, block_exaport {{/str}}
-                        </span>
-                    </label>
-                    <select class="form-control custom-select w-auto mw-100" id="exaport-share-course" data-share-filter="filtercourseid">
-                        <option value="">{{#str}} share_filter_no_course_priority, block_exaport {{/str}}</option>
-                        {{#courseoptions}}
-                            <option value="{{id}}">{{name}}</option>
-                        {{/courseoptions}}
-                    </select>
-                </div>
-            {{/hascourseoptions}}
-            <div class="d-flex flex-wrap align-items-center gap-1">
-                <div class="d-flex flex-wrap gap-1" data-region="sender-filter-chips"
-                     data-remove-label="{{#str}} remove {{/str}}"></div>
-                <button type="button" class="badge bg-primary text-light border-0 m-1 exaport-clear-filters-chip"
-                        data-action="clear-senders" hidden>
-                    {{#str}} share_filter_clear_users, block_exaport {{/str}}
-                </button>
             </div>
         {{/hassenders}}
         <div role="status">

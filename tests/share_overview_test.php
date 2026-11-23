@@ -445,7 +445,7 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertSame([], share_overview::get_my_shares($this->owner->id));
     }
 
-    /** Categories use their saved course and collections use visible course participants. */
+    /** Pages and categories use their saved course and collections use visible course participants. */
     public function test_shared_with_me_discovery_keeps_the_two_course_scopes_distinct(): void {
         global $DB;
 
@@ -471,21 +471,31 @@ final class share_overview_test extends \advanced_testcase {
         $DB->set_field('block_exaportcate', 'courseid', $categorycourse->id, ['id' => $categoryid]);
         $DB->set_field('block_exaportcate', 'timemodified', 0, ['id' => $categoryid]);
         $this->share_category_with_user($categoryid, $recipient->id);
+        $itemid = $this->create_item($this->owner);
+        $DB->set_field('block_exaportitem', 'courseid', $categorycourse->id, ['id' => $itemid]);
+        $this->share_item_with_user($itemid, $recipient->id);
 
         $this->setUser($recipient);
-        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
-        $data = $page->export_for_template($this->createMock(\renderer_base::class));
+        $sharedrows = share_overview::get_shared_with_me($recipient->id);
+        $output = $this->createMock(\renderer_base::class);
+        $page = new output\shared_with_me_page($sharedrows, SITEID);
+        $data = $page->export_for_template($output);
         $rows = array_column($data['rows'], null, 'entitytype');
 
         $this->assertSame([['id' => (int)$this->owner->id, 'name' => fullname($this->owner)]], $data['senders']);
         $this->assertSame([(int)$categorycourse->id, (int)$sendercourse->id], array_column($data['courseoptions'], 'id'));
         $this->assertSame((int)$this->owner->id, $rows['view']['ownerid']);
-        $this->assertSame((string)$sendercourse->id, $rows['view']['ownercourseids']);
-        $this->assertSame(0, $rows['view']['categorycourseid']);
-        $this->assertSame((int)$categorycourse->id, $rows['category']['categorycourseid']);
-        $this->assertSame('', $rows['category']['ownercourseids']);
+        $this->assertSame((string)$sendercourse->id, $rows['view']['filtercourseids']);
+        $this->assertSame((string)$categorycourse->id, $rows['category']['filtercourseids']);
+        $this->assertSame((string)$categorycourse->id, $rows['item']['filtercourseids']);
         $this->assertSame(userdate($updated, get_string('strftimedate', 'langconfig')), $rows['view']['updateddate']);
         $this->assertSame('', $rows['category']['updateddate']);
+        $this->assertSame(0, $data['defaultcourseid']);
+
+        $coursepage = new output\shared_with_me_page($sharedrows, (int)$categorycourse->id);
+        $this->assertSame((int)$categorycourse->id, $coursepage->export_for_template($output)['defaultcourseid']);
+        $unlistedcoursepage = new output\shared_with_me_page($sharedrows, (int)$othercourse->id);
+        $this->assertSame(0, $unlistedcoursepage->export_for_template($output)['defaultcourseid']);
     }
 
     /** Direct sharing does not grant access to the sender's otherwise unavailable course membership. */
@@ -513,7 +523,7 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertCount(1, $data['rows']);
         $this->assertSame('view', $data['rows'][0]['entitytype']);
         $this->assertSame((int)$this->owner->id, $data['rows'][0]['ownerid']);
-        $this->assertSame('', $data['rows'][0]['ownercourseids']);
+        $this->assertSame('', $data['rows'][0]['filtercourseids']);
         $view = block_exaport_get_view_from_access('id/' . $this->owner->id . '-' . $viewid);
         $this->assertNotEmpty($view);
         $this->assertEquals($viewid, $view->id);
@@ -544,7 +554,7 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertFalse(has_capability('moodle/site:accessallgroups', $context));
         $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
         $data = $page->export_for_template($this->createMock(\renderer_base::class));
-        $rows = array_column($data['rows'], 'ownercourseids', 'ownerid');
+        $rows = array_column($data['rows'], 'filtercourseids', 'ownerid');
 
         $this->assertCount(2, $rows);
         $this->assertSame((string)$course->id, $rows[$this->owner->id]);
@@ -552,7 +562,7 @@ final class share_overview_test extends \advanced_testcase {
 
         groups_remove_member($recipientgroup->id, $recipient->id);
         $data = $page->export_for_template($this->createMock(\renderer_base::class));
-        $rows = array_column($data['rows'], 'ownercourseids', 'ownerid');
+        $rows = array_column($data['rows'], 'filtercourseids', 'ownerid');
         $this->assertCount(2, $rows);
         $this->assertSame('', $rows[$this->owner->id]);
         $this->assertSame('', $rows[$otherowner->id]);

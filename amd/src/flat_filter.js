@@ -26,14 +26,10 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var entryTypeSelect;    // Entry-type filter dropdown (All / Only items / Only views).
     var shareFilters;       // Filter bar on My shares or Shared with me.
     var shareClearFilters; // Clear search and type on the outgoing overview.
-    var shareOwnerSelect; // Incoming shares only: source of searchable sender options.
-    var shareCourseSelect; // Incoming shares only: put one course before other courses.
     var shareSenderGrouping; // Incoming shares only: group matching rows by sender.
-    var shareCourseRegion; // Course scope is available for categories and collections only.
     var selectedShareOwners = {}; // Map of selected incoming sender IDs to their display names.
-    var shareOwnerChips; // Container for the incoming sender selection chips.
-    var shareClearOwners; // Clear the incoming sender selection.
-    var shareOwnerWidget; // Searchable sender dropdown, refreshed after external selection changes.
+    var selectedShareCourses = {}; // Map of selected incoming course IDs to their display names.
+    var shareCourseExplicit = false; // An explicit empty selection suppresses the context course default.
     var incomingSharesTable; // Incoming headers own their sort state without a sort dropdown.
     var incomingSort = 'name-asc';
     var sortAttributes = {
@@ -93,44 +89,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
-     * Restore a scope only when its value is an enabled option in the current select.
-     *
-     * @param {HTMLSelectElement} select Scope control, if present.
-     * @param {string|null} value Requested URL value.
-     */
-    function restoreShareScope(select, value) {
-        if (!select) {
-            return;
-        }
-        var valid = Array.from(select.options).some(function(option) {
-            return option.value === value && !option.disabled;
-        });
-        select.value = valid ? value : '';
-    }
-
-    /**
-     * Keep course discovery specific to the active type, without carrying its semantics across types.
-     *
-     * @param {boolean} reset Whether the entry type has changed.
-     */
-    function updateShareCourseScope(reset) {
-        var type = entryTypeSelect ? entryTypeSelect.value : 'all';
-        var supported = type === 'category' || type === 'view';
-        if (shareCourseSelect) {
-            if (reset || !supported) {
-                shareCourseSelect.value = '';
-            }
-            shareCourseSelect.disabled = !supported;
-        }
-        if (shareCourseRegion) {
-            shareCourseRegion.hidden = !supported;
-            shareCourseRegion.querySelectorAll('[data-course-label]').forEach(function(label) {
-                label.hidden = label.getAttribute('data-course-label') !== type;
-            });
-        }
-    }
-
-    /**
      * Keep share filters in the current URL, separate from Portfolio preferences.
      */
     function saveShareFilters() {
@@ -150,10 +108,16 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             Object.keys(selectedShareOwners).forEach(function(id) {
                 url.searchParams.append('userid', id);
             });
-            if (shareCourseSelect && !shareCourseSelect.disabled && shareCourseSelect.value) {
-                url.searchParams.set('filtercourseid', shareCourseSelect.value);
-            } else {
-                url.searchParams.delete('filtercourseid');
+            url.searchParams.delete('filtercourseid');
+            if (shareCourseExplicit) {
+                var courseids = Object.keys(selectedShareCourses);
+                if (courseids.length) {
+                    courseids.forEach(function(id) {
+                        url.searchParams.append('filtercourseid', id);
+                    });
+                } else {
+                    url.searchParams.set('filtercourseid', '');
+                }
             }
         }
         history.replaceState(null, '', url);
@@ -169,22 +133,33 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         if (!entryTypeSelect.value) {
             entryTypeSelect.value = 'all';
         }
-        shareOwnerSelect = shareFilters.querySelector('[data-share-filter="userid"]');
-        shareCourseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
-        shareCourseRegion = shareFilters.querySelector('[data-region="share-course-filter"]');
-        shareOwnerChips = shareFilters.querySelector('[data-region="sender-filter-chips"]');
         shareClearFilters = shareFilters.querySelector('[data-action="clear-filters"]');
-        shareClearOwners = shareFilters.querySelector('[data-action="clear-senders"]');
         if (incomingSharesTable) {
-            initShareOwnerFilter(params.getAll('userid'));
-            restoreShareScope(shareCourseSelect, params.get('filtercourseid'));
-            if (shareCourseSelect) {
-                shareCourseSelect.addEventListener('change', function() {
-                    saveShareFilters();
-                    filterItems();
-                });
+            selectedShareOwners = initSharePicker({
+                select: shareFilters.querySelector('[data-share-filter="userid"]'),
+                ids: params.getAll('userid'),
+                chips: shareFilters.querySelector('[data-region="sender-filter-chips"]'),
+                clear: shareFilters.querySelector('[data-action="clear-senders"]'),
+                inputId: 'exaport-share-sender-search',
+                attribute: 'data-sender-id'
+            });
+            var courseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
+            shareCourseExplicit = params.has('filtercourseid');
+            var courseids = params.getAll('filtercourseid');
+            if (!shareCourseExplicit && courseSelect) {
+                courseids.push(courseSelect.getAttribute('data-default-course-id'));
             }
-            updateShareCourseScope(false);
+            selectedShareCourses = initSharePicker({
+                select: courseSelect,
+                ids: courseids,
+                chips: shareFilters.querySelector('[data-region="course-filter-chips"]'),
+                clear: shareFilters.querySelector('[data-action="clear-courses"]'),
+                inputId: 'exaport-share-course-search',
+                attribute: 'data-course-id',
+                onChange: function() {
+                    shareCourseExplicit = true;
+                }
+            });
             saveShareFilters();
         }
         if (shareClearFilters) {
@@ -194,14 +169,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 searchInput.focus();
                 saveShareFilters();
                 filterItems();
-            });
-        }
-        if (shareClearOwners) {
-            shareClearOwners.addEventListener('click', function() {
-                selectedShareOwners = {};
-                applyShareOwnerSelection();
-                shareOwnerWidget.refresh();
-                document.getElementById('exaport-share-sender-search').focus();
             });
         }
     }
@@ -267,73 +234,86 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
-     * Render incoming sender chips and refresh filtering after an individual removal.
-     */
-    function renderShareOwnerChips() {
-        if (shareClearOwners) {
-            shareClearOwners.hidden = Object.keys(selectedShareOwners).length === 0;
-        }
-        var removeLabel = shareOwnerChips ? shareOwnerChips.getAttribute('data-remove-label') : '';
-        renderSelectionChips(shareOwnerChips, selectedShareOwners, 'data-sender-id', function(id) {
-            var restoreFocus = shareOwnerChips.contains(document.activeElement);
-            delete selectedShareOwners[id];
-            applyShareOwnerSelection();
-            shareOwnerWidget.refresh();
-            if (restoreFocus) {
-                document.getElementById('exaport-share-sender-search').focus();
-            }
-        }, removeLabel || 'Remove');
-    }
-
-    /**
-     * Apply a change to the selected senders.
-     */
-    function applyShareOwnerSelection() {
-        renderShareOwnerChips();
-        saveShareFilters();
-        filterItems();
-    }
-
-    /**
-     * Enhance the incoming sender select into a searchable multiple selection with chips.
+     * Enhance an incoming sender or course select with searchable options and independent chips.
      *
-     * @param {string[]} ids Sender IDs restored from repeated or single userid URL parameters.
+     * @param {Object} config Select, restored IDs, chips, clear control, inputId, attribute and optional onChange.
+     * @return {Object} Selection map shared with filtering and URL state; changed in place.
      */
-    function initShareOwnerFilter(ids) {
-        selectedShareOwners = {};
-        if (!shareOwnerSelect) {
-            return;
+    function initSharePicker(config) {
+        var selection = {};
+        if (!config.select) {
+            return selection;
         }
-        var knownOwners = Object.create(null);
-        Array.from(shareOwnerSelect.options).forEach(function(option) {
+        var knownOptions = Object.create(null);
+        Array.from(config.select.options).forEach(function(option) {
             if (option.value && !option.disabled) {
-                knownOwners[option.value] = option.text;
+                knownOptions[option.value] = option.text;
             }
         });
-        ids.forEach(function(id) {
-            if (Object.prototype.hasOwnProperty.call(knownOwners, id)) {
-                selectedShareOwners[id] = knownOwners[id];
+        config.ids.forEach(function(id) {
+            if (Object.prototype.hasOwnProperty.call(knownOptions, id)) {
+                selection[id] = knownOptions[id];
             }
         });
-        shareOwnerWidget = CategorySelect.build({
-            select: shareOwnerSelect,
-            inputId: 'exaport-share-sender-search',
-            placeholder: shareOwnerSelect.options[0].text,
+        var widget;
+
+        /** Render this picker's selected values and its clear action. */
+        function renderPickerChips() {
+            if (config.clear) {
+                config.clear.hidden = Object.keys(selection).length === 0;
+            }
+            var removeLabel = config.chips ? config.chips.getAttribute('data-remove-label') : '';
+            renderSelectionChips(config.chips, selection, config.attribute, function(id) {
+                var restoreFocus = config.chips.contains(document.activeElement);
+                delete selection[id];
+                applySelection();
+                widget.refresh();
+                if (restoreFocus) {
+                    document.getElementById(config.inputId).focus();
+                }
+            }, removeLabel || 'Remove');
+        }
+
+        /** Apply a pick, removal or clear without changing the other picker's selection. */
+        function applySelection() {
+            if (config.onChange) {
+                config.onChange();
+            }
+            renderPickerChips();
+            saveShareFilters();
+            filterItems();
+        }
+
+        widget = CategorySelect.build({
+            select: config.select,
+            inputId: config.inputId,
+            placeholder: config.select.options[0].text,
             keepOpenOnPick: true,
             skipFirstOption: true,
             isSelected: function(id) {
-                return !Object.prototype.hasOwnProperty.call(knownOwners, id) ||
-                    Object.prototype.hasOwnProperty.call(selectedShareOwners, id);
+                return !Object.prototype.hasOwnProperty.call(knownOptions, id) ||
+                    Object.prototype.hasOwnProperty.call(selection, id);
             },
             onPick: function(id, name) {
-                selectedShareOwners[id] = name;
-                applyShareOwnerSelection();
+                selection[id] = name;
+                applySelection();
             }
         });
-        Array.from(shareOwnerSelect.labels).forEach(function(label) {
-            label.htmlFor = 'exaport-share-sender-search';
+        Array.from(config.select.labels).forEach(function(label) {
+            label.htmlFor = config.inputId;
         });
-        renderShareOwnerChips();
+        if (config.clear) {
+            config.clear.addEventListener('click', function() {
+                Object.keys(selection).forEach(function(id) {
+                    delete selection[id];
+                });
+                applySelection();
+                widget.refresh();
+                document.getElementById(config.inputId).focus();
+            });
+        }
+        renderPickerChips();
+        return selection;
     }
 
     /**
@@ -372,6 +352,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
         var selectedCatIds = Object.keys(selectedCategories).map(Number);
         var selectedOwnerIds = Object.keys(selectedShareOwners);
+        var selectedCourseIds = Object.keys(selectedShareCourses);
         var selectedEntryType = entryTypeSelect ? entryTypeSelect.value : 'all';
 
         // If "show subcategories" is checked, expand each selected category to include descendants.
@@ -401,10 +382,14 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 return catIds.indexOf(catId) !== -1;
             });
             var matchesEntryType = !selectedEntryType || selectedEntryType === 'all' || entryType === selectedEntryType;
-            var matchesOwner = !shareOwnerSelect || selectedOwnerIds.length === 0 ||
+            var matchesOwner = selectedOwnerIds.length === 0 ||
                 selectedOwnerIds.indexOf(item.getAttribute('data-owner-id')) !== -1;
+            var matchesCourse = selectedCourseIds.length === 0 ||
+                (item.getAttribute('data-filter-course-ids') || '').split(',').some(function(id) {
+                    return selectedCourseIds.indexOf(id) !== -1;
+                });
 
-            var matches = matchesSearch && matchesCategory && matchesEntryType && matchesOwner;
+            var matches = matchesSearch && matchesCategory && matchesEntryType && matchesOwner && matchesCourse;
             item.style.display = matches ? '' : 'none';
             hasMatches = hasMatches || matches;
         });
@@ -497,19 +482,12 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         });
         var columns = rows.length ? rows[0].cells.length : 1;
         var fragment = document.createDocumentFragment();
-        var courseScoped = shareCourseSelect && !shareCourseSelect.disabled && shareCourseSelect.value;
 
-        var appendHeading = function(name, count, type) {
+        var appendHeading = function(name, count) {
             var heading = document.createElement('tr');
-            heading.setAttribute('data-share-group-header', type);
-            if (type === 'course') {
-                heading.classList.add('table-active');
-            }
+            heading.setAttribute('data-share-group-header', 'sender');
             var cell = document.createElement('th');
             cell.colSpan = columns;
-            if (type === 'sender' && courseScoped) {
-                cell.className = 'pl-4 ps-4';
-            }
             cell.textContent = name + ' (' + count + ')';
             heading.appendChild(cell);
             fragment.appendChild(heading);
@@ -535,38 +513,14 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 var cmp = a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
                 return field === 'sender' && dir === 'desc' ? -cmp : cmp;
             }).forEach(function(owner) {
-                appendHeading(owner.name, owner.rows.length, 'sender');
+                appendHeading(owner.name, owner.rows.length);
                 owner.rows.forEach(function(row) {
                     fragment.appendChild(row);
                 });
             });
         };
 
-        if (courseScoped) {
-            var courseid = shareCourseSelect.value;
-            var courseRows = [];
-            var otherRows = [];
-            visible.forEach(function(row) {
-                var matches;
-                if (entryTypeSelect.value === 'category') {
-                    matches = row.getAttribute('data-category-course-id') === courseid;
-                } else {
-                    var courseids = (row.getAttribute('data-owner-course-ids') || '').split(',').map(function(id) {
-                        return id.trim();
-                    });
-                    matches = courseids.indexOf(courseid) !== -1;
-                }
-                (matches ? courseRows : otherRows).push(row);
-            });
-            appendHeading(shareCourseSelect.options[shareCourseSelect.selectedIndex].text, courseRows.length, 'course');
-            appendRows(courseRows);
-            if (otherRows.length) {
-                appendHeading(table.getAttribute('data-other-courses') || '', otherRows.length, 'course');
-                appendRows(otherRows);
-            }
-        } else {
-            appendRows(visible);
-        }
+        appendRows(visible);
         rows.forEach(function(row) {
             if (row.style.display === 'none') {
                 fragment.appendChild(row);
@@ -830,7 +784,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             if (entryTypeSelect) {
                 entryTypeSelect.addEventListener('change', function() {
                     if (shareFilters) {
-                        updateShareCourseScope(true);
                         saveShareFilters();
                     } else {
                         Prefs.savePreference('entrytype', entryTypeSelect.value);

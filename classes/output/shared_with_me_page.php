@@ -109,6 +109,8 @@ class shared_with_me_page implements renderable, templatable {
             $copyform = $copyfields && $row->entity_type === 'category'
                 ? $copyfields + ['categoryid' => (int)$row->id] : null;
             $hascopyactions = $hascopyactions || $copyform !== null;
+            $filtercourseids = $row->entity_type === 'view' ? ($ownercourseids[$ownerid] ?? '')
+                : (isset($courseoptions[$row->courseid]) ? (string)$row->courseid : '');
 
             $exportedrows[] = [
                 'typeicon'        => $this->build_type_icon($row),
@@ -122,8 +124,7 @@ class shared_with_me_page implements renderable, templatable {
                 'url'             => $this->build_url($row),
                 'ownerid'         => $ownerid,
                 'ownername'       => $senders[$ownerid]['name'] ?? '',
-                'ownercourseids'  => $row->entity_type === 'view' ? ($ownercourseids[$ownerid] ?? '') : '',
-                'categorycourseid' => $row->entity_type === 'category' ? (int)$row->courseid : 0,
+                'filtercourseids' => $filtercourseids,
                 'coursename'      => $coursename,
                 'sharemodetext'   => block_exaport_get_share_summary($share),
                 'sharetooltip'    => block_exaport_get_share_tooltip($share),
@@ -144,6 +145,7 @@ class shared_with_me_page implements renderable, templatable {
             'copycategory'     => $hascopyactions ? get_string('copycategory', 'block_exaport') : '',
             'hascourseoptions' => (bool)$courseoptions,
             'courseoptions'    => array_values($courseoptions),
+            'defaultcourseid'  => isset($courseoptions[$this->courseid]) ? $this->courseid : 0,
             'nothingtext'      => get_string('nothingsharedwithme', 'block_exaport'),
             'columns'          => [
                 ['sortfield' => 'name', 'label' => get_string('title', 'block_exaport')],

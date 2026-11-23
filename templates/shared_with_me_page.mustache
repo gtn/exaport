@@ -25,12 +25,15 @@
         rows              - List of rows:
                                typeicon (pre-rendered HTML), typelabel, title, titlenamelower, entitytype, timemodified,
                               url, entityid, ownerid, ownername, coursename, categorycourseid, ownercourseids, updateddate,
-                              sharemodetext, sharetooltip, hastooltip, commentcount, hascomments
+                              sharemodetext, sharetooltip, hastooltip, commentcount, hascomments,
+                              copyform (optional POST fields: url, sesskey, courseid, categoryid)
         nothingtext       - Localised text shown when nothing is shared with the user
         columns           - Localised column labels and their sort fields, in display order
         searchcontrols    - Pre-rendered HTML for the filter controls
         groupbysender     - Saved display preference for grouping rows by sender
         hassenders, senders, hascourseoptions, courseoptions - Available discovery options
+        hascopyactions    - Whether to show the optional actions column
+        copycategory      - Localised copy action label
 }}
 <div class="block_exaport_shared_with_me">
     {{> block_exaport/share_filter_controls }}
@@ -53,6 +56,9 @@
                                 </button>
                             </th>
                         {{/columns}}
+                        {{#hascopyactions}}
+                            <th scope="col" class="text-nowrap">{{#str}} actions {{/str}}</th>
+                        {{/hascopyactions}}
                     </tr>
                 </thead>
                 <tbody>
@@ -89,6 +95,20 @@
                                 {{^hastooltip}}{{sharemodetext}}{{/hastooltip}}
                             </td>
                             <td>{{#hascomments}}{{commentcount}}{{/hascomments}}</td>
+                            {{#hascopyactions}}
+                                <td>
+                                    {{#copyform}}
+                                        <form action="{{url}}" method="post" class="m-0">
+                                            <input type="hidden" name="action" value="copy">
+                                            <input type="hidden" name="sesskey" value="{{sesskey}}">
+                                            <input type="hidden" name="courseid" value="{{courseid}}">
+                                            <input type="hidden" name="categoryid" value="{{categoryid}}">
+                                            <button type="submit" class="btn btn-secondary btn-sm text-nowrap"
+                                                    aria-label="{{copycategory}}: {{title}}">{{copycategory}}</button>
+                                        </form>
+                                    {{/copyform}}
+                                </td>
+                            {{/hascopyactions}}
                         </tr>
                     {{/rows}}
                 </tbody>

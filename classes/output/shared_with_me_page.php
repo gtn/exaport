@@ -60,7 +60,7 @@ class shared_with_me_page implements renderable, templatable {
      * @return array
      */
     public function export_for_template(renderer_base $output): array {
-        global $DB;
+        global $CFG, $DB;
 
         $ownerids = array_unique(array_column($this->rows, 'owner_userid'));
         $owners = $ownerids ? $DB->get_records_list('user', 'id', $ownerids) : [];
@@ -89,6 +89,12 @@ class shared_with_me_page implements renderable, templatable {
         }
         $ownercourseids = $this->get_collection_owner_courseids(array_keys($collectionowners), $enrolledcourses);
 
+        $copyfields = empty($CFG->block_exaport_copy_category_to_my) ? [] : [
+            'url' => (new \moodle_url('/blocks/exaport/shared_with_me.php'))->out(false),
+            'sesskey' => sesskey(),
+            'courseid' => $this->courseid,
+        ];
+        $hascopyactions = false;
         $dateformat = get_string('strftimedate', 'langconfig');
         $exportedrows = [];
         foreach ($this->rows as $row) {
@@ -100,6 +106,9 @@ class shared_with_me_page implements renderable, templatable {
                 : '';
             $title = format_string($row->title);
             $timemodified = (int)($row->timemodified ?? 0);
+            $copyform = $copyfields && $row->entity_type === 'category'
+                ? $copyfields + ['categoryid' => (int)$row->id] : null;
+            $hascopyactions = $hascopyactions || $copyform !== null;
 
             $exportedrows[] = [
                 'typeicon'        => $this->build_type_icon($row),
@@ -121,6 +130,7 @@ class shared_with_me_page implements renderable, templatable {
                 'hastooltip'      => $share->is_shared(),
                 'commentcount'    => (int)($row->comment_cnt ?? 0),
                 'hascomments'     => (int)($row->comment_cnt ?? 0) > 0,
+                'copyform'        => $copyform,
             ];
         }
 
@@ -130,6 +140,8 @@ class shared_with_me_page implements renderable, templatable {
             'hassenders'       => (bool)$senders,
             'senders'          => array_values($senders),
             'groupbysender'    => (bool)get_user_preferences('block_exaport_group_by_sender', 0),
+            'hascopyactions'   => $hascopyactions,
+            'copycategory'     => $hascopyactions ? get_string('copycategory', 'block_exaport') : '',
             'hascourseoptions' => (bool)$courseoptions,
             'courseoptions'    => array_values($courseoptions),
             'nothingtext'      => get_string('nothingsharedwithme', 'block_exaport'),

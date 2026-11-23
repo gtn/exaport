@@ -26,6 +26,12 @@
             {{/hassenders}}
         </div>
         {{#hassenders}}
+            <div class="mt-2 d-flex align-items-center">
+                <label class="mb-0 font-weight-normal fw-normal">
+                    <input type="checkbox" id="exaport-group-by-sender"{{#groupbysender}} checked{{/groupbysender}}>
+                    {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
+                </label>
+            </div>
             {{#hascourseoptions}}
                 <div class="mt-2" data-region="share-course-filter" hidden>
                     <label for="exaport-share-course" class="mb-1">

@@ -413,6 +413,12 @@ function block_exaport_user_preferences(): array {
         'default' => 1,
         'permissioncallback' => [core_user::class, 'is_current_user'],
     ];
+    $preferences['block_exaport_group_by_sender'] = [
+        'type' => PARAM_INT,
+        'null' => NULL_NOT_ALLOWED,
+        'default' => 0,
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    ];
     $preferences['block_exaport_entrytype'] = [
         'type' => PARAM_ALPHA,
         'null' => NULL_NOT_ALLOWED,

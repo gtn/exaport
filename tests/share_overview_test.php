@@ -22,6 +22,7 @@ global $CFG;
 require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
 require_once($CFG->dirroot . '/blocks/exaport/tests/fixtures/exaport_test_helpers_trait.php');
 require_once($CFG->dirroot . '/cohort/lib.php');
+require_once($CFG->dirroot . '/course/lib.php');
 
 /**
  * Tests for share_overview::build_share_info() across item, category and view entity types.
@@ -442,6 +443,142 @@ final class share_overview_test extends \advanced_testcase {
 
         $CFG->block_exaport_disable_shareemails = 1;
         $this->assertSame([], share_overview::get_my_shares($this->owner->id));
+    }
+
+    /** Categories use their saved course and collections use visible course participants. */
+    public function test_shared_with_me_discovery_keeps_the_two_course_scopes_distinct(): void {
+        global $DB;
+
+        $generator = $this->getDataGenerator();
+        $recipient = $generator->create_user();
+        $sendercourse = $generator->create_course(['fullname' => 'Sender course']);
+        $categorycourse = $generator->create_course(['fullname' => 'Category course']);
+        $othercourse = $generator->create_course(['fullname' => 'Unlisted course']);
+        $generator->enrol_user($recipient->id, $sendercourse->id, 'student');
+        $generator->enrol_user($recipient->id, $categorycourse->id, 'student');
+        $generator->enrol_user($this->owner->id, $sendercourse->id, 'student');
+        $generator->enrol_user($this->owner->id, $othercourse->id, 'student');
+
+        // A role alone does not make the sender an enrolled participant.
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'student'], MUST_EXIST);
+        role_assign($roleid, $this->owner->id, \context_course::instance($categorycourse->id)->id);
+
+        $updated = 1700000000;
+        $viewid = $this->create_view($this->owner);
+        $DB->set_field('block_exaportview', 'timemodified', $updated, ['id' => $viewid]);
+        $this->share_view_with_user($viewid, $recipient->id);
+        $categoryid = $this->create_category($this->owner, internshare: 1);
+        $DB->set_field('block_exaportcate', 'courseid', $categorycourse->id, ['id' => $categoryid]);
+        $DB->set_field('block_exaportcate', 'timemodified', 0, ['id' => $categoryid]);
+        $this->share_category_with_user($categoryid, $recipient->id);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $data = $page->export_for_template($this->createMock(\renderer_base::class));
+        $rows = array_column($data['rows'], null, 'entitytype');
+
+        $this->assertSame([['id' => (int)$this->owner->id, 'name' => fullname($this->owner)]], $data['senders']);
+        $this->assertSame([(int)$categorycourse->id, (int)$sendercourse->id], array_column($data['courseoptions'], 'id'));
+        $this->assertSame((int)$this->owner->id, $rows['view']['ownerid']);
+        $this->assertSame((string)$sendercourse->id, $rows['view']['ownercourseids']);
+        $this->assertSame(0, $rows['view']['categorycourseid']);
+        $this->assertSame((int)$categorycourse->id, $rows['category']['categorycourseid']);
+        $this->assertSame('', $rows['category']['ownercourseids']);
+        $this->assertSame(userdate($updated, get_string('strftimedate', 'langconfig')), $rows['view']['updateddate']);
+        $this->assertSame('', $rows['category']['updateddate']);
+    }
+
+    /** Direct sharing does not grant access to the sender's otherwise unavailable course membership. */
+    public function test_shared_with_me_conceals_collection_course_without_participants_access(): void {
+        global $DB;
+
+        $generator = $this->getDataGenerator();
+        $recipient = $generator->create_user();
+        $course = $generator->create_course();
+        $generator->enrol_user($recipient->id, $course->id, 'student');
+        $generator->enrol_user($this->owner->id, $course->id, 'student');
+        $context = \context_course::instance($course->id);
+        $studentroleid = $DB->get_field('role', 'id', ['shortname' => 'student'], MUST_EXIST);
+        assign_capability('moodle/course:viewparticipants', CAP_PROHIBIT, $studentroleid, $context->id);
+        assign_capability('moodle/course:enrolreview', CAP_PROHIBIT, $studentroleid, $context->id);
+
+        $viewid = $this->create_view($this->owner);
+        $this->share_view_with_user($viewid, $recipient->id);
+
+        $this->setUser($recipient);
+        $this->assertFalse(course_can_view_participants($context));
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $data = $page->export_for_template($this->createMock(\renderer_base::class));
+
+        $this->assertCount(1, $data['rows']);
+        $this->assertSame('view', $data['rows'][0]['entitytype']);
+        $this->assertSame((int)$this->owner->id, $data['rows'][0]['ownerid']);
+        $this->assertSame('', $data['rows'][0]['ownercourseids']);
+        $view = block_exaport_get_view_from_access('id/' . $this->owner->id . '-' . $viewid);
+        $this->assertNotEmpty($view);
+        $this->assertEquals($viewid, $view->id);
+    }
+
+    /** A separate-groups course only identifies members visible to the recipient. */
+    public function test_shared_with_me_conceals_collection_courses_for_other_groups(): void {
+        $generator = $this->getDataGenerator();
+        $recipient = $generator->create_user();
+        $otherowner = $generator->create_user();
+        $course = $generator->create_course(['groupmode' => SEPARATEGROUPS]);
+        foreach ([$recipient, $this->owner, $otherowner] as $user) {
+            $generator->enrol_user($user->id, $course->id, 'student');
+        }
+
+        $recipientgroup = $generator->create_group(['courseid' => $course->id]);
+        $othergroup = $generator->create_group(['courseid' => $course->id]);
+        groups_add_member($recipientgroup->id, $recipient->id);
+        groups_add_member($recipientgroup->id, $this->owner->id);
+        groups_add_member($othergroup->id, $otherowner->id);
+        foreach ([$this->owner, $otherowner] as $owner) {
+            $this->share_view_with_user($this->create_view($owner), $recipient->id);
+        }
+
+        $this->setUser($recipient);
+        $context = \context_course::instance($course->id);
+        $this->assertTrue(course_can_view_participants($context));
+        $this->assertFalse(has_capability('moodle/site:accessallgroups', $context));
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $data = $page->export_for_template($this->createMock(\renderer_base::class));
+        $rows = array_column($data['rows'], 'ownercourseids', 'ownerid');
+
+        $this->assertCount(2, $rows);
+        $this->assertSame((string)$course->id, $rows[$this->owner->id]);
+        $this->assertSame('', $rows[$otherowner->id]);
+
+        groups_remove_member($recipientgroup->id, $recipient->id);
+        $data = $page->export_for_template($this->createMock(\renderer_base::class));
+        $rows = array_column($data['rows'], 'ownercourseids', 'ownerid');
+        $this->assertCount(2, $rows);
+        $this->assertSame('', $rows[$this->owner->id]);
+        $this->assertSame('', $rows[$otherowner->id]);
+    }
+
+    /** Sender grouping defaults off and follows the current recipient's saved preference. */
+    public function test_shared_with_me_sender_grouping_preference_is_per_user(): void {
+        $recipient = $this->getDataGenerator()->create_user();
+        $otherrecipient = $this->getDataGenerator()->create_user();
+        $itemid = $this->create_item($this->owner);
+        $this->share_item_with_user($itemid, $recipient->id);
+        $this->share_item_with_user($itemid, $otherrecipient->id);
+        $output = $this->createMock(\renderer_base::class);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $this->assertFalse($page->export_for_template($output)['groupbysender']);
+        set_user_preference('block_exaport_group_by_sender', 1);
+
+        $this->setUser($otherrecipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($otherrecipient->id), SITEID);
+        $this->assertFalse($page->export_for_template($output)['groupbysender']);
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), SITEID);
+        $this->assertTrue($page->export_for_template($output)['groupbysender']);
     }
 
     // -------------------------------------------------------------------------

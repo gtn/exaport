@@ -21,8 +21,7 @@
                 {{#hascourseoptions}}
                     <div style="min-width: 160px; max-width: 250px;">
                         <label class="sr-only" for="exaport-share-course">{{#str}} course {{/str}}</label>
-                        <select class="form-control custom-select" id="exaport-share-course" data-share-filter="filtercourseid"
-                                data-default-course-id="{{defaultcourseid}}">
+                        <select class="form-control custom-select" id="exaport-share-course" data-share-filter="course">
                             <option value="">{{#str}} share_filter_search_course, block_exaport {{/str}}</option>
                             {{#courseoptions}}
                                 <option value="{{id}}">{{name}}</option>

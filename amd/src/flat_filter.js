@@ -29,7 +29,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var shareSenderGrouping; // Incoming shares only: group matching rows by sender.
     var selectedShareOwners = {}; // Map of selected incoming sender IDs to their display names.
     var selectedShareCourses = {}; // Map of selected incoming course IDs to their display names.
-    var shareCourseExplicit = false; // An explicit empty selection suppresses the context course default.
     var incomingSharesTable; // Incoming headers own their sort state without a sort dropdown.
     var incomingSort = 'name-asc';
     var sortAttributes = {
@@ -108,17 +107,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             Object.keys(selectedShareOwners).forEach(function(id) {
                 url.searchParams.append('userid', id);
             });
-            url.searchParams.delete('filtercourseid');
-            if (shareCourseExplicit) {
-                var courseids = Object.keys(selectedShareCourses);
-                if (courseids.length) {
-                    courseids.forEach(function(id) {
-                        url.searchParams.append('filtercourseid', id);
-                    });
-                } else {
-                    url.searchParams.set('filtercourseid', '');
-                }
-            }
         }
         history.replaceState(null, '', url);
     }
@@ -143,22 +131,13 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 inputId: 'exaport-share-sender-search',
                 attribute: 'data-sender-id'
             });
-            var courseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
-            shareCourseExplicit = params.has('filtercourseid');
-            var courseids = params.getAll('filtercourseid');
-            if (!shareCourseExplicit && courseSelect) {
-                courseids.push(courseSelect.getAttribute('data-default-course-id'));
-            }
             selectedShareCourses = initSharePicker({
-                select: courseSelect,
-                ids: courseids,
+                select: shareFilters.querySelector('[data-share-filter="course"]'),
+                ids: [],
                 chips: shareFilters.querySelector('[data-region="course-filter-chips"]'),
                 clear: shareFilters.querySelector('[data-action="clear-courses"]'),
                 inputId: 'exaport-share-course-search',
-                attribute: 'data-course-id',
-                onChange: function() {
-                    shareCourseExplicit = true;
-                }
+                attribute: 'data-course-id'
             });
             saveShareFilters();
         }
@@ -236,7 +215,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     /**
      * Enhance an incoming sender or course select with searchable options and independent chips.
      *
-     * @param {Object} config Select, restored IDs, chips, clear control, inputId, attribute and optional onChange.
+     * @param {Object} config Select, restored IDs, chips, clear control, inputId and attribute.
      * @return {Object} Selection map shared with filtering and URL state; changed in place.
      */
     function initSharePicker(config) {
@@ -276,9 +255,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
 
         /** Apply a pick, removal or clear without changing the other picker's selection. */
         function applySelection() {
-            if (config.onChange) {
-                config.onChange();
-            }
             renderPickerChips();
             saveShareFilters();
             filterItems();

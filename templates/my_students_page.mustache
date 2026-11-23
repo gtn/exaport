@@ -20,6 +20,7 @@
     Trusted-teacher roster, with students in the current course first.
 
     Context variables:
+        coursepicker - Rendered Moodle course selector, if available
         hasstudents - Whether the roster has students
         groups - Nonempty groups containing key, label and students
         students - Rows with id, name, courses and url
@@ -29,6 +30,9 @@
 }}
 <div class="block_exaport_my_students text-left text-start" data-region="my-students">
     <h2 class="h4 mb-3">{{#str}} show_mystudents, block_exaport {{/str}}</h2>
+    {{#coursepicker}}
+        <div class="mb-3">{{{coursepicker}}}</div>
+    {{/coursepicker}}
     {{^hasstudents}}
         <p data-region="no-students">{{emptytext}}</p>
     {{/hasstudents}}

@@ -145,7 +145,6 @@ class shared_with_me_page implements renderable, templatable {
             'copycategory'     => $hascopyactions ? get_string('copycategory', 'block_exaport') : '',
             'hascourseoptions' => (bool)$courseoptions,
             'courseoptions'    => array_values($courseoptions),
-            'defaultcourseid'  => isset($courseoptions[$this->courseid]) ? $this->courseid : 0,
             'nothingtext'      => get_string('nothingsharedwithme', 'block_exaport'),
             'columns'          => [
                 ['sortfield' => 'name', 'label' => get_string('title', 'block_exaport')],

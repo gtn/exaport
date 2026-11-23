@@ -26,9 +26,12 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var entryTypeSelect;    // Entry-type filter dropdown (All / Only items / Only views).
     var shareFilters;       // Filter bar on My shares or Shared with me.
     var shareClearFilters; // Clear search and type on the outgoing overview.
+    var shareOwnerSelect; // Incoming shares only: source of searchable sender options.
     var shareSenderGrouping; // Incoming shares only: group matching rows by sender.
     var selectedShareOwners = {}; // Map of selected incoming sender IDs to their display names.
-    var selectedShareCourses = {}; // Map of selected incoming course IDs to their display names.
+    var shareOwnerChips; // Container for the incoming sender selection chips.
+    var shareClearOwners; // Clear the incoming sender selection.
+    var shareOwnerWidget; // Searchable sender dropdown, refreshed after external selection changes.
     var incomingSharesTable; // Incoming headers own their sort state without a sort dropdown.
     var incomingSort = 'name-asc';
     var sortAttributes = {
@@ -121,24 +124,12 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         if (!entryTypeSelect.value) {
             entryTypeSelect.value = 'all';
         }
+        shareOwnerSelect = shareFilters.querySelector('[data-share-filter="userid"]');
+        shareOwnerChips = shareFilters.querySelector('[data-region="sender-filter-chips"]');
         shareClearFilters = shareFilters.querySelector('[data-action="clear-filters"]');
+        shareClearOwners = shareFilters.querySelector('[data-action="clear-senders"]');
         if (incomingSharesTable) {
-            selectedShareOwners = initSharePicker({
-                select: shareFilters.querySelector('[data-share-filter="userid"]'),
-                ids: params.getAll('userid'),
-                chips: shareFilters.querySelector('[data-region="sender-filter-chips"]'),
-                clear: shareFilters.querySelector('[data-action="clear-senders"]'),
-                inputId: 'exaport-share-sender-search',
-                attribute: 'data-sender-id'
-            });
-            selectedShareCourses = initSharePicker({
-                select: shareFilters.querySelector('[data-share-filter="course"]'),
-                ids: [],
-                chips: shareFilters.querySelector('[data-region="course-filter-chips"]'),
-                clear: shareFilters.querySelector('[data-action="clear-courses"]'),
-                inputId: 'exaport-share-course-search',
-                attribute: 'data-course-id'
-            });
+            initShareOwnerFilter(params.getAll('userid'));
             saveShareFilters();
         }
         if (shareClearFilters) {
@@ -148,6 +139,14 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 searchInput.focus();
                 saveShareFilters();
                 filterItems();
+            });
+        }
+        if (shareClearOwners) {
+            shareClearOwners.addEventListener('click', function() {
+                selectedShareOwners = {};
+                applyShareOwnerSelection();
+                shareOwnerWidget.refresh();
+                document.getElementById('exaport-share-sender-search').focus();
             });
         }
     }
@@ -213,83 +212,73 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
-     * Enhance an incoming sender or course select with searchable options and independent chips.
-     *
-     * @param {Object} config Select, restored IDs, chips, clear control, inputId and attribute.
-     * @return {Object} Selection map shared with filtering and URL state; changed in place.
+     * Render incoming sender chips and refresh filtering after an individual removal.
      */
-    function initSharePicker(config) {
-        var selection = {};
-        if (!config.select) {
-            return selection;
+    function renderShareOwnerChips() {
+        if (shareClearOwners) {
+            shareClearOwners.hidden = Object.keys(selectedShareOwners).length === 0;
         }
-        var knownOptions = Object.create(null);
-        Array.from(config.select.options).forEach(function(option) {
+        var removeLabel = shareOwnerChips ? shareOwnerChips.getAttribute('data-remove-label') : '';
+        renderSelectionChips(shareOwnerChips, selectedShareOwners, 'data-sender-id', function(id) {
+            var restoreFocus = shareOwnerChips.contains(document.activeElement);
+            delete selectedShareOwners[id];
+            applyShareOwnerSelection();
+            shareOwnerWidget.refresh();
+            if (restoreFocus) {
+                document.getElementById('exaport-share-sender-search').focus();
+            }
+        }, removeLabel || 'Remove');
+    }
+
+    /**
+     * Apply a change to the selected senders.
+     */
+    function applyShareOwnerSelection() {
+        renderShareOwnerChips();
+        saveShareFilters();
+        filterItems();
+    }
+
+    /**
+     * Enhance the incoming sender select into a searchable multiple selection with chips.
+     *
+     * @param {string[]} ids Sender IDs restored from repeated or single userid URL parameters.
+     */
+    function initShareOwnerFilter(ids) {
+        selectedShareOwners = {};
+        if (!shareOwnerSelect) {
+            return;
+        }
+        var knownOwners = Object.create(null);
+        Array.from(shareOwnerSelect.options).forEach(function(option) {
             if (option.value && !option.disabled) {
-                knownOptions[option.value] = option.text;
+                knownOwners[option.value] = option.text;
             }
         });
-        config.ids.forEach(function(id) {
-            if (Object.prototype.hasOwnProperty.call(knownOptions, id)) {
-                selection[id] = knownOptions[id];
+        ids.forEach(function(id) {
+            if (Object.prototype.hasOwnProperty.call(knownOwners, id)) {
+                selectedShareOwners[id] = knownOwners[id];
             }
         });
-        var widget;
-
-        /** Render this picker's selected values and its clear action. */
-        function renderPickerChips() {
-            if (config.clear) {
-                config.clear.hidden = Object.keys(selection).length === 0;
-            }
-            var removeLabel = config.chips ? config.chips.getAttribute('data-remove-label') : '';
-            renderSelectionChips(config.chips, selection, config.attribute, function(id) {
-                var restoreFocus = config.chips.contains(document.activeElement);
-                delete selection[id];
-                applySelection();
-                widget.refresh();
-                if (restoreFocus) {
-                    document.getElementById(config.inputId).focus();
-                }
-            }, removeLabel || 'Remove');
-        }
-
-        /** Apply a pick, removal or clear without changing the other picker's selection. */
-        function applySelection() {
-            renderPickerChips();
-            saveShareFilters();
-            filterItems();
-        }
-
-        widget = CategorySelect.build({
-            select: config.select,
-            inputId: config.inputId,
-            placeholder: config.select.options[0].text,
+        shareOwnerWidget = CategorySelect.build({
+            select: shareOwnerSelect,
+            inputId: 'exaport-share-sender-search',
+            placeholder: shareOwnerSelect.options[0].text,
             keepOpenOnPick: true,
             skipFirstOption: true,
             isSelected: function(id) {
-                return !Object.prototype.hasOwnProperty.call(knownOptions, id) ||
-                    Object.prototype.hasOwnProperty.call(selection, id);
+                return !Object.prototype.hasOwnProperty.call(knownOwners, id) ||
+                    Object.prototype.hasOwnProperty.call(selectedShareOwners, id);
             },
             onPick: function(id, name) {
-                selection[id] = name;
-                applySelection();
+                selectedShareOwners[id] = name;
+                applyShareOwnerSelection();
             }
         });
-        Array.from(config.select.labels).forEach(function(label) {
-            label.htmlFor = config.inputId;
+        Array.from(shareOwnerSelect.labels).forEach(function(label) {
+            label.htmlFor = 'exaport-share-sender-search';
         });
-        if (config.clear) {
-            config.clear.addEventListener('click', function() {
-                Object.keys(selection).forEach(function(id) {
-                    delete selection[id];
-                });
-                applySelection();
-                widget.refresh();
-                document.getElementById(config.inputId).focus();
-            });
-        }
-        renderPickerChips();
-        return selection;
+        renderShareOwnerChips();
     }
 
     /**
@@ -328,7 +317,6 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         var searchText = (searchInput ? searchInput.value : '').toLowerCase();
         var selectedCatIds = Object.keys(selectedCategories).map(Number);
         var selectedOwnerIds = Object.keys(selectedShareOwners);
-        var selectedCourseIds = Object.keys(selectedShareCourses);
         var selectedEntryType = entryTypeSelect ? entryTypeSelect.value : 'all';
 
         // If "show subcategories" is checked, expand each selected category to include descendants.
@@ -360,12 +348,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             var matchesEntryType = !selectedEntryType || selectedEntryType === 'all' || entryType === selectedEntryType;
             var matchesOwner = selectedOwnerIds.length === 0 ||
                 selectedOwnerIds.indexOf(item.getAttribute('data-owner-id')) !== -1;
-            var matchesCourse = selectedCourseIds.length === 0 ||
-                (item.getAttribute('data-filter-course-ids') || '').split(',').some(function(id) {
-                    return selectedCourseIds.indexOf(id) !== -1;
-                });
-
-            var matches = matchesSearch && matchesCategory && matchesEntryType && matchesOwner && matchesCourse;
+            var matches = matchesSearch && matchesCategory && matchesEntryType && matchesOwner;
             item.style.display = matches ? '' : 'none';
             hasMatches = hasMatches || matches;
         });
@@ -441,8 +424,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
      * @param {string} dir Sort direction.
      */
     function sortIncomingShares(field, dir) {
-        var table = incomingSharesTable;
-        var body = table.querySelector('tbody');
+        var body = incomingSharesTable.querySelector('tbody');
         if (!body) {
             return;
         }
@@ -456,27 +438,10 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         var visible = rows.filter(function(row) {
             return row.style.display !== 'none';
         });
-        var columns = rows.length ? rows[0].cells.length : 1;
         var fragment = document.createDocumentFragment();
-
-        var appendHeading = function(name, count) {
-            var heading = document.createElement('tr');
-            heading.setAttribute('data-share-group-header', 'sender');
-            var cell = document.createElement('th');
-            cell.colSpan = columns;
-            cell.textContent = name + ' (' + count + ')';
-            heading.appendChild(cell);
-            fragment.appendChild(heading);
-        };
-        var appendRows = function(sectionRows) {
-            if (!shareSenderGrouping || !shareSenderGrouping.checked) {
-                sectionRows.forEach(function(row) {
-                    fragment.appendChild(row);
-                });
-                return;
-            }
+        if (shareSenderGrouping && shareSenderGrouping.checked) {
             var owners = Object.create(null);
-            sectionRows.forEach(function(row) {
+            visible.forEach(function(row) {
                 var id = row.getAttribute('data-owner-id') || '';
                 if (!owners[id]) {
                     owners[id] = {id: id, name: row.getAttribute('data-owner-name') || '', rows: []};
@@ -489,14 +454,22 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 var cmp = a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
                 return field === 'sender' && dir === 'desc' ? -cmp : cmp;
             }).forEach(function(owner) {
-                appendHeading(owner.name, owner.rows.length);
+                var heading = document.createElement('tr');
+                heading.setAttribute('data-share-group-header', 'sender');
+                var cell = document.createElement('th');
+                cell.colSpan = owner.rows[0].cells.length;
+                cell.textContent = owner.name + ' (' + owner.rows.length + ')';
+                heading.appendChild(cell);
+                fragment.appendChild(heading);
                 owner.rows.forEach(function(row) {
                     fragment.appendChild(row);
                 });
             });
-        };
-
-        appendRows(visible);
+        } else {
+            visible.forEach(function(row) {
+                fragment.appendChild(row);
+            });
+        }
         rows.forEach(function(row) {
             if (row.style.display === 'none') {
                 fragment.appendChild(row);

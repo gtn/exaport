@@ -24,14 +24,14 @@
         hasrows           - Boolean: at least one share row
         rows              - List of rows:
                                typeicon (pre-rendered HTML), typelabel, title, titlenamelower, entitytype, timemodified,
-                              url, entityid, ownerid, ownername, coursename, filtercourseids, updateddate,
+                              url, entityid, ownerid, ownername, coursename, updateddate,
                               sharemodetext, sharetooltip, hastooltip, commentcount, hascomments,
                               copyform (optional POST fields: url, sesskey, courseid, categoryid)
         nothingtext       - Localised text shown when nothing is shared with the user
         columns           - Localised column labels and their sort fields, in display order
         searchcontrols    - Pre-rendered HTML for the filter controls
         groupbysender     - Saved display preference for grouping rows by sender
-        hassenders, senders, hascourseoptions, courseoptions - Available filter options
+        hassenders, senders - Available sender filter options
         hascopyactions    - Whether to show the optional actions column
         copycategory      - Localised copy action label
 }}
@@ -71,7 +71,6 @@
                             data-owner-id="{{ownerid}}"
                             data-owner-name="{{ownername}}"
                             data-course-name="{{coursename}}"
-                            data-filter-course-ids="{{filtercourseids}}"
                             data-shared-with="{{sharemodetext}}"
                             data-comment-count="{{commentcount}}">
                             <td><a href="{{url}}">{{title}}</a></td>

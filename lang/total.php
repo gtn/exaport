@@ -1622,13 +1622,9 @@ return [
         'Nach Person gruppieren',
         'Group by sender',
     ],
-    'share_filter_search_course' => [
-        'Kurs suchen...',
-        'Search course...',
-    ],
-    'share_filter_clear_courses' => [
-        'Kursfilter zurücksetzen',
-        'Clear course filter',
+    'share_course_unspecified' => [
+        'Kein Kurs angegeben',
+        'No course specified',
     ],
     'sharedwith' => [
         'Geteilt mit',

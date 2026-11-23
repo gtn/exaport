@@ -34,11 +34,34 @@ if (empty($CFG->block_exaport_enable_shared_with_me)) {
 
 $PAGE->set_url('/blocks/exaport/shared_with_me.php', ['courseid' => $courseid]);
 
+$copycategoryid = null;
+if (optional_param('action', '', PARAM_ALPHA) === 'copy') {
+    if (empty($CFG->block_exaport_copy_category_to_my)) {
+        print_error('areaisdisabled', 'block_exaport');
+    }
+    if (!data_submitted()) {
+        throw new moodle_exception('invalidrequest');
+    }
+    require_sesskey();
+    $copycategoryid = required_param('categoryid', PARAM_INT);
+}
+
+$rows = share_overview::get_shared_with_me($USER->id);
+if ($copycategoryid !== null) {
+    // Copy only a Category shared with the current user, as shown in this overview.
+    foreach ($rows as $row) {
+        if ($row->entity_type === 'category' && (int)$row->id === $copycategoryid) {
+            $copy = \block_exaport\copy_category_to_myself($copycategoryid);
+            redirect(new moodle_url('/blocks/exaport/view_items.php', ['courseid' => $courseid, 'categoryid' => $copy->id]));
+        }
+    }
+    throw new moodle_exception('invalidcategoryid');
+}
+
 block_exaport_print_header("shared_with_me");
 
 echo "<div class='block_eportfolio_center'>\n";
 
-$rows = share_overview::get_shared_with_me($USER->id);
 if ($rows) {
     block_exaport_require_filter_js();
 }

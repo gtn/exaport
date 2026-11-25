@@ -24,10 +24,7 @@ use block_exaport\output\shared_with_me_page;
 
 $courseid = required_param('courseid', PARAM_INT);
 
-require_login($courseid);
-
-$context = context_system::instance();
-require_capability('block/exaport:use', $context);
+block_exaport_require_login($courseid);
 
 if (empty($CFG->block_exaport_enable_shared_with_me)) {
     print_error('areaisdisabled', 'block_exaport');

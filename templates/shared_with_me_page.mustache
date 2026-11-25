@@ -24,14 +24,14 @@
         hasrows           - Boolean: at least one share row
         rows              - List of rows:
                                typeicon (pre-rendered HTML), typelabel, title, titlenamelower, entitytype, timemodified,
-                              url, entityid, ownerid, ownername, coursename, updateddate,
+                              url, entityid, ownerid, ownername, coursename, categorycourseid, ownercourseids, updateddate,
                               sharemodetext, sharetooltip, hastooltip, commentcount, hascomments,
                               copyform (optional POST fields: url, sesskey, courseid, categoryid)
         nothingtext       - Localised text shown when nothing is shared with the user
         columns           - Localised column labels and their sort fields, in display order
         searchcontrols    - Pre-rendered HTML for the filter controls
         groupbysender     - Saved display preference for grouping rows by sender
-        hassenders, senders - Available sender filter options
+        hassenders, senders, hascourseoptions, courseoptions - Available discovery options
         hascopyactions    - Whether to show the optional actions column
         copycategory      - Localised copy action label
 }}
@@ -43,7 +43,8 @@
     {{#hasrows}}
         <div class="table-responsive">
             <table class="generaltable table table-striped table-hover exaport-share-overview-table"
-                   style="width: 100%;" data-region="incoming-shares-table">
+                   style="width: 100%;" data-region="incoming-shares-table"
+                   data-other-courses="{{#str}} othercourses, block_exaport {{/str}}">
                 <thead>
                     <tr>
                         {{#columns}}
@@ -71,6 +72,8 @@
                             data-owner-id="{{ownerid}}"
                             data-owner-name="{{ownername}}"
                             data-course-name="{{coursename}}"
+                            data-category-course-id="{{categorycourseid}}"
+                            data-owner-course-ids="{{ownercourseids}}"
                             data-shared-with="{{sharemodetext}}"
                             data-comment-count="{{commentcount}}">
                             <td><a href="{{url}}">{{title}}</a></td>

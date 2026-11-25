@@ -1622,6 +1622,18 @@ return [
         'Nach Person gruppieren',
         'Group by sender',
     ],
+    'share_filter_category_course' => [
+        'Kurs zuerst anzeigen',
+        'Show course first',
+    ],
+    'share_filter_collection_course' => [
+        'Personen aus diesem Kurs zuerst anzeigen',
+        'Show senders from this course first',
+    ],
+    'share_filter_no_course_priority' => [
+        'Keine Kurspriorität',
+        'No course priority',
+    ],
     'share_course_unspecified' => [
         'Kein Kurs angegeben',
         'No course specified',

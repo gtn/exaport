@@ -74,6 +74,22 @@ class shared_with_me_page implements renderable, templatable {
         $courses = $courseids ? $DB->get_records_list('course', 'id', $courseids, '', 'id, fullname') : [];
         $unspecifiedcourse = get_string('share_course_unspecified', 'block_exaport');
 
+        $enrolledcourses = enrol_get_my_courses();
+        $courseoptions = [];
+        foreach ($enrolledcourses as $course) {
+            $name = html_entity_decode(strip_tags(format_string($course->fullname)), ENT_QUOTES, 'UTF-8');
+            $courseoptions[$course->id] = ['id' => (int)$course->id, 'name' => $name];
+        }
+        core_collator::asort_array_of_arrays_by_key($courseoptions, 'name');
+
+        $collectionowners = [];
+        foreach ($this->rows as $row) {
+            if ($row->entity_type === 'view') {
+                $collectionowners[$row->owner_userid] = true;
+            }
+        }
+        $ownercourseids = $this->get_collection_owner_courseids(array_keys($collectionowners), $enrolledcourses);
+
         $copyfields = empty($CFG->block_exaport_copy_category_to_my) ? [] : [
             'url' => (new \moodle_url('/blocks/exaport/shared_with_me.php'))->out(false),
             'sesskey' => sesskey(),
@@ -107,6 +123,8 @@ class shared_with_me_page implements renderable, templatable {
                 'url'             => $this->build_url($row),
                 'ownerid'         => $ownerid,
                 'ownername'       => $senders[$ownerid]['name'] ?? '',
+                'ownercourseids'  => $row->entity_type === 'view' ? ($ownercourseids[$ownerid] ?? '') : '',
+                'categorycourseid' => $row->entity_type === 'category' ? (int)$row->courseid : 0,
                 'coursename'      => $coursename,
                 'sharemodetext'   => block_exaport_get_share_summary($share),
                 'sharetooltip'    => block_exaport_get_share_tooltip($share),
@@ -125,6 +143,8 @@ class shared_with_me_page implements renderable, templatable {
             'groupbysender'    => (bool)get_user_preferences('block_exaport_group_by_sender', 0),
             'hascopyactions'   => $hascopyactions,
             'copycategory'     => $hascopyactions ? get_string('copycategory', 'block_exaport') : '',
+            'hascourseoptions' => (bool)$courseoptions,
+            'courseoptions'    => array_values($courseoptions),
             'nothingtext'      => get_string('nothingsharedwithme', 'block_exaport'),
             'columns'          => [
                 ['sortfield' => 'name', 'label' => get_string('title', 'block_exaport')],
@@ -137,6 +157,52 @@ class shared_with_me_page implements renderable, templatable {
             ],
             'searchcontrols'   => $this->searchcontrols,
         ];
+    }
+
+    /**
+     * Find courses where each collection owner is visible to the viewer in the course roster.
+     *
+     * @param int[] $ownerids Collection owner IDs in the overview.
+     * @param \stdClass[] $courses The viewer's enrolled courses.
+     * @return string[] Comma-separated course IDs keyed by collection owner ID.
+     */
+    private function get_collection_owner_courseids(array $ownerids, array $courses): array {
+        global $CFG, $DB, $USER;
+
+        if (!$ownerids || !$courses) {
+            return [];
+        }
+
+        require_once($CFG->dirroot . '/course/lib.php');
+
+        [$ownersql, $ownerparams] = $DB->get_in_or_equal($ownerids, SQL_PARAMS_NAMED, 'owner');
+        $matches = [];
+        foreach ($courses as $course) {
+            $context = \context_course::instance($course->id);
+            if (!course_can_view_participants($context)) {
+                continue;
+            }
+
+            $groupids = [];
+            if ((int)$course->groupmode === SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $context)) {
+                $groupids = array_keys(groups_get_all_groups($course->id, $USER->id));
+                if (!$groupids) {
+                    // An empty group list would otherwise query the whole course.
+                    continue;
+                }
+            }
+
+            $onlyactive = !has_all_capabilities(['moodle/course:enrolreview', 'moodle/course:viewsuspendedusers'], $context);
+            [$enrolledsql, $enrolledparams] = get_enrolled_sql($context, '', $groupids, $onlyactive);
+            $sql = "SELECT u.id
+                      FROM {user} u
+                     WHERE u.id $ownersql AND u.suspended = 0 AND u.id IN ($enrolledsql)";
+            foreach ($DB->get_fieldset_sql($sql, $ownerparams + $enrolledparams) as $ownerid) {
+                $matches[$ownerid][] = $course->id;
+            }
+        }
+
+        return array_map(static fn(array $ids): string => implode(',', $ids), $matches);
     }
 
     /**

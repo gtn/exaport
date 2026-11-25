@@ -1,7 +1,7 @@
 {{!
     @template block_exaport/share_filter_controls
 
-    Shared search, sort and type controls, with sender controls for incoming shares.
+    Shared search, sort and type controls, with discovery options for incoming shares.
 }}
 {{#hasrows}}
 {{#searchcontrols}}
@@ -32,6 +32,24 @@
                     {{#str}} share_filter_group_by_sender, block_exaport {{/str}}
                 </label>
             </div>
+            {{#hascourseoptions}}
+                <div class="mt-2" data-region="share-course-filter" hidden>
+                    <label for="exaport-share-course" class="mb-1">
+                        <span data-course-label="category" hidden>
+                            {{#str}} share_filter_category_course, block_exaport {{/str}}
+                        </span>
+                        <span data-course-label="view" hidden>
+                            {{#str}} share_filter_collection_course, block_exaport {{/str}}
+                        </span>
+                    </label>
+                    <select class="form-control custom-select w-auto mw-100" id="exaport-share-course" data-share-filter="filtercourseid">
+                        <option value="">{{#str}} share_filter_no_course_priority, block_exaport {{/str}}</option>
+                        {{#courseoptions}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/courseoptions}}
+                    </select>
+                </div>
+            {{/hascourseoptions}}
             <div class="d-flex flex-wrap align-items-center gap-1">
                 <div class="d-flex flex-wrap gap-1" data-region="sender-filter-chips"
                      data-remove-label="{{#str}} remove {{/str}}"></div>

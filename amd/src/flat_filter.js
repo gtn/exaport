@@ -27,7 +27,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     var shareFilters;       // Filter bar on My shares or Shared with me.
     var shareClearFilters; // Clear search and type on the outgoing overview.
     var shareOwnerSelect; // Incoming shares only: source of searchable sender options.
+    var shareCourseSelect; // Incoming shares only: put one course before other courses.
     var shareSenderGrouping; // Incoming shares only: group matching rows by sender.
+    var shareCourseRegion; // Course scope is available for categories and collections only.
     var selectedShareOwners = {}; // Map of selected incoming sender IDs to their display names.
     var shareOwnerChips; // Container for the incoming sender selection chips.
     var shareClearOwners; // Clear the incoming sender selection.
@@ -91,6 +93,44 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
     }
 
     /**
+     * Restore a scope only when its value is an enabled option in the current select.
+     *
+     * @param {HTMLSelectElement} select Scope control, if present.
+     * @param {string|null} value Requested URL value.
+     */
+    function restoreShareScope(select, value) {
+        if (!select) {
+            return;
+        }
+        var valid = Array.from(select.options).some(function(option) {
+            return option.value === value && !option.disabled;
+        });
+        select.value = valid ? value : '';
+    }
+
+    /**
+     * Keep course discovery specific to the active type, without carrying its semantics across types.
+     *
+     * @param {boolean} reset Whether the entry type has changed.
+     */
+    function updateShareCourseScope(reset) {
+        var type = entryTypeSelect ? entryTypeSelect.value : 'all';
+        var supported = type === 'category' || type === 'view';
+        if (shareCourseSelect) {
+            if (reset || !supported) {
+                shareCourseSelect.value = '';
+            }
+            shareCourseSelect.disabled = !supported;
+        }
+        if (shareCourseRegion) {
+            shareCourseRegion.hidden = !supported;
+            shareCourseRegion.querySelectorAll('[data-course-label]').forEach(function(label) {
+                label.hidden = label.getAttribute('data-course-label') !== type;
+            });
+        }
+    }
+
+    /**
      * Keep share filters in the current URL, separate from Portfolio preferences.
      */
     function saveShareFilters() {
@@ -110,6 +150,11 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             Object.keys(selectedShareOwners).forEach(function(id) {
                 url.searchParams.append('userid', id);
             });
+            if (shareCourseSelect && !shareCourseSelect.disabled && shareCourseSelect.value) {
+                url.searchParams.set('filtercourseid', shareCourseSelect.value);
+            } else {
+                url.searchParams.delete('filtercourseid');
+            }
         }
         history.replaceState(null, '', url);
     }
@@ -125,11 +170,21 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             entryTypeSelect.value = 'all';
         }
         shareOwnerSelect = shareFilters.querySelector('[data-share-filter="userid"]');
+        shareCourseSelect = shareFilters.querySelector('[data-share-filter="filtercourseid"]');
+        shareCourseRegion = shareFilters.querySelector('[data-region="share-course-filter"]');
         shareOwnerChips = shareFilters.querySelector('[data-region="sender-filter-chips"]');
         shareClearFilters = shareFilters.querySelector('[data-action="clear-filters"]');
         shareClearOwners = shareFilters.querySelector('[data-action="clear-senders"]');
         if (incomingSharesTable) {
             initShareOwnerFilter(params.getAll('userid'));
+            restoreShareScope(shareCourseSelect, params.get('filtercourseid'));
+            if (shareCourseSelect) {
+                shareCourseSelect.addEventListener('change', function() {
+                    saveShareFilters();
+                    filterItems();
+                });
+            }
+            updateShareCourseScope(false);
             saveShareFilters();
         }
         if (shareClearFilters) {
@@ -346,8 +401,9 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 return catIds.indexOf(catId) !== -1;
             });
             var matchesEntryType = !selectedEntryType || selectedEntryType === 'all' || entryType === selectedEntryType;
-            var matchesOwner = selectedOwnerIds.length === 0 ||
+            var matchesOwner = !shareOwnerSelect || selectedOwnerIds.length === 0 ||
                 selectedOwnerIds.indexOf(item.getAttribute('data-owner-id')) !== -1;
+
             var matches = matchesSearch && matchesCategory && matchesEntryType && matchesOwner;
             item.style.display = matches ? '' : 'none';
             hasMatches = hasMatches || matches;
@@ -424,7 +480,8 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
      * @param {string} dir Sort direction.
      */
     function sortIncomingShares(field, dir) {
-        var body = incomingSharesTable.querySelector('tbody');
+        var table = incomingSharesTable;
+        var body = table.querySelector('tbody');
         if (!body) {
             return;
         }
@@ -438,10 +495,34 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
         var visible = rows.filter(function(row) {
             return row.style.display !== 'none';
         });
+        var columns = rows.length ? rows[0].cells.length : 1;
         var fragment = document.createDocumentFragment();
-        if (shareSenderGrouping && shareSenderGrouping.checked) {
+        var courseScoped = shareCourseSelect && !shareCourseSelect.disabled && shareCourseSelect.value;
+
+        var appendHeading = function(name, count, type) {
+            var heading = document.createElement('tr');
+            heading.setAttribute('data-share-group-header', type);
+            if (type === 'course') {
+                heading.classList.add('table-active');
+            }
+            var cell = document.createElement('th');
+            cell.colSpan = columns;
+            if (type === 'sender' && courseScoped) {
+                cell.className = 'pl-4 ps-4';
+            }
+            cell.textContent = name + ' (' + count + ')';
+            heading.appendChild(cell);
+            fragment.appendChild(heading);
+        };
+        var appendRows = function(sectionRows) {
+            if (!shareSenderGrouping || !shareSenderGrouping.checked) {
+                sectionRows.forEach(function(row) {
+                    fragment.appendChild(row);
+                });
+                return;
+            }
             var owners = Object.create(null);
-            visible.forEach(function(row) {
+            sectionRows.forEach(function(row) {
                 var id = row.getAttribute('data-owner-id') || '';
                 if (!owners[id]) {
                     owners[id] = {id: id, name: row.getAttribute('data-owner-name') || '', rows: []};
@@ -454,21 +535,37 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
                 var cmp = a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
                 return field === 'sender' && dir === 'desc' ? -cmp : cmp;
             }).forEach(function(owner) {
-                var heading = document.createElement('tr');
-                heading.setAttribute('data-share-group-header', 'sender');
-                var cell = document.createElement('th');
-                cell.colSpan = owner.rows[0].cells.length;
-                cell.textContent = owner.name + ' (' + owner.rows.length + ')';
-                heading.appendChild(cell);
-                fragment.appendChild(heading);
+                appendHeading(owner.name, owner.rows.length, 'sender');
                 owner.rows.forEach(function(row) {
                     fragment.appendChild(row);
                 });
             });
-        } else {
+        };
+
+        if (courseScoped) {
+            var courseid = shareCourseSelect.value;
+            var courseRows = [];
+            var otherRows = [];
             visible.forEach(function(row) {
-                fragment.appendChild(row);
+                var matches;
+                if (entryTypeSelect.value === 'category') {
+                    matches = row.getAttribute('data-category-course-id') === courseid;
+                } else {
+                    var courseids = (row.getAttribute('data-owner-course-ids') || '').split(',').map(function(id) {
+                        return id.trim();
+                    });
+                    matches = courseids.indexOf(courseid) !== -1;
+                }
+                (matches ? courseRows : otherRows).push(row);
             });
+            appendHeading(shareCourseSelect.options[shareCourseSelect.selectedIndex].text, courseRows.length, 'course');
+            appendRows(courseRows);
+            if (otherRows.length) {
+                appendHeading(table.getAttribute('data-other-courses') || '', otherRows.length, 'course');
+                appendRows(otherRows);
+            }
+        } else {
+            appendRows(visible);
         }
         rows.forEach(function(row) {
             if (row.style.display === 'none') {
@@ -733,6 +830,7 @@ define(['block_exaport/prefs', 'block_exaport/category_select'], function(Prefs,
             if (entryTypeSelect) {
                 entryTypeSelect.addEventListener('change', function() {
                     if (shareFilters) {
+                        updateShareCourseScope(true);
                         saveShareFilters();
                     } else {
                         Prefs.savePreference('entrytype', entryTypeSelect.value);

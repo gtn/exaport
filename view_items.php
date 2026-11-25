@@ -125,11 +125,13 @@ if ($type != 'shared' && $type != 'sharedstudent' && $type != 'extern_category')
     $type = 'mine';
 }
 
-$studentsinsharedwithme = $type === 'sharedstudent' && !empty($CFG->block_exaport_enable_shared_with_me);
+$sharedcategoriesenabled = !empty($CFG->block_exaport_enable_shared_categories);
+$sharedwithmeenabled = !empty($CFG->block_exaport_enable_shared_with_me);
+$studentsinsharedwithme = $type === 'sharedstudent' && $sharedwithmeenabled;
+$sharedcategoryoverview = !$sharedcategoriesenabled && $sharedwithmeenabled ? 'shared_with_me' : 'shared_categories';
 if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
     print_error('areaisdisabled', 'block_exaport');
-} elseif (($type === 'shared' || $type === 'sharedstudent') && !$studentsinsharedwithme
-        && empty($CFG->block_exaport_enable_shared_categories)) {
+} elseif ($type === 'sharedstudent' && !$studentsinsharedwithme && !$sharedcategoriesenabled) {
     print_error('areaisdisabled', 'block_exaport');
 }
 
@@ -300,6 +302,7 @@ if ($type == 'sharedstudent') {
         $items = [];
     }
     */
+    // Direct Category links are authorized here independently of the legacy overview tab.
     if (!$categoryid) {
         throw new moodle_exception('wrong category');
     } else if (!$selecteduser) {
@@ -335,14 +338,15 @@ if ($type == 'sharedstudent') {
 
         $currentcategory = $categories[$categoryid];
         $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
+        $parentcategory = null;
         if (isset($categories[$currentcategory->pid]) &&
             category_allowed($selecteduser, $categories, $categories[$currentcategory->pid])
         ) {
             $parentcategory = $categories[$currentcategory->pid];
-        } else {
+        } else if ($sharedcategoriesenabled || $sharedwithmeenabled) {
             $parentcategory = (object)[
                 'id' => 0,
-                'url' => new moodle_url('shared_categories.php', ['courseid' => $COURSE->id]),
+                'url' => new moodle_url('/blocks/exaport/' . $sharedcategoryoverview . '.php', ['courseid' => $COURSE->id]),
                 'name' => '',
             ];
         }
@@ -586,7 +590,7 @@ if (($type === 'extern_category') && $externaccess_category) {
     echo $OUTPUT->header();
     echo block_exaport_wrapperdivstart();
 } else {
-    $header = $type === 'shared' || $type === 'sharedstudent' ? 'shared_categories' : 'myportfolio';
+    $header = $type === 'shared' || $type === 'sharedstudent' ? $sharedcategoryoverview : 'myportfolio';
     block_exaport_print_header($studentsinsharedwithme ? 'shared_with_me' : $header);
 
     echo "<div class='box generalbox'>";

@@ -70,8 +70,9 @@ class shared_with_me_page implements renderable, templatable {
         }
         core_collator::asort_array_of_arrays_by_key($senders, 'name');
 
-        $courseids = array_unique(array_filter(array_column($this->rows, 'courseid')));
+        $courseids = array_diff(array_unique(array_filter(array_column($this->rows, 'courseid'))), [SITEID]);
         $courses = $courseids ? $DB->get_records_list('course', 'id', $courseids, '', 'id, fullname') : [];
+        $unspecifiedcourse = get_string('share_course_unspecified', 'block_exaport');
 
         $enrolledcourses = enrol_get_my_courses();
         $courseoptions = [];
@@ -101,9 +102,9 @@ class shared_with_me_page implements renderable, templatable {
             $ownerid = (int)$row->owner_userid;
             $share = $row->shareinfo ??
                 \block_exaport\share_overview::build_share_info($row->entity_type, (int)$row->id, $row);
-            $coursename = !empty($row->courseid) && isset($courses[$row->courseid])
+            $coursename = isset($courses[$row->courseid])
                 ? format_string($courses[$row->courseid]->fullname)
-                : '';
+                : $unspecifiedcourse;
             $title = format_string($row->title);
             $timemodified = (int)($row->timemodified ?? 0);
             $copyform = $copyfields && $row->entity_type === 'category'

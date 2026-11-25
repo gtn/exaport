@@ -558,6 +558,38 @@ final class share_overview_test extends \advanced_testcase {
         $this->assertSame('', $rows[$otherowner->id]);
     }
 
+    /** The Course column displays a course name only when an entry has a real course. */
+    public function test_shared_with_me_displays_recorded_courses(): void {
+        global $DB;
+
+        $generator = $this->getDataGenerator();
+        $recipient = $generator->create_user();
+        $course = $generator->create_course(['fullname' => 'Recorded course']);
+        $generator->enrol_user($recipient->id, $course->id, 'student');
+        $generator->enrol_user($this->owner->id, $course->id, 'student');
+        $this->share_view_with_user($this->create_view($this->owner), $recipient->id);
+
+        $unspecified = get_string('share_course_unspecified', 'block_exaport');
+        $expected = [];
+        foreach ([0 => $unspecified, SITEID => $unspecified, $course->id => $course->fullname] as $courseid => $label) {
+            $itemid = $this->create_item($this->owner);
+            $DB->set_field('block_exaportitem', 'courseid', $courseid, ['id' => $itemid]);
+            $this->share_item_with_user($itemid, $recipient->id);
+            $expected[$itemid] = $label;
+        }
+
+        $this->setUser($recipient);
+        $page = new output\shared_with_me_page(share_overview::get_shared_with_me($recipient->id), $course->id);
+        $data = $page->export_for_template($this->createMock(\renderer_base::class));
+        $labels = [];
+        foreach ($data['rows'] as $row) {
+            $labels[$row['entitytype']][$row['entityid']] = $row['coursename'];
+        }
+
+        $this->assertSame([$unspecified], array_values($labels['view']));
+        $this->assertEquals($expected, $labels['item']);
+    }
+
     /** Sender grouping defaults off and follows the current recipient's saved preference. */
     public function test_shared_with_me_sender_grouping_preference_is_per_user(): void {
         $recipient = $this->getDataGenerator()->create_user();

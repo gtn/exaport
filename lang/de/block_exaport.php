@@ -404,6 +404,7 @@ $string['share_filter_group_by_sender'] = 'Nach Person gruppieren';
 $string['share_filter_category_course'] = 'Kurs zuerst anzeigen';
 $string['share_filter_collection_course'] = 'Personen aus diesem Kurs zuerst anzeigen';
 $string['share_filter_no_course_priority'] = 'Keine Kurspriorität';
+$string['share_course_unspecified'] = 'Kein Kurs angegeben';
 $string['sharedwith'] = 'Geteilt mit';
 $string['sharedwithotherusers'] = 'Intern mit anderen Nutzer/innen geteilt';
 $string['sharedwith_user_cnt'] = 'Mit {$a} Nutzer/innen geteilt';

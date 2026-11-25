@@ -1634,6 +1634,10 @@ return [
         'Keine Kurspriorität',
         'No course priority',
     ],
+    'share_course_unspecified' => [
+        'Kein Kurs angegeben',
+        'No course specified',
+    ],
     'sharedwith' => [
         'Geteilt mit',
         'Shared with',

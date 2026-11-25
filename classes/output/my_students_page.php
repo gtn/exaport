@@ -19,8 +19,10 @@ namespace block_exaport\output;
 defined('MOODLE_INTERNAL') || die();
 
 use core_collator;
+use moodle_url;
 use renderable;
 use renderer_base;
+use single_select;
 use templatable;
 
 /**
@@ -56,6 +58,22 @@ class my_students_page implements renderable, templatable {
      * @return array Template context.
      */
     public function export_for_template(renderer_base $output): array {
+        $courses = enrol_get_my_courses(null, 'fullname ASC');
+        $coursepicker = '';
+        if ($courses) {
+            $options = [SITEID => s(get_string('fulllistofcourses'))];
+            foreach ($courses as $course) {
+                $name = html_entity_decode(strip_tags(format_string($course->fullname)), ENT_QUOTES, 'UTF-8');
+                $options[$course->id] = s($name);
+            }
+            $url = new moodle_url('/blocks/exaport/shared_with_me.php', ['mode' => 'students']);
+            $selectedcourse = isset($options[$this->courseid]) ? $this->courseid : SITEID;
+            $picker = new single_select($url, 'courseid', $options, $selectedcourse, null);
+            $picker->set_label(s(get_string('course')));
+            $picker->attributes['id'] = 'block-exaport-students-course';
+            $coursepicker = $output->render($picker);
+        }
+
         $groups = ['thiscourse' => [], 'othercourses' => []];
         foreach ($this->students as $student) {
             $courseids = array_map('intval', $student->courseids);
@@ -67,7 +85,7 @@ class my_students_page implements renderable, templatable {
                 'id' => (int)$student->id,
                 'name' => fullname($student),
                 'courses' => implode(', ', $coursenames),
-                'url' => (new \moodle_url('/blocks/exaport/view_items.php', [
+                'url' => (new moodle_url('/blocks/exaport/view_items.php', [
                     'courseid' => $this->courseid,
                     'type' => 'sharedstudent',
                     'userid' => (int)$student->id,
@@ -89,6 +107,7 @@ class my_students_page implements renderable, templatable {
         }
 
         return [
+            'coursepicker' => $coursepicker,
             'hasstudents' => (bool)$exportedgroups,
             'groups' => $exportedgroups,
             'emptytext' => get_string('nousersfound'),

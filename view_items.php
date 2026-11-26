@@ -131,9 +131,7 @@ $sharedcategoriesenabled = !empty($CFG->block_exaport_enable_shared_categories);
 $sharedwithmeenabled = !empty($CFG->block_exaport_enable_shared_with_me);
 $studentsinsharedwithme = $type === 'sharedstudent' && $sharedwithmeenabled;
 $sharedcategoryoverview = !$sharedcategoriesenabled && $sharedwithmeenabled ? 'shared_with_me' : 'shared_categories';
-if ($type == 'mine' && empty($CFG->block_exaport_enable_myportfolio)) {
-    print_error('areaisdisabled', 'block_exaport');
-} elseif ($type === 'sharedstudent' && !$studentsinsharedwithme && !$sharedcategoriesenabled) {
+if ($type === 'sharedstudent' && !$studentsinsharedwithme && !$sharedcategoriesenabled) {
     print_error('areaisdisabled', 'block_exaport');
 }
 

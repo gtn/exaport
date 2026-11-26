@@ -199,9 +199,6 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_exaport_enable_resume',
         get_string('settings_enable_resume_head', 'block_exaport'),
         get_string('settings_enable_resume_body', 'block_exaport'), 1));
-    $settings->add(new admin_setting_configcheckbox('block_exaport_enable_myportfolio',
-        get_string('settings_enable_myportfolio_head', 'block_exaport'),
-        get_string('settings_enable_myportfolio_body', 'block_exaport'), 1));
     $settings->add(new admin_setting_configcheckbox('block_exaport_enable_views',
         get_string('settings_enable_views_head', 'block_exaport'),
         get_string('settings_enable_views_body', 'block_exaport'), 1));

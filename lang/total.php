@@ -3411,6 +3411,18 @@ return [
         'Hierarchische Ordner',
         'Hierarchical folders',
     ],
+    'settings_portfolio_display_editing_heading' => [
+        'Anzeige und Bearbeitung des Portfolios',
+        'Portfolio display and editing',
+    ],
+    'settings_show_item_intro_in_editor' => [
+        'Kurzbeschreibung im Seiteneditor anzeigen',
+        'Show short description in the Page editor',
+    ],
+    'settings_show_item_intro_in_editor_description' => [
+        'Zeigt das Feld „Kurzbeschreibung“ beim Erstellen und Bearbeiten von Seiten an. Vorhandene Kurzbeschreibungen bleiben erhalten, wenn diese Einstellung deaktiviert ist.',
+        'Show the Short description field when creating or editing Pages. Existing descriptions are kept when this setting is off.',
+    ],
     'settings_hide_category_thumbnail' => [
         'Kategorie-Vorschaubilder ausblenden',
         'Hide category thumbnails',

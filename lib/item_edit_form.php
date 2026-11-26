@@ -94,6 +94,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
         $mform = &$this->_form;
 
         $pendingeditor = !empty($this->_customdata['pendingeditor']);
+        $showintro = $this->_customdata['showintro'] ?? true;
         // Assignment import keeps its own submission flow; the normal editor owns pending blocks.
         $sections = ['mainsettings' => true, 'content' => false, 'competences' => false];
         foreach ($this->_customdata['itemeditsections'] ?? [] as $section => $visible) {
@@ -156,9 +157,7 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
             $mform->add_exaport_help_button('langid', 'forms.item.langid');
         }
 
-        $textareafields = [ // Field name => string marker.
-            'intro' => 'shortdescription',
-        ];
+        $textareafields = $showintro ? ['intro' => 'shortdescription'] : [];
         $usetextareas = @$this->_customdata['useTextareas'] ?: [];
         foreach ($textareafields as $textareafield => $stringmarker) {
             if (isset($usetextareas[$textareafield]) && $usetextareas[$textareafield]) {
@@ -389,8 +388,10 @@ class block_exaport_item_edit_form extends block_exaport_moodleform {
 
             $mform->disabledIf('name', 'allowedit', 'neq', 1);
             $mform->disabledIf('categoryids', 'allowedit', 'neq', 1);
-            $mform->disabledIf('intro', 'allowedit', 'neq', 1);
-            $mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
+            if ($showintro) {
+                $mform->disabledIf('intro', 'allowedit', 'neq', 1);
+                $mform->disabledIf('intro_editor', 'allowedit', 'neq', 1);
+            }
             $mform->disabledIf('iconfile', 'allowedit', 'neq', 1);
 
             if ($exampleid && !empty($this->_customdata['allowresubmission'])) {

@@ -205,8 +205,10 @@ require_once("{$CFG->dirroot}/blocks/exaport/lib/item_edit_form.php");
 
 $textfieldoptions = array('trusttext' => true, 'subdirs' => true, 'maxfiles' => 99, 'context' => context_user::instance($USER->id));
 
+$showintro = (bool)(get_config('block_exaport')->show_item_intro_in_editor ?? true);
+$textfields = $showintro ? POSSIBLE_IFRAME_FIELDS : array_diff(POSSIBLE_IFRAME_FIELDS, ['intro']);
 $usetextareas = [];
-foreach (POSSIBLE_IFRAME_FIELDS as $itemfield) {
+foreach ($textfields as $itemfield) {
     $usetextareas[$itemfield] = false;
     if ($existing && $existing->{$itemfield} && preg_match('!<iframe!i', $existing->{$itemfield})) {
         $usetextareas[$itemfield] = true;
@@ -246,7 +248,7 @@ $submittedpending = $submitted && optional_param('pendingeditor', 0, PARAM_BOOL)
 $pendingeditor = ($allowedit || $submittedpending) && in_array($action, ['add', 'edit'], true);
 $editorstate = $pendingeditor ? item_editor::initial_state($existing ?: null) : null;
 if ($pendingeditor && $submittedpending) {
-    foreach (POSSIBLE_IFRAME_FIELDS as $field) {
+    foreach ($textfields as $field) {
         // Rebuild the submitted input names after an error, even if the saved HTML mode changed.
         if (isset($submitted->{$field . '_editor'})) {
             $usetextareas[$field] = false;
@@ -264,7 +266,8 @@ $itemeditsections = [
 ];
 
 $editform = new block_exaport_item_edit_form($_SERVER['REQUEST_URI'] . '&type=' . $type,
-    array('current' => $existing, 'useTextareas' => $usetextareas, 'textfieldoptions' => $textfieldoptions, 'course' => $course,
+    array('current' => $existing, 'showintro' => $showintro, 'useTextareas' => $usetextareas,
+        'textfieldoptions' => $textfieldoptions, 'course' => $course,
         'type' => $type, 'action' => $action, 'allowedit' => $allowedit, 'allowresubmission' => $allowresubmission,
         'cattype' => $cattype, 'catid' => $categoryidforform, 'itemcontentblocks' => $itemcontentblocks,
         'itemcontentaddurl' => $itemcontentaddurl, 'itemcontentownerid' => (int)($existing->userid ?? $USER->id),
@@ -348,7 +351,9 @@ switch ($action) {
         }
         $post->id = $existing->id;
         $post->name = $existing->name;
-        $post->intro = $existing->intro;
+        if ($showintro) {
+            $post->intro = $existing->intro;
+        }
         $post->project_description = $existing->project_description;
         $post->project_process = $existing->project_process;
         $post->project_result = $existing->project_result;
@@ -520,6 +525,7 @@ function block_exaport_do_add($post, $blogeditform, $returnurl, $courseid, $text
     $post->type = $post->type === 'mixed' ? 'note' : $post->type;
     $post->url = '';
     $post->attachment = '';
+    $post->intro ??= '';
 
     foreach ($usetextareas as $fieldname => $usetextarea) {
         if (!$usetextarea) {

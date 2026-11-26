@@ -1583,6 +1583,11 @@ function block_exaport_get_user_category($title, $userid) {
 function block_exaport_create_user_category($title, $userid, $parentid = 0, $courseid = 0) {
     global $DB, $USER;
 
+    $parentid = (int)$parentid;
+    if (!\block_exaport\category_helper::is_valid_parent($parentid, (int)$userid)) {
+        return false;
+    }
+
     if (!$DB->record_exists('block_exaportcate', array('userid' => $userid, 'name' => $title, 'pid' => $parentid))) {
         $creatorid = !empty($USER->id) ? $USER->id : 0;
         $id = $DB->insert_record('block_exaportcate', array(

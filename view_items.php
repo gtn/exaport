@@ -22,11 +22,13 @@ use block_exaport\globals as g;
 use function block_exaport\common\print_error;
 
 /**
- * Returns true if $category is accessible to $selecteduser within the shared subtree.
- * A category is allowed if it, or any ancestor, is directly in $selecteduser->categories.
+ * Checks whether the current viewer can reach a Category shared by $selecteduser.
+ * A Category is allowed if it or an ancestor from the same owner is in $selecteduser->categories.
  */
 function category_allowed($selecteduser, $categories, $category) {
-    while ($category) {
+    $visited = [];
+    while ($category && (int)$category->userid === (int)$selecteduser->id && !isset($visited[$category->id])) {
+        $visited[$category->id] = true;
         if (isset($selecteduser->categories[$category->id])) {
             return true;
         } else if ($category->pid && isset($categories[$category->pid])) {
@@ -324,6 +326,14 @@ if ($type == 'sharedstudent') {
             ORDER BY c.name ASC
         ", array($selecteduser->id));
 
+        // Reuse the authorized tree for content, navigation and Category labels in both layouts.
+        $categories = array_filter($categories, static function($category) use ($selecteduser, $categories) {
+            return category_allowed($selecteduser, $categories, $category);
+        });
+        if (!isset($categories[$categoryid])) {
+            throw new moodle_exception('not allowed');
+        }
+
         foreach ($categories as $category) {
             $category->url = $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $courseid . '&type=shared&userid=' . $userid .
                 '&categoryid=' . $category->id;
@@ -332,16 +342,10 @@ if ($type == 'sharedstudent') {
         // Build a tree according to parent.
         $categoriesbyparent = \block_exaport\category_helper::build_by_parent($categories);
 
-        if (!isset($categories[$categoryid])) {
-            throw new moodle_exception('not allowed');
-        }
-
         $currentcategory = $categories[$categoryid];
         $subcategories = !empty($categoriesbyparent[$currentcategory->id]) ? $categoriesbyparent[$currentcategory->id] : [];
         $parentcategory = null;
-        if (isset($categories[$currentcategory->pid]) &&
-            category_allowed($selecteduser, $categories, $categories[$currentcategory->pid])
-        ) {
+        if (isset($categories[$currentcategory->pid])) {
             $parentcategory = $categories[$currentcategory->pid];
         } else if ($sharedcategoriesenabled || $sharedwithmeenabled) {
             $parentcategory = (object)[
@@ -351,32 +355,18 @@ if ($type == 'sharedstudent') {
             ];
         }
 
-        if (!category_allowed($selecteduser, $categories, $currentcategory)) {
-            throw new moodle_exception('not allowed');
-        }
-
         if ($layout == 'flat') {
-            // Flat mode lists all shared items, limited to categories shared to the current user.
-            $allowedcategories = [];
-            foreach ($categories as $category) {
-                if ((int)$category->id === 0) {
-                    continue;
-                }
-                if (category_allowed($selecteduser, $categories, $category)) {
-                    $allowedcategories[(int)$category->id] = $category;
-                }
-            }
-
+            $allowedcategoryids = array_keys($categories);
             $currentcategory = $rootcategory;
             $parentcategory = null;
             $subcategories = [];
-            $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort, array_keys($allowedcategories));
+            $items = \block_exaport\category_helper::load_flat_items($selecteduser->id, $categories, $sqlsort, $allowedcategoryids);
             $views = \block_exaport\view_helper::load_flat_views(
                 $selecteduser->id,
                 $categories,
                 $parsedsort[0],
                 $parsedsort[1],
-                array_keys($allowedcategories)
+                $allowedcategoryids
             );
         } else {
             $items = \block_exaport\category_helper::load_shared_category_items(
@@ -663,22 +653,11 @@ if ($type == 'mine' && $layout == 'folder') {
     echo block_exaport_render_entrytype_control($entrytype);
 
     if ($type == 'shared') {
-        // Build a categoriesbyparent map containing only categories actually
-        // accessible to the current user (mirrors the flat-mode $filtercategories guard).
         $allowedcategoriesbyparent = [];
         foreach ($categories as $cat) {
-            if ((int)$cat->id === 0) {
-                continue;
-            }
-            if (!category_allowed($selecteduser, $categories, $cat)) {
-                continue;
-            }
             $pid = (int)$cat->pid;
-            // Re-root: if the real parent is outside the shared subtree, treat this
-            // category as a top-level entry (pid=0) so it surfaces in the select tree.
-            if (!isset($categories[$pid]) || !category_allowed($selecteduser, $categories, $categories[$pid])) {
-                $pid = 0;
-            }
+            // A shared Category with no visible parent appears at the top level.
+            $pid = isset($categories[$pid]) ? $pid : 0;
             $allowedcategoriesbyparent[$pid][] = $cat;
         }
 
@@ -715,9 +694,6 @@ if ($type == 'mine' && $layout == 'folder') {
     $filtercategories = [];
     foreach ($categories as $category) {
         if ((int)$category->id === 0) {
-            continue;
-        }
-        if ($type == 'shared' && !category_allowed($selecteduser, $categories, $category)) {
             continue;
         }
         $filtercategories[(int)$category->id] = \block_exaport\category_helper::full_path_name($category->id, $categories);
@@ -768,19 +744,15 @@ if ($type == 'mine' && $layout == 'folder') {
     echo '</div>';
 
     // Build category children map for JS (parent_id => [child_id, ...]).
-    // For 'shared', apply the same category_allowed() guard as $filtercategories above so
-    // the two structures remain consistent and subcategory expansion never references a
-    // category the current user was not permitted to see.
-    $isshared = ($type == 'shared');
     $categorychildrenmap = [];
     foreach ($categories as $cat) {
         if ((int)$cat->id === 0) {
             continue;
         }
-        if ($isshared && !category_allowed($selecteduser, $categories, $cat)) {
-            continue;
-        }
         $pid = (int)$cat->pid;
+        if ($type === 'shared' && !isset($categories[$pid])) {
+            $pid = 0;
+        }
         if (!isset($categorychildrenmap[$pid])) {
             $categorychildrenmap[$pid] = [];
         }
@@ -1452,12 +1424,11 @@ function block_exaport_category_path($category, $courseid = 1, $currentcategoryP
 
 /**
  * Builds a breadcrumb path for shared-category folder mode.
- * Walks up via pid through $categories, stopping before any ancestor that fails
- * category_allowed() so private parent folders above the shared boundary are never shown.
+ * Walks up through authorized Categories and stops when a parent is absent or repeats.
  * Renders: [user icon] username / [folder icon] ancestor / ... / [folder icon] current (active).
  *
  * @param stdClass $currentcategory
- * @param array $categories All of the owner's categories (id => stdClass), with ->url set.
+ * @param array $categories The owner's authorized Categories (id => stdClass), with ->url set.
  * @param stdClass $selecteduser Sharing user, with ->categories (directly shared ids) and ->name.
  * @return string HTML breadcrumb matching the classes used by block_exaport_category_path().
  */
@@ -1465,14 +1436,9 @@ function block_exaport_shared_category_path($currentcategory, $categories, $sele
     // Walk up from current category, collecting allowed ancestors.
     $chain = [];
     $current = $currentcategory;
-    while ($current) {
-        $chain[] = $current;
-        $pid = (int)$current->pid;
-        if (isset($categories[$pid]) && category_allowed($selecteduser, $categories, $categories[$pid])) {
-            $current = $categories[$pid];
-        } else {
-            break;
-        }
+    while ($current && !isset($chain[$current->id])) {
+        $chain[$current->id] = $current;
+        $current = $categories[(int)$current->pid] ?? null;
     }
     $chain = array_reverse($chain);
 

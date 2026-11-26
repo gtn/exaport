@@ -21,7 +21,7 @@ global $OUTPUT;
 $courseid = optional_param('courseid', 0, PARAM_INT);
 $edit = optional_param('edit', 0, PARAM_INT);
 
-$pid = optional_param('pid', '', PARAM_INT);
+$pid = max(0, optional_param('pid', 0, PARAM_INT));
 $name = optional_param('name', '', PARAM_TEXT);
 $cataction = optional_param('cataction', '', PARAM_ALPHA);
 $catconfirm = optional_param('catconfirm', 0, PARAM_INT);
@@ -63,11 +63,10 @@ if ($cataction) {
             case "add":
                 $newentry->userid = $USER->id;
                 $newentry->creatorid = $USER->id;
-                if ($pid > 0) {
-                    $newentry->pid = $pid;
-                } else {
-                    $newentry->pid = 0;
+                if (!\block_exaport\category_helper::is_valid_parent($pid, $USER->id)) {
+                    throw new \block_exaport\moodle_exception('invalidparentcategory');
                 }
+                $newentry->pid = $pid;
 
                 if (!$newentry->id = $DB->insert_record("block_exaportcate", $newentry)) {
                     error("Could not insert this category");
@@ -108,13 +107,12 @@ if ($cataction) {
                 $newentry->id = $editid;
                 $newentry->userid = $USER->id;
 
-                if ($pid > 0) {
-                    $newentry->pid = $pid;
-                } else {
-                    $newentry->pid = 0;
-                }
                 $conditions = array("id" => $newentry->id, "userid" => $USER->id);
                 if ($DB->count_records("block_exaportcate", $conditions) == 1) {
+                    if (!\block_exaport\category_helper::is_valid_parent($pid, $USER->id, $editid)) {
+                        throw new \block_exaport\moodle_exception('invalidparentcategory');
+                    }
+                    $newentry->pid = $pid;
                     if (!$DB->update_record("block_exaportcate", $newentry)) {
                         error("Could not update your categories");
                     } else {

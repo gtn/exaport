@@ -6,16 +6,19 @@ namespace block_exaport;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once(__DIR__ . '/../lib/item_content_helpers.php');
+require_once(__DIR__ . '/../lib/lib.php');
+require_once(__DIR__ . '/fixtures/exaport_test_helpers_trait.php');
 
 /**
- * Regression coverage for the individual shared-item copy controller.
+ * Regression coverage for copying shared items and categories to a personal portfolio.
  *
  * @package block_exaport
  * @copyright 2026 gtn gmbh
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class item_copytoself_test extends \advanced_testcase {
+    use \block_exaport\tests\exaport_test_helpers_trait;
+
     public function test_controller_copies_structured_content_to_recipient_without_mutating_source(): void {
         global $CFG, $DB, $USER, $PAGE, $COURSE, $OUTPUT, $SESSION;
 
@@ -186,5 +189,66 @@ final class item_copytoself_test extends \advanced_testcase {
         $this->assertSame((int)$recipient->id, (int)$copiedfile->get_userid());
         $this->assertEquals($sourcebefore, $DB->get_record('block_exaportitem', ['id' => $sourceid], '*', MUST_EXIST));
         $this->assertEquals($blocks, \block_exaport_get_item_content_blocks($sourceid));
+    }
+
+    public function test_category_copy_keeps_contributed_items_and_skips_other_owners_categories(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $contributor = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $root = $this->create_category($owner, 'Shared category', internshare: 1);
+        $child = $this->create_category($owner, 'Child', $root);
+        $grandchild = $this->create_category($owner, 'Grandchild', $child);
+        $foreign = $this->create_category($contributor, 'Private category', $child);
+        $DB->insert_record('block_exaportcatshar', ['catid' => $root, 'userid' => $recipient->id]);
+        $DB->insert_record('block_exaportcatshar', ['catid' => $root, 'userid' => $contributor->id]);
+
+        // A contribution is a Page linked to the shared tree. Its owner need not own the Categories.
+        $contribution = $DB->insert_record('block_exaportitem', [
+            'userid' => $contributor->id, 'name' => 'Contributed page', 'type' => 'note', 'intro' => '',
+        ]);
+        item_category_helper::sync_item_categories($contribution, [$grandchild]);
+        $privateitem = $DB->insert_record('block_exaportitem', [
+            'userid' => $contributor->id, 'name' => 'Private page', 'type' => 'note', 'intro' => '',
+        ]);
+        item_category_helper::sync_item_categories($privateitem, [$foreign]);
+        $this->setUser($recipient);
+
+        $copy = copy_category_to_myself($root);
+
+        $conditions = ['userid' => $recipient->id];
+        $this->assertSame(3, $DB->count_records('block_exaportcate', $conditions));
+        $copiedchild = $DB->get_record('block_exaportcate', $conditions + ['pid' => $copy->id, 'name' => 'Child'], '*', MUST_EXIST);
+        $copiedgrandchild = $DB->get_record(
+            'block_exaportcate', $conditions + ['pid' => $copiedchild->id, 'name' => 'Grandchild'], '*', MUST_EXIST
+        );
+        $itemcopy = $DB->get_record('block_exaportitem', $conditions, '*', MUST_EXIST);
+        $this->assertSame('Contributed page', $itemcopy->name);
+        $this->assertTrue($DB->record_exists('block_exaportitemcate', [
+            'itemid' => $itemcopy->id, 'cateid' => $copiedgrandchild->id,
+        ]));
+    }
+
+    public function test_category_copy_visits_each_category_once_in_a_cycle(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $owner = $this->getDataGenerator()->create_user();
+        $recipient = $this->getDataGenerator()->create_user();
+        $root = $this->create_category($owner, 'Shared category', internshare: 1);
+        $child = $this->create_category($owner, 'Child', $root);
+        $DB->set_field('block_exaportcate', 'pid', $child, ['id' => $root]);
+        $DB->insert_record('block_exaportcatshar', ['catid' => $root, 'userid' => $recipient->id]);
+        $this->setUser($recipient);
+
+        $copy = copy_category_to_myself($root);
+
+        $this->assertSame(0, (int)$copy->pid);
+        $this->assertSame(2, $DB->count_records('block_exaportcate', ['userid' => $recipient->id]));
+        $this->assertTrue($DB->record_exists('block_exaportcate', [
+            'userid' => $recipient->id, 'pid' => $copy->id, 'name' => 'Child',
+        ]));
     }
 }

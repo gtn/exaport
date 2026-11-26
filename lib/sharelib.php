@@ -1849,37 +1849,13 @@ namespace {
             $itemwhere .
             " GROUP BY $categorycolumns, u.firstname, u.lastname, u.picture" .
             " ORDER BY u.lastname, u.firstname, c.name", array($userid, (int)block_exaport_sharegroups_enabled(), $userid));
-        // return array();
-        // Get users for grouping later.
-        $sharedusers = array();
-        $sharedcategories = array();
-        foreach ($categories as $key => $categorie) {
-            if (!in_array($categorie->userid, $sharedusers)) {
-                $sharedusers[] = $categorie->userid;
+        $sharedusers = array_values(array_unique(array_column($categories, 'userid')));
+        $sharedcategories = [];
+        $visited = [];
+        foreach ($categories as $category) {
+            foreach (block_exaport_get_owned_category_tree_ids($category->id, $category->userid, $visited) as $categoryid) {
+                $sharedcategories[] = $categoryid;
             }
-            if (!in_array($categorie->id, $sharedcategories)) {
-                $sharedcategories[] = $categorie->id;
-            }
-        }
-
-        // Get sub categories (recursively).
-        $get_subcats = function($parent_id) use (&$get_subcats, &$sharedcategories, $DB) {
-            $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $parent_id], null, 'id, id as tmp');
-            foreach ($subcategories as $categoryid) {
-                if (!in_array($categoryid, $sharedcategories)) {
-                    $sharedcategories[] = $categoryid;
-                }
-                $get_subcats($categoryid);
-            }
-        };
-        for ($i = 0, $c = count($sharedcategories); $i < $c; $i++) {
-            $get_subcats($sharedcategories[$i]);
-            /*$subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $sharedcategories[$i]], null, 'id, id as tmp');
-            foreach ($subcategories as $categoryid) {
-                if (!in_array($categoryid, $sharedcategories)) {
-                    $sharedcategories[] = $categoryid;
-                }
-            }*/
         }
         // filter categories by needed itemid
         if ($itemid) {
@@ -1945,17 +1921,19 @@ namespace {
             return $shareditems;
         } else {
             $sharedartefactsbyuser = array();
-            foreach ($sharedusers as $key => $userid) {
-                $sharedartefactsbyuser[$key]['userid'] = $userid;
-                $sharedartefactsbyuser[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $userid)));
-                $items = $DB->get_records_sql('SELECT i.* FROM {block_exaportitem} i ' .
-                    ' JOIN {block_exaportitemcate} ic ON ic.itemid = i.id' .
-                    ' WHERE i.userid=? AND ic.cateid IN (' . $sharedcategorieslist . ')',
-                    array('userid' => $userid));
-                $sharedartefactsbyuser[$key]['items'] = $items;
-                // Delete empty categories.
-                if (count($sharedartefactsbyuser[$key]['items']) == 0) {
-                    unset($sharedartefactsbyuser[$key]);
+            if ($sharedcategories) {
+                foreach ($sharedusers as $key => $userid) {
+                    $sharedartefactsbyuser[$key]['userid'] = $userid;
+                    $sharedartefactsbyuser[$key]['fullname'] = fullname($DB->get_record('user', array('id' => $userid)));
+                    $items = $DB->get_records_sql('SELECT i.* FROM {block_exaportitem} i ' .
+                        ' JOIN {block_exaportitemcate} ic ON ic.itemid = i.id' .
+                        ' WHERE i.userid=? AND ic.cateid IN (' . $sharedcategorieslist . ')',
+                        array('userid' => $userid));
+                    $sharedartefactsbyuser[$key]['items'] = $items;
+                    // Delete empty categories.
+                    if (count($sharedartefactsbyuser[$key]['items']) == 0) {
+                        unset($sharedartefactsbyuser[$key]);
+                    }
                 }
             }
 
@@ -2249,14 +2227,9 @@ namespace block_exaport {
                           AND u.deleted = 0
                     ORDER BY u.lastname, u.firstname, c.name', array($userid, $USER->id));
 
-        // add subcategories (TODO: check!)
-        foreach ($categories as $cuid => $cat) {
-            $subcategories = $DB->get_records_menu('block_exaportcate', ['pid' => $cuid], null, 'id, id as tmp');
-            foreach ($subcategories as $categoryid) {
-                if (!array_key_exists($categoryid, $categories)) {
-                    $categories[$categoryid] = $DB->get_record('block_exaportcate', ['id' => $categoryid]);
-                }
-            }
+        // Preserve immediate child access within each sharer's Category tree.
+        foreach ($categories as $category) {
+            $categories += $DB->get_records('block_exaportcate', ['pid' => $category->id, 'userid' => $category->userid]);
         }
 
         $tree = [];

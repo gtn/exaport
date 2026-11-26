@@ -49,7 +49,7 @@ if (optional_param('action', '', PARAM_ALPHA) == 'addstdcat') {
     redirect('view_items.php?courseid=' . $courseid);
 }
 if (optional_param('action', '', PARAM_ALPHA) == 'movetocategory') {
-    confirm_sesskey();
+    require_sesskey();
 
     $category = $DB->get_record("block_exaportcate", array(
         'id' => required_param('id', PARAM_INT),
@@ -59,13 +59,14 @@ if (optional_param('action', '', PARAM_ALPHA) == 'movetocategory') {
         die(block_exaport_get_string('category_not_found'));
     }
 
-    if (!$targetcategory = block_exaport_get_category(required_param('categoryid', PARAM_INT))) {
-        die('target category not found');
+    $parentid = required_param('categoryid', PARAM_INT);
+    if (!\block_exaport\category_helper::is_valid_parent($parentid, $USER->id, (int)$category->id)) {
+        throw new \block_exaport\moodle_exception('invalidparentcategory');
     }
 
     $DB->update_record('block_exaportcate', (object)array(
         'id' => $category->id,
-        'pid' => $targetcategory->id,
+        'pid' => $parentid,
     ));
 
     echo 'ok';

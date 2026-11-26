@@ -19,7 +19,7 @@ namespace block_exaport;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/blocks/exaport/lib/sharelib.php');
+require_once($CFG->dirroot . '/blocks/exaport/lib/lib.php');
 require_once($CFG->dirroot . '/blocks/exaport/tests/fixtures/exaport_test_helpers_trait.php');
 
 /**
@@ -148,6 +148,63 @@ final class category_helper_test extends \advanced_testcase {
 
         $this->assertFalse(category_helper::is_valid_parent($category, $this->owner->id, $category));
         $this->assertFalse(category_helper::is_valid_parent($descendant, $this->owner->id, $category));
+    }
+
+    public function test_category_creation_helper_requires_a_same_owner_parent(): void {
+        global $DB;
+
+        $otherowner = $this->getDataGenerator()->create_user();
+        $ownparent = $this->create_category($this->owner, 'Own parent');
+        $foreignparent = $this->create_category($otherowner, 'Foreign parent');
+
+        $category = block_exaport_create_user_category('Valid child', $this->owner->id, $ownparent);
+
+        $this->assertEquals($ownparent, $category->pid);
+        $this->assertFalse(block_exaport_create_user_category('Invalid child', $this->owner->id, $foreignparent));
+        $this->assertFalse($DB->record_exists('block_exaportcate', ['userid' => $this->owner->id, 'name' => 'Invalid child']));
+    }
+
+    public function test_shared_category_navigation_only_follows_same_owner_children(): void {
+        $recipient = $this->getDataGenerator()->create_user();
+        $otherowner = $this->getDataGenerator()->create_user();
+        $shared = $this->create_category($this->owner, 'Shared root', internshare: 1);
+        $child = $this->create_category($this->owner, 'Child', $shared);
+        // Model a legacy parent link between two owners.
+        $this->create_category($otherowner, 'Private category', $shared);
+        $this->share_with_user($shared, $recipient->id);
+        $this->setUser($recipient);
+
+        $sharedusers = get_categories_shared_to_user($recipient->id);
+
+        $this->assertSame([(int)$this->owner->id], array_keys($sharedusers));
+        $this->assertEqualsCanonicalizing([$shared, $child], array_keys($sharedusers[$this->owner->id]->categories));
+    }
+
+    public function test_page_access_stays_inside_the_shared_category_tree(): void {
+        global $DB;
+
+        $recipient = $this->getDataGenerator()->create_user();
+        $contributor = $this->getDataGenerator()->create_user();
+        $shared = $this->create_category($this->owner, 'Shared root', internshare: 1);
+        $child = $this->create_category($this->owner, 'Child', $shared);
+        $grandchild = $this->create_category($this->owner, 'Grandchild', $child);
+        $foreign = $this->create_category($contributor, 'Private category', $child);
+        $this->share_with_user($shared, $recipient->id);
+
+        $pages = [];
+        foreach ([
+            'Nested Page' => [$this->owner->id, $grandchild],
+            'Contributed Page' => [$contributor->id, $child],
+            'Private Page' => [$this->owner->id, $foreign],
+        ] as $name => [$ownerid, $categoryid]) {
+            $pages[$name] = $DB->insert_record('block_exaportitem', ['userid' => $ownerid, 'name' => $name, 'type' => 'note']);
+            item_category_helper::sync_item_categories($pages[$name], [$categoryid]);
+        }
+        $this->setUser($recipient);
+
+        $this->assertEquals($this->owner->id, block_exaport_can_user_access_shared_item($recipient->id, $pages['Nested Page']));
+        $this->assertEquals($contributor->id, block_exaport_can_user_access_shared_item($recipient->id, $pages['Contributed Page']));
+        $this->assertFalse(block_exaport_can_user_access_shared_item($recipient->id, $pages['Private Page']));
     }
 
     // -------------------------------------------------------------------------

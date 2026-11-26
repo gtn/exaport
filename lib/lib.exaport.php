@@ -21,7 +21,7 @@ use block_exaport\globals as g;
 
 defined('MOODLE_INTERNAL') || die();
 
-// Copy shared structure tree to user.
+// Copy a shared tree whose root has been authorized by the caller.
 function copy_category_to_myself($categoryid) {
     $rootcat = g::$DB->get_record("block_exaportcate", array('id' => $categoryid));
     if (!$rootcat) {
@@ -30,13 +30,15 @@ function copy_category_to_myself($categoryid) {
 
     // A requested tree is copied atomically: failures never report a partial tree.
     $transaction = g::$DB->start_delegated_transaction();
-    $newroot = _copy_category_to_myself_iterator($rootcat, 0);
+    $visited = [];
+    $newroot = _copy_category_to_myself_iterator($rootcat, 0, $visited);
     $transaction->allow_commit();
     return $newroot;
 }
 
-function _copy_category_to_myself_iterator($currcat, $parentcatid) {
+function _copy_category_to_myself_iterator($currcat, $parentcatid, array &$visited) {
     global $CFG, $USER;
+    $visited[$currcat->id] = true;
     $newcat = new \stdClass();
     $newcat->pid = $parentcatid;
     $newcat->userid = g::$USER->id;
@@ -51,9 +53,12 @@ function _copy_category_to_myself_iterator($currcat, $parentcatid) {
     $newcat->creatorid = !empty(g::$USER->id) ? g::$USER->id : 0;
     $newcat->id = g::$DB->insert_record("block_exaportcate", $newcat);
 
-    $children = g::$DB->get_records("block_exaportcate", array('pid' => $currcat->id));
+    // A shared Category only grants access to child Categories belonging to its owner.
+    $children = g::$DB->get_records('block_exaportcate', ['pid' => $currcat->id, 'userid' => $currcat->userid]);
     foreach ($children as $category) {
-        _copy_category_to_myself_iterator($category, $newcat->id);
+        if (!isset($visited[$category->id])) {
+            _copy_category_to_myself_iterator($category, $newcat->id, $visited);
+        }
     }
 
     $items = g::$DB->get_records_sql('

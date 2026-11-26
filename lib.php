@@ -383,17 +383,19 @@ function block_exaport_get_authorized_file(context $context, string $filearea, a
  */
 function block_exaport_user_preferences(): array {
     $preferences = [];
+    $caneditlayout = static fn(stdClass $user): bool =>
+        core_user::is_current_user($user) && block_exaport_item_list_layout_changes_allowed();
     $preferences['block_exaport_layout'] = [
         'type' => PARAM_ALPHA,
         'null' => NULL_NOT_ALLOWED,
         'default' => block_exaport_get_default_layout(),
-        'permissioncallback' => [core_user::class, 'is_current_user'],
+        'permissioncallback' => $caneditlayout,
     ];
     $preferences['block_exaport_folderlayout'] = [
         'type' => PARAM_ALPHA,
         'null' => NULL_NOT_ALLOWED,
         'default' => block_exaport_get_default_folderlayout(),
-        'permissioncallback' => [core_user::class, 'is_current_user'],
+        'permissioncallback' => $caneditlayout,
     ];
     $preferences['block_exaport_sort'] = [
         'type' => PARAM_ALPHANUMEXT,

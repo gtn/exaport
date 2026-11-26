@@ -3376,16 +3376,16 @@ return [
         'Item list display defaults',
     ],
     'settings_items_display_defaults_description' => [
-        'Diese Standardwerte gelten nur für Personen, die noch kein Layout gewählt haben. Die Darstellung kann jederzeit geändert werden; die eigene gespeicherte Auswahl hat immer Vorrang.',
-        'These defaults apply only to users who have not yet chosen a layout. Users can always change the display, and their saved choice takes precedence.',
+        'Legt Standardlayout und Standarddarstellung für Eintragslisten fest.',
+        'Choose the default layout and presentation for item lists.',
     ],
     'settings_default_folderlayout' => [
         'Standarddarstellung in Ordnern',
         'Default folder display',
     ],
     'settings_default_folderlayout_description' => [
-        'Darstellung der Einträge innerhalb von Ordnern, wenn noch keine persönliche Einstellung vorhanden ist.',
-        'How items are displayed within folders when no user preference exists.',
+        'Zeigt Einträge als Kacheln oder in einer Detailtabelle an.',
+        'Show items as tiles or in a details table.',
     ],
     'settings_default_folderlayout_details' => [
         'Details',
@@ -3400,8 +3400,8 @@ return [
         'Default item list layout',
     ],
     'settings_default_layout_description' => [
-        'Legt fest, ob die Einträge in hierarchischen Ordnern oder als flache Liste angezeigt werden, wenn noch keine persönliche Einstellung vorhanden ist.',
-        'Whether the item list uses hierarchical folders or a flat list when no user preference exists.',
+        'Legt fest, ob die Einträge in hierarchischen Ordnern oder als flache Liste angezeigt werden.',
+        'Whether the item list uses hierarchical folders or a flat list.',
     ],
     'settings_default_layout_flat' => [
         'Flach',
@@ -3410,6 +3410,14 @@ return [
     'settings_default_layout_folder' => [
         'Hierarchische Ordner',
         'Hierarchical folders',
+    ],
+    'settings_allow_item_list_layout_changes' => [
+        'Änderungen am Layout der Eintragsliste erlauben',
+        'Allow users to change the item list layout',
+    ],
+    'settings_allow_item_list_layout_changes_description' => [
+        'Wenn diese Einstellung deaktiviert ist, werden die Layout-Optionen ausgeblendet und die beiden Standardwerte oben gelten für alle. Gespeicherte Einstellungen werden wieder verwendet, sobald Layout-Änderungen erlaubt sind.',
+        'Turn this off to hide the layout controls and apply both defaults above to everyone. Saved choices take effect again when layout changes are allowed.',
     ],
     'settings_portfolio_display_editing_heading' => [
         'Anzeige und Bearbeitung des Portfolios',

@@ -244,6 +244,9 @@ if ($ADMIN->fulltree) {
             'tiles' => get_string('settings_default_folderlayout_tiles', 'block_exaport'),
             'details' => get_string('settings_default_folderlayout_details', 'block_exaport'),
         ]));
+    $settings->add(new admin_setting_configcheckbox('block_exaport/allow_item_list_layout_changes',
+        get_string('settings_allow_item_list_layout_changes', 'block_exaport'),
+        get_string('settings_allow_item_list_layout_changes_description', 'block_exaport'), 1));
 
     $settings->add(new admin_setting_heading('exaport/portfolio_display_editing',
         get_string('settings_portfolio_display_editing_heading', 'block_exaport'), ''));

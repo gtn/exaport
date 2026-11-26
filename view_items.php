@@ -94,14 +94,6 @@ if ($access && preg_match('!^hash/[0-9]+-[a-zA-Z0-9]{8}$!', $access)) {
 $context = context_system::instance();
 
 // Fall back to stored user preferences when not provided via URL.
-$layoutfromurl = $layout;
-if (!$layout) {
-    $layout = get_user_preferences('block_exaport_layout', block_exaport_get_default_layout());
-}
-$folderlayoutfromurl = $folderlayout;
-if (!$folderlayout) {
-    $folderlayout = get_user_preferences('block_exaport_folderlayout', block_exaport_get_default_folderlayout());
-}
 $sortfromurl = $sort;
 if (!$sort) {
     $sort = get_user_preferences('block_exaport_sort', 'date-desc');
@@ -135,24 +127,36 @@ if ($type === 'sharedstudent' && !$studentsinsharedwithme && !$sharedcategoriese
     print_error('areaisdisabled', 'block_exaport');
 }
 
-// Main layout mode switch: folder (legacy navigation) or flat (all items).
-if (in_array($layout, ['tiles', 'details'])) {
-    // Backward compatibility for old URL layout values.
-    $folderlayout = $layout;
-    $layout = 'folder';
-}
-if (!in_array($layout, ['folder', 'flat'])) {
+$allowlayoutchanges = block_exaport_item_list_layout_changes_allowed();
+if (!$allowlayoutchanges) {
     $layout = block_exaport_get_default_layout();
-}
-if (!in_array($folderlayout, ['tiles', 'details'])) {
     $folderlayout = block_exaport_get_default_folderlayout();
-}
-// Persist preferences on page load when explicitly provided via URL.
-if ($layoutfromurl !== '') {
-    set_user_preference('block_exaport_layout', $layout);
-}
-if ($folderlayoutfromurl !== '' || $layoutfromurl !== '') {
-    set_user_preference('block_exaport_folderlayout', $folderlayout);
+} else {
+    $layoutfromurl = $layout;
+    if (!$layout) {
+        $layout = get_user_preferences('block_exaport_layout', block_exaport_get_default_layout());
+    }
+    $folderlayoutfromurl = $folderlayout;
+    if (!$folderlayout) {
+        $folderlayout = get_user_preferences('block_exaport_folderlayout', block_exaport_get_default_folderlayout());
+    }
+    if (in_array($layout, ['tiles', 'details'])) {
+        // Backward compatibility for old URL layout values.
+        $folderlayout = $layout;
+        $layout = 'folder';
+    }
+    if (!in_array($layout, ['folder', 'flat'])) {
+        $layout = block_exaport_get_default_layout();
+    }
+    if (!in_array($folderlayout, ['tiles', 'details'])) {
+        $folderlayout = block_exaport_get_default_folderlayout();
+    }
+    if ($layoutfromurl !== '') {
+        set_user_preference('block_exaport_layout', $layout);
+    }
+    if ($folderlayoutfromurl !== '' || $layoutfromurl !== '') {
+        set_user_preference('block_exaport_folderlayout', $folderlayout);
+    }
 }
 if ($showsubcategoriesfromurl !== -1) {
     set_user_preference('block_exaport_show_subcategories', (int)$show_subcategories);
@@ -804,61 +808,40 @@ if ($type == 'mine' && $layout == 'folder') {
 }
 
 if ($type === 'extern_category') {
-    // External category access: show category heading + folder/flat toggle + tiles/details toggle.
-    // Flat mode is scoped to the shared subtree (see data loading above), so it never leaks
-    // unshared categories. No print/other-users controls in the read-only external view.
     echo '<h2>' . format_string($currentcategory->name) . '</h2>';
-    echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
-    echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
-    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
-        . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
-        . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
-    // Flat link resets categoryid: flat mode always lists the whole shared subtree from its root.
-    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'categoryid' => $externaccess_category->id, 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
-        . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
-        . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
-    echo '</div>';
-    echo '<div class="d-flex align-items-center" style="gap: 0.5rem;">';
-    echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
-    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="tiles">'
-        . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
-        . ' ' . block_exaport_get_string("tiles") . '</a>';
-    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="details">'
-        . block_exaport_fontawesome_icon('list', 'solid', 1)
-        . ' ' . block_exaport_get_string("details") . '</a>';
-    echo '</div>';
-    echo '</div>';
-    echo '</div>';
-    // Entry-type filter for external folder mode (items vs views).
-    if ($layout == 'folder') {
-        echo '<div class="exaport-flat-filter mb-3 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
-        echo block_exaport_render_entrytype_control($entrytype);
+}
+
+if ($allowlayoutchanges || $type === 'mine') {
+    $toolbaralignment = $allowlayoutchanges ? 'justify-content-between' : 'justify-content-end';
+    echo '<div class="excomdos_additem' . ($useBootstrapLayout ? ' d-flex align-items-center flex-wrap ' . $toolbaralignment : '') . '">';
+
+    if ($allowlayoutchanges) {
+        $flaturlparams = ['layout' => 'flat', 'folderlayout' => $folderlayout];
+        if ($externaccess_category) {
+            // Flat mode starts at the root of the shared subtree.
+            $flaturlparams['categoryid'] = $externaccess_category->id;
+        }
+        echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
+        echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+            . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
+            . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
+        echo '<a href="' . $PAGE->url->out(true, $flaturlparams) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
+            . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
+            . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
         echo '</div>';
-        block_exaport_require_filter_js();
     }
-} else {
-    echo '<div class="excomdos_additem ' . ($useBootstrapLayout ? 'd-flex justify-content-between align-items-center flex-wrap' : '') . '">';
 
-    // Left side: folder/flat display toggle (btn-group style).
-    echo '<div class="btn-group exaport-layout-toggle" role="group" aria-label="Layout">';
-    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'folder', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'folder' ? 'btn-primary' : 'btn-outline-secondary') . '">'
-        . block_exaport_fontawesome_icon('folder-open', 'regular', 1)
-        . ' ' . get_string('layout_mode_folder', 'block_exaport') . '</a>';
-    echo '<a href="' . $PAGE->url->out(true, ['layout' => 'flat', 'folderlayout' => $folderlayout]) . '" class="btn btn-sm ' . ($layout == 'flat' ? 'btn-primary' : 'btn-outline-secondary') . '">'
-        . block_exaport_fontawesome_icon('table-cells', 'solid', 1)
-        . ' ' . get_string('layout_mode_flat', 'block_exaport') . '</a>';
-    echo '</div>';
-
-    // Right side: tiles/details toggle (btn-group style) + printer-friendly button.
     echo '<div class="d-flex align-items-center" style="gap: 0.5rem;">';
-    echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
-    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="tiles">'
-        . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
-        . ' ' . block_exaport_get_string("tiles") . '</a>';
-    echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="details">'
-        . block_exaport_fontawesome_icon('list', 'solid', 1)
-        . ' ' . block_exaport_get_string("details") . '</a>';
-    echo '</div>';
+    if ($allowlayoutchanges) {
+        echo '<div class="btn-group exaport-view-toggle" role="group" aria-label="View">';
+        echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'tiles']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'tiles' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="tiles">'
+            . block_exaport_fontawesome_icon('table-cells-large', 'solid', 1)
+            . ' ' . block_exaport_get_string("tiles") . '</a>';
+        echo '<a href="' . $PAGE->url->out(true, ['folderlayout' => 'details']) . '" class="btn btn-sm exaport-view-toggle-action ' . ($folderlayout == 'details' ? 'btn-primary' : 'btn-outline-secondary') . '" data-folderlayout="details">'
+            . block_exaport_fontawesome_icon('list', 'solid', 1)
+            . ' ' . block_exaport_get_string("details") . '</a>';
+        echo '</div>';
+    }
     if ($type == 'mine') {
         echo '<a target="_blank" href="' . $CFG->wwwroot . '/blocks/exaport/view_items_print.php?courseid=' . $courseid . '" class="btn btn-sm btn-outline-secondary">'
             . block_exaport_fontawesome_icon('print', 'solid', 1)
@@ -866,7 +849,13 @@ if ($type === 'extern_category') {
     }
     echo '</div>';
     echo '</div>';
+}
 
+if ($type === 'extern_category' && $layout == 'folder') {
+    echo '<div class="exaport-flat-filter mb-3 d-flex flex-wrap align-items-center" style="gap: 0.5rem;">';
+    echo block_exaport_render_entrytype_control($entrytype);
+    echo '</div>';
+    block_exaport_require_filter_js();
 }
 
 $PAGE->requires->js_call_amd('block_exaport/view_items_state', 'init', [$folderlayout, $layout]);

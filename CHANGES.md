@@ -1,3 +1,10 @@
+### v5.2 (2026112600) ###
+* Improve filtering and sorting in the sharing overviews. Add "My Students" and "Category copying" to "Shared with Me".
+* Keep shared Category links working when the legacy tab is hidden and limit browsing and copying to the authorized tree.
+* Revoke Collection email links when sharing is turned off or recipients are removed.
+* Keep My Portfolio available always and remove its visibility setting.
+* Update German translations and add informal German (`de_du`).
+
 ### v5.2 (2026111802) ###
 * Remove Exaport-owned Exacomp links on uninstall so reinstalled items do not inherit old competencies.
 

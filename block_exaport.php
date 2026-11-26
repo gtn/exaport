@@ -77,12 +77,10 @@ class block_exaport extends block_list {
                 $icon . block_exaport_get_string('resume_my') . '</a>';
         }
 
-        if (!empty($CFG->block_exaport_enable_myportfolio)) {
-            $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/my_portfolio.svg' . '" width="16" height="16" class="icon" alt="" />';
-            $this->content->items[] = '<a title="' . block_exaport_get_string('myportfoliotitle') . '" ' .
-                ' href="' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '">' .
-                $icon . block_exaport_get_string('myportfolio') . '</a>';
-        }
+        $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/my_portfolio.svg' . '" width="16" height="16" class="icon" alt="" />';
+        $this->content->items[] = '<a title="' . block_exaport_get_string('myportfoliotitle') . '" ' .
+            ' href="' . $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id . '">' .
+            $icon . block_exaport_get_string('myportfolio') . '</a>';
 
         if (!empty($CFG->block_exaport_enable_views)) {
             $icon = '<img src="' . $CFG->wwwroot . '/blocks/exaport/pix/myviews.svg' . '" width="16" height="16" class="icon" alt="" />';

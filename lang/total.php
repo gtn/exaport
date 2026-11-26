@@ -3323,14 +3323,6 @@ return [
         'Den Navigationsbereich "Mein Lebenslauf" ein-/ausblenden.',
         'Show or hide the "My CV" navigation area.',
     ],
-    'settings_enable_myportfolio_head' => [
-        'Bereich "Meine Seiten" anzeigen',
-        'Show "My Pages" area',
-    ],
-    'settings_enable_myportfolio_body' => [
-        'Den Navigationsbereich "Meine Seiten" ein-/ausblenden.',
-        'Show or hide the "My Pages" navigation area.',
-    ],
     'settings_enable_views_head' => [
         'Bereich "Meine Sammelmappen" anzeigen',
         'Show "My Collections" area',

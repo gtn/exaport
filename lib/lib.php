@@ -822,10 +822,8 @@ function block_exaport_print_header($itemidentifier, $subitemidentifier = null) 
         $tabs['resume_my'] = new tabobject('resume_my', $CFG->wwwroot . '/blocks/exaport/resume.php?courseid=' . $COURSE->id,
             get_string("resume_my", "block_exaport"), '', true);
     }
-    if (!empty($CFG->block_exaport_enable_myportfolio)) {
-        $tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id,
-            block_exaport_get_string("myportfolio"), '', true);
-    }
+    $tabs['myportfolio'] = new tabobject('myportfolio', $CFG->wwwroot . '/blocks/exaport/view_items.php?courseid=' . $COURSE->id,
+        block_exaport_get_string("myportfolio"), '', true);
     if (!empty($CFG->block_exaport_enable_views)) {
         $tabs['views'] = new tabobject('views', $CFG->wwwroot . '/blocks/exaport/views_list.php?courseid=' . $COURSE->id,
             get_string("views", "block_exaport"), '', true);

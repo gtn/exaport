@@ -1651,5 +1651,10 @@ function xmldb_block_exaport_upgrade($oldversion) {
         upgrade_block_savepoint(true, 2026111800, 'exaport');
     }
 
+    if ($oldversion < 2026111803) {
+        unset_config('block_exaport_enable_myportfolio');
+        upgrade_block_savepoint(true, 2026111803, 'exaport');
+    }
+
     return $result;
 }
